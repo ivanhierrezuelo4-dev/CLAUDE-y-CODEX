@@ -1,0 +1,7 @@
+node_modules
+dist
+.nexo
+package-lock.json
+test-results
+playwright-report
+*.tsbuildinfo

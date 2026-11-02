@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.nexo/
+.env
+.env.*
+!.env.example
+*.log
+playwright-report/
+test-results/
+*.tsbuildinfo
+.DS_Store
