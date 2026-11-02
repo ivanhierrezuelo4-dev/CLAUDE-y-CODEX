@@ -56,6 +56,7 @@ export type Provider = {
   message: string;
 };
 export type State = {
+  preview?: boolean;
   projects: Project[];
   tasks: Task[];
   events: {

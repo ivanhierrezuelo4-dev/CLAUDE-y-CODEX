@@ -21,17 +21,26 @@ const requestSchema = z.object({
 
 export function createApp(
   db,
-  { dataDir, distDir, runner = runProvider, status = providerStatus } = {},
+  { dataDir, distDir, runner = runProvider, status = providerStatus, preview = false } = {},
 ) {
+  if (
+    preview &&
+    db
+      .prepare('PRAGMA database_list')
+      .all()
+      .some((database) => database.file)
+  ) {
+    throw new Error('La vista previa solo puede usar una base de datos temporal en memoria.');
+  }
   const app = express();
   const active = new Map();
   app.disable('x-powered-by');
   app.use((req, res, next) => {
     const host = req.hostname;
-    if (!['localhost', '127.0.0.1', '[::1]', '::1'].includes(host))
+    if (!preview && !['localhost', '127.0.0.1', '[::1]', '::1'].includes(host))
       return res.status(403).json({ error: 'Nexo solo admite acceso local.' });
     const origin = req.headers.origin;
-    if (origin) {
+    if (origin && !preview) {
       try {
         const u = new URL(origin);
         if (!['127.0.0.1', 'localhost'].includes(u.hostname) || !['4317', '5173'].includes(u.port))
@@ -44,8 +53,18 @@ export function createApp(
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; " +
+        (preview ? '' : "frame-ancestors 'none'; ") +
+        "base-uri 'self'; form-action 'self'",
     );
+    if (preview && !['GET', 'HEAD'].includes(req.method)) {
+      return res
+        .status(403)
+        .json({
+          error:
+            'Esta vista permite explorar Nexo. El guardado y las consultas a IA están desactivados en la vista de prueba.',
+        });
+    }
     if (
       req.path.startsWith('/api') &&
       !['GET', 'HEAD'].includes(req.method) &&
@@ -57,10 +76,16 @@ export function createApp(
   });
   app.use(express.json({ limit: '2mb' }));
   app.get('/api/health', (_req, res) =>
-    res.json({ ok: true, version: '0.1.0', mode: 'local', execution: 'read-only' }),
+    res.json({
+      ok: true,
+      version: '0.1.0',
+      mode: preview ? 'preview' : 'local',
+      execution: 'read-only',
+    }),
   );
   app.get('/api/state', (_req, res) =>
     res.json({
+      preview,
       projects: projectList(db),
       tasks: db
         .prepare('SELECT * FROM tasks ORDER BY created_at DESC LIMIT 300')
@@ -75,7 +100,19 @@ export function createApp(
       },
     }),
   );
-  app.get('/api/providers', async (req, res) => res.json(await status(req.query.refresh === '1')));
+  app.get('/api/providers', async (req, res) =>
+    res.json(
+      preview
+        ? ['claude', 'codex'].map((name) => ({
+            name,
+            installed: false,
+            authenticated: false,
+            authType: 'unknown',
+            message: 'Vista de prueba · conexión a IA desactivada',
+          }))
+        : await status(req.query.refresh === '1'),
+    ),
+  );
   app.patch('/api/settings', (req, res) => {
     const value = z.object({ allowCli: z.boolean() }).parse(req.body);
     db.prepare(

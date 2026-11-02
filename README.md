@@ -18,6 +18,8 @@ Cuando termine la preparación, abre **Abrir-Nexo.cmd** en Windows o **Abrir-Nex
 
 ## Preparación técnica
 
+Para explorar el diseño dentro de una vista web del entorno, se ha añadido `npm run preview` después de `npm run build`. Sirve una vista de prueba en el puerto **3000**, admite mostrarse incrustada y usa una base de datos independiente en memoria. No abre `.nexo`, no inspecciona sesiones y rechaza operaciones de guardado o consulta a IA. El acceso mediante el botón de vista previa depende de que la plataforma dirija su visor a ese puerto. La oficina personal completa sigue arrancándose con `npm start` y conserva sus restricciones de acceso local.
+
 Requisitos: **Node.js 24 LTS**, npm y Git. No necesitas Docker, claves API ni Obsidian instalado.
 
 ```sh

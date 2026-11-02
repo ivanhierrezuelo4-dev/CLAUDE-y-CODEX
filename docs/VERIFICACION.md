@@ -26,3 +26,7 @@ Ejecutada en Linux, con Node.js 24 y Chromium del entorno.
 Los tests usan ejecutores inyectados y una CLI falsa para probar el protocolo. No se han hecho llamadas reales a modelos ni se han utilizado las cuentas del usuario para producir resultados de prueba. Detectar una sesión de Codex en el entorno no valida el flujo completo en su PC.
 
 La automatización de GitHub está configurada; una validación local no establece que un workflow remoto haya terminado.
+
+## Vista web incrustada
+
+Se añadieron dos pruebas del modo de demostración: rechaza bases de datos persistentes y bloquea guardado, consultas a modelos e inspección de sesiones. El conjunto pasa con 21 pruebas. Se sirve el build en el puerto 3000, separado de la oficina personal. La disponibilidad del botón de la plataforma necesita su ruta al puerto; una comprobación dentro de Chromium no verifica por sí sola ese botón externo.

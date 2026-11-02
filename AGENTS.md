@@ -6,6 +6,7 @@
 - `server/`: Node.js 24, Express y `node:sqlite`. `store.mjs` define la persistencia; `context.mjs` la recuperación; `providers.mjs` las CLI; `app.mjs` las operaciones.
 - `.nexo/`: datos privados ignorados por Git. Nunca subirlos ni vaciarlos para hacer pasar una prueba.
 - `tests/`: pruebas de backend sin IA; `tests/browser/`: recorridos Playwright con datos temporales.
+- `npm run preview`: vista de demostración solicitada por el usuario, en el puerto 3000. Solo datos iniciales en memoria, sin guardado ni consultas a modelos. Nunca conectarla a una base de datos privada; `createApp` rechaza esa combinación. No debilitar el servidor de la oficina personal para habilitar el visor.
 
 Usa el checkout existente. No crees worktrees salvo que el usuario lo solicite. Conserva cambios y documentos del usuario.
 

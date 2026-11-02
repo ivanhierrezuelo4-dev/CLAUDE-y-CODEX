@@ -351,7 +351,11 @@ function App() {
               {p.active_count > 0 && <span className="live-dot" />}
             </button>
           ))}
-          <button className="nav-item add-project" onClick={() => setModal('project')}>
+          <button
+            disabled={state.preview}
+            className="nav-item add-project"
+            onClick={() => setModal('project')}
+          >
             <Plus size={17} />
             Nuevo proyecto
           </button>
@@ -417,7 +421,7 @@ function App() {
             </button>
             <span className="local-status">
               <span />
-              Local
+              {state.preview ? 'Vista previa' : 'Local'}
             </span>
             <button className="icon-button" aria-label="Ayuda" onClick={() => setModal('guide')}>
               <CircleHelp size={18} />
@@ -426,6 +430,15 @@ function App() {
         </header>
         <div className="page-layout">
           <main className="main-content">
+            {state.preview && (
+              <div className="preview-notice" role="status">
+                <ShieldCheck size={17} />
+                <p>
+                  <strong>Vista de prueba.</strong> Puedes explorar la oficina. El guardado y las
+                  consultas a IA están desactivados aquí.
+                </p>
+              </div>
+            )}
             <div className="page-heading">
               <div>
                 <div className="eyebrow">
@@ -455,12 +468,20 @@ function App() {
                 </p>
               </div>
               {view === 'overview' ? (
-                <button className="button primary" onClick={() => setModal('project')}>
+                <button
+                  disabled={state.preview}
+                  className="button primary"
+                  onClick={() => setModal('project')}
+                >
                   <Plus size={17} />
                   Nuevo proyecto
                 </button>
               ) : view === 'project' ? (
-                <button className="button secondary compact" onClick={() => setModal('edit')}>
+                <button
+                  disabled={state.preview}
+                  className="button secondary compact"
+                  onClick={() => setModal('edit')}
+                >
                   <Settings2 size={16} />
                   Configurar
                 </button>
@@ -539,7 +560,7 @@ function App() {
                 project={project}
                 projects={state.projects}
                 selectProject={setProjectId}
-                busy={busy}
+                busy={busy || Boolean(state.preview)}
                 prepare={async (request, budget, provider) => {
                   if (!project) return;
                   await act(async () => {
@@ -598,7 +619,7 @@ function App() {
                     multiple
                     accept=".md,.txt,.csv,.json,.xlsx"
                     aria-label="Importar documentos"
-                    disabled={busy}
+                    disabled={busy || state.preview}
                     onChange={(e) => {
                       void importFiles(e.target.files);
                       e.target.value = '';
@@ -849,7 +870,7 @@ function App() {
         >
           <ProjectForm
             initial={modal === 'edit' ? project : undefined}
-            busy={busy}
+            busy={busy || Boolean(state.preview)}
             save={(input) =>
               act(async () => {
                 const p = await api<Project>(
@@ -941,7 +962,7 @@ function App() {
             </button>
             <button
               className="button primary"
-              disabled={busy}
+              disabled={busy || state.preview}
               onClick={() =>
                 act(async () => {
                   setProviders(await api<Provider[]>('/providers?refresh=1'));
@@ -1159,7 +1180,7 @@ function App() {
               {task.status === 'done' && (
                 <button
                   className="button secondary"
-                  disabled={busy}
+                  disabled={busy || state.preview}
                   onClick={() =>
                     act(async () => {
                       await api(`/tasks/${task.id}/save-memory`, 'POST');
@@ -1177,7 +1198,7 @@ function App() {
                 state.projects.find((p) => p.id === task.project_id)?.mode === 'team' && (
                   <button
                     className="button secondary"
-                    disabled={busy}
+                    disabled={busy || state.preview}
                     onClick={() =>
                       act(async () => {
                         const next = await api<Task>(`/tasks/${task.id}/second-opinion`, 'POST');
@@ -1193,7 +1214,7 @@ function App() {
               {task.status === 'running' ? (
                 <button
                   className="button secondary"
-                  disabled={busy}
+                  disabled={busy || state.preview}
                   onClick={() =>
                     act(async () => {
                       await api(`/tasks/${task.id}/stop`, 'POST');
@@ -1207,7 +1228,7 @@ function App() {
               ) : task.status === 'review' ? (
                 <button
                   className="button primary"
-                  disabled={busy}
+                  disabled={busy || state.preview}
                   onClick={() =>
                     act(async () => {
                       await api(`/tasks/${task.id}`, 'PATCH', { status: 'done' });
@@ -1223,7 +1244,7 @@ function App() {
                 task.status !== 'done' && (
                   <button
                     className="button primary"
-                    disabled={busy}
+                    disabled={busy || state.preview}
                     onClick={() =>
                       act(async () => {
                         await api(`/tasks/${task.id}/run`, 'POST');
