@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Oficina en píxeles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: árbol vertical (tú → Claude → tipos de petición → ruta → trabajadores) con cables SVG; panel de detalle a la derecha (abajo en móvil). Estética pixel art oscura, un solo tema deliberado. */
+:root{
+  --bg:#0B0E14; --panel:#151B26; --panel2:#1C2433; --line:#2A3446; --text:#EDF2F7; --muted:#AAB6C6;
+  --claude:#F08A5D; --codex:#55D98B; --sun:#FCEE0A; --cyan:#00E5FF; --vault:#A78BFA; --alert:#FF5C7C; --ink:#0B0E14;
+  --f-pix:"Press Start 2P",ui-monospace,monospace;
+  --f-ui:"IBM Plex Mono",ui-monospace,"Consolas",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:15px/1.55 var(--f-ui);margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px;
+  background-image:radial-gradient(rgba(0,229,255,.06) 1px,transparent 1px);background-size:16px 16px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1200px;margin:0 auto}
+h1,h2{font-family:var(--f-pix);font-weight:400;line-height:1.4;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.05rem,3.2vw,1.6rem)}
+h2{font-size:.95rem}
+p{margin:0}
+a{color:var(--cyan)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.85em;background:var(--panel2);padding:1px 5px}
+.muted{color:var(--muted)}
+
+header{padding-block:26px 14px;display:grid;gap:10px}
+.sub{color:var(--muted);max-width:70ch}
+.badge{display:inline-block;font-family:var(--f-pix);font-size:.6rem;padding:5px 7px;border:2px solid currentColor;line-height:1.2}
+.b-sim{color:var(--vault)}
+
+/* Controles de capacidad */
+.bar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;background:var(--panel);border:3px solid var(--line);padding:12px;box-shadow:4px 4px 0 #000}
+.grp{display:grid;gap:6px}
+.grp>span{font-family:var(--f-pix);font-size:.6rem;color:var(--muted);letter-spacing:.04em}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{background:var(--panel2);border:2px solid var(--line);padding:6px 10px;cursor:pointer;box-shadow:2px 2px 0 #000}
+.seg button[aria-pressed="true"]{background:var(--cyan);color:var(--ink);border-color:var(--cyan);font-weight:600}
+.seg button:hover{border-color:var(--cyan)}
+
+/* Escena */
+.scene{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;margin-top:18px;align-items:start}
+@media (max-width:920px){.scene{grid-template-columns:1fr}}
+.tree{position:relative;background:var(--panel);border:3px solid var(--line);padding:18px 10px 22px;box-shadow:4px 4px 0 #000;min-width:0;overflow:hidden}
+#wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.row{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 14px;margin-bottom:34px}
+.row:last-child{margin-bottom:0}
+.rowlbl{position:relative;z-index:1;text-align:center;margin:-24px 0 10px;line-height:1}
+.rowlbl:empty{display:none}
+.rowlbl span{display:inline-block;font-family:var(--f-pix);font-size:.55rem;color:var(--muted);background:var(--panel);padding:3px 6px}
+.node{display:grid;justify-items:center;gap:4px;background:var(--bg);border:3px solid var(--line);padding:8px 10px 7px;min-width:92px;max-width:150px;cursor:pointer;box-shadow:3px 3px 0 #000;text-align:center}
+.node:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 #000}
+.node .nm{font-weight:600;font-size:.9rem;line-height:1.2}
+.node .sm{font-size:.8rem;color:var(--muted);line-height:1.2}
+.node svg{image-rendering:pixelated;display:block}
+.node.claude{border-color:var(--claude)} .node.claude .nm{color:var(--claude)}
+.node.codex{border-color:var(--codex)} .node.codex .nm{color:var(--codex)}
+.node.sun .nm{color:var(--sun)} .node.sun{border-color:var(--sun)}
+.node.ivan{border-color:var(--sun)} .node.ivan .nm{color:var(--sun)}
+.node.tool{border-color:var(--cyan)} .node.tool .nm{color:var(--cyan)}
+.node.vault{border-color:var(--vault)} .node.vault .nm{color:var(--vault)}
+.node.wait{border-color:var(--muted)}
+.node.type{border-style:dashed}
+.node[aria-pressed="true"],.node.sel{background:var(--panel2);outline:3px solid var(--text);outline-offset:2px}
+.node.dim{opacity:.55;filter:grayscale(.5)}
+.node.big{min-width:150px;padding:10px 14px}
+.pill{font-family:var(--f-pix);font-size:.5rem;padding:3px 5px;line-height:1.3;border:2px solid currentColor}
+.pill.warn{color:var(--sun)} .pill.bad{color:var(--alert)} .pill.ok{color:var(--codex)}
+.press{font-family:var(--f-pix);font-size:.55rem;color:var(--ink);background:var(--sun);padding:4px 6px;margin-top:2px}
+@media (prefers-reduced-motion:no-preference){
+  .pop{animation:pop .28s steps(4) both}
+  @keyframes pop{from{transform:scale(.85)}to{transform:scale(1)}}
+  .press{animation:blink 1.6s steps(2) infinite}
+  @keyframes blink{50%{opacity:.55}}
+}
+
+/* Detalle */
+.detail{background:var(--panel);border:3px solid var(--line);padding:14px;box-shadow:4px 4px 0 #000;display:grid;gap:10px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px)}
+@media (max-width:920px){.detail{position:static}}
+.detail .hd{display:flex;gap:10px;align-items:center}
+.detail h2{font-size:.8rem}
+dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 10px;margin:0;font-size:.95rem}
+dt{color:var(--muted)} dd{margin:0}
+.note{border-left:4px solid var(--sun);padding:6px 10px;background:var(--panel2);font-size:.92rem}
+.note.bad{border-color:var(--alert)}
+
+/* Leyenda y pie */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;font-size:.92rem;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:14px;height:14px;display:inline-block;border:2px solid #000}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+@media (max-width:800px){.cards{grid-template-columns:1fr}}
+.card{background:var(--panel);border:3px solid var(--line);padding:12px;box-shadow:4px 4px 0 #000;display:grid;gap:6px}
+.card h2{font-size:.7rem;color:var(--cyan)}
+.card ul{margin:0;padding-left:18px;font-size:.95rem}
+footer{margin-top:24px;color:var(--muted);font-size:.9rem;border-top:3px solid var(--line);padding-top:12px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="badge b-sim" style="justify-self:start">SIMULACIÓN · NO CONECTADA</span>
+  <h1>Oficina Claude + Codex</h1>
+  <p class="sub">Pulsa a Claude para ver cómo reparte el trabajo. Cada rama muestra quién lo hace y con qué modelo. Arriba puedes cambiar el cupo para ver qué pasa cuando Claude se acerca a su límite. Pulsa cualquier casilla para ver los detalles.</p>
+</header>
+
+<div class="bar" role="group" aria-label="Simular capacidad">
+  <div class="grp"><span>CUPO DE CLAUDE</span>
+    <div class="seg" data-g="mode">
+      <button data-v="normal" aria-pressed="true">Normal</button>
+      <button data-v="prep" aria-pressed="false">85–95 %: preparar traspaso</button>
+      <button data-v="reserva" aria-pressed="false">Reserva (5 % / 3 %)</button>
+      <button data-v="ausente" aria-pressed="false">Claude no disponible</button>
+    </div></div>
+  <div class="grp"><span>EN RESERVA</span>
+    <div class="seg" data-g="pref">
+      <button data-v="relevo" aria-pressed="true">Relevo a Codex</button>
+      <button data-v="esperar" aria-pressed="false">Esperar recarga</button>
+    </div></div>
+  <div class="grp"><span>CUPO DE CODEX</span>
+    <div class="seg" data-g="cx">
+      <button data-v="si" aria-pressed="true">Hay cupo</button>
+      <button data-v="no" aria-pressed="false">Agotado</button>
+    </div></div>
+</div>
+
+<div class="scene">
+  <div class="tree" id="tree">
+    <svg id="wires" aria-hidden="true"></svg>
+    <div class="row" id="r0"></div>
+    <div class="row" id="r1"></div>
+    <div class="row" id="r2"></div>
+    <div class="rowlbl" id="l3"></div>
+    <div class="row" id="r3"></div>
+    <div class="rowlbl" id="l4"></div>
+    <div class="row" id="r4"></div>
+    <div class="rowlbl" id="l5"></div>
+    <div class="row" id="r5"></div>
+  </div>
+  <aside class="detail" id="detail" aria-live="polite"></aside>
+</div>
+
+<div class="legend">
+  <span><i class="sw" style="background:var(--claude)"></i>Claude</span>
+  <span><i class="sw" style="background:var(--codex)"></i>Codex</span>
+  <span><i class="sw" style="background:var(--sun)"></i>Tú / Sol</span>
+  <span><i class="sw" style="background:var(--cyan)"></i>Herramienta sin IA</span>
+  <span><i class="sw" style="background:var(--vault)"></i>Bóveda Obsidian</span>
+  <span>Línea discontinua = opcional o según riesgo</span>
+</div>
+
+<div class="cards">
+  <div class="card"><h2>QUÉ ES ESTO</h2><p>Un mapa del <b>kit de oficina</b>: un <code>AGENTS.md</code> común, una skill con los procedimientos, dos scripts pequeños para el cupo y tu bóveda. Se copia en cualquier proyecto. No es una app.</p></div>
+  <div class="card"><h2>REGLAS DE AHORRO</h2><ul><li>El trabajo que gasta muchos tokens va a Codex (su cupo es otro)</li><li>Opus planifica; Sonnet ejecuta (<code>opusplan</code>)</li><li>Revisión extra solo si el riesgo es alto</li><li>Máximo 2 correcciones; sin bucles</li></ul></div>
+  <div class="card"><h2>QUÉ NO SE INVENTA</h2><ul><li>Tiempo restante de una tarea</li><li>Saldo sumado de Claude y Codex</li><li>Acceso a modelos: se comprueba con <code>/model</code></li><li>Ahorros prometidos por herramientas</li></ul></div>
+</div>
+
+<footer>Los nombres de modelo vienen del catálogo oficial de Codex y del changelog de Claude Code (consultados el 2 nov 2026). Que tu cuenta tenga acceso está pendiente de comprobar. Los iconos son dibujos propios en píxel, no logotipos oficiales.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+/* ---------- sprites ---------- */
+const PAL={o:'#F08A5D',O:'#B9542E',g:'#55D98B',G:'#24804A',y:'#FCEE0A',Y:'#D9A400',b:'#3A7BD5',c:'#00E5FF',w:'#EDF2F7',k:'#0B0E14',p:'#A78BFA',P:'#5B3BB0',l:'#DCE4EE',L:'#7E8CA0',s:'#F2C9A0',r:'#FF5C7C'};
+const SP={
+claude:["....oooo....","....oOOo....",".oo.oOOo.oo.",".ooooOOoooo.","..ooOOOOoo..","ooOOOOOOOOoo","ooOOOOOOOOoo","..ooOOOOoo..",".ooooOOoooo.",".oo.oOOo.oo.","....oOOo....","....oooo...."],
+opus:[".y..y..y..y.",".yy.yy.yy.y.",".yyyyyyyyyy.","....oOOo....",".oo.oOOo.oo.","..ooOOOOoo..","ooOOOOOOOOoo","ooOOOOOOOOoo","..ooOOOOoo..",".oo.oOOo.oo.","....oOOo....","....oooo...."],
+sonnet:["............","....oooo....","...ooOOoo...","..o.oOOo.o..","..ooOOOOoo..",".oOOOOOOOOo.",".oOOOOOOOOo.","..ooOOOOoo..","..o.oOOo.o..","...ooOOoo...","....oooo....","............"],
+haiku:["............","............","............",".....oo.....","....oOOo....","...oOOOOo...","...oOOOOo...","....oOOo....",".....oo.....","............","............","............"],
+codex:["gggggggggggg","gGGGGGGGGGGg","gGkkkkkkkkGg","gGkgkkkkkkGg","gGkkgkkkkkGg","gGkkkgkkkkGg","gGkkgkkkkkGg","gGkgkkggggGg","gGkkkkkkkkGg","gGGGGGGGGGGg","gggggggggggg","....GGGG...."],
+sol:[".....yy.....","..y..yy..y..","...y....y...","....YYYY....","y..YyyyyY..y","yy.YyyyyY.yy","...YyyyyY...","....YYYY....","...y....y...","..y..yy..y..",".....yy.....","............"],
+terra:["....bbbb....","..bbggbbbb..",".bbgggbbbbb.",".bggggbbggb.","bbgggbbbgggb","bbbggbbbbggb","bbbbbbbgbbbb","bbbbbbgggbbb",".bbbbbbggbb.",".bbgbbbbbbb.","..bbbbbbbb..","....bbbb...."],
+luna:["....llll....","..lllll.....",".lllll......",".llllL......","lllll.......","llllL.......","llllL.......","lllll.......",".llllL......",".llllll.....","..lllllll...","....llll...."],
+astra:[".....cc.....",".....cc.....","....cwwc....","cccccwwccccc",".ccwwwwwwcc.","..ccwwwwcc..","...cwwwwc...","..ccwccwcc..","..cwc..cwc..",".ccc....ccc.",".cc......cc.","............"],
+ivan:["....YYYY....","...YYYYYY...","...ssssss...","...skssks...","...ssssss...","....ssss....","..yyyyyyyy..",".yyyyyyyyyy.",".yyyyyyyyyy.",".yy.yyyy.yy.","....yyyy....","....y..y...."],
+vault:[".....pp.....","....pwwp....","...pwwpPp...","..pwwppPPp..",".pwwpppPPPp.",".pwppppPPPp.",".pPpppPPPPp.","..pPpPPPPp..","...pPPPPp...","....pPPp....",".....pp.....","............"],
+check:["............","..........g.",".........gg.","........gg..",".g.....gg...",".gg...gg....","..gg.gg.....","...ggg......","....g.......","............","............","............"],
+scale:[".....yy.....","yyyyyyyyyyyy",".y...yy...y.","y.y..yy..y.y","yyy..yy..yyy",".....yy.....",".....yy.....",".....yy.....","....yyyy....","...yyyyyy...","............","............"],
+gear:["....cccc....",".cc.c..c.cc.",".cccccccccc.","..cc....cc..","ccc......ccc","cc...cc...cc","cc...cc...cc","ccc......ccc","..cc....cc..",".cccccccccc.",".cc.c..c.cc.","....cccc...."],
+wait:[".LLLLLLLLLL.","..L......L..","..LyyyyyyL..","...LyyyyL...","....LyyL....",".....LL.....","....L..L....","...L.yy.L...","..L.yyyy.L..","..LyyyyyyL..",".LLLLLLLLLL.","............"],
+note:["oooooooooo..","owwwwwwwwoo.","owkkkkkkwwo.","owwwwwwwwwo.","owkkkkkkkwo.","owwwwwwwwwo.","owkkkkkwwwo.","owwwwwwwwwo.","owkkkkkkkwo.","owwwwwwwwwo.","ooooooooooo.","............"],
+q:["...cccccc...","..cc....cc..","..c......c..","........cc..",".......cc...","......cc....",".....cc.....",".....cc.....","............",".....cc.....",".....cc.....","............"]
+};
+function sprite(name,px){ const m=SP[name]; const n=12; px=px||4; let r='';
+  m.forEach((row,y)=>{ for(let x=0;x<row.length;x++){ const ch=row[x]; if(ch!=='.'&&PAL[ch]) r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[ch]}"/>`; } });
+  return `<svg width="${n*px}" height="${n*px}" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`; }
+
+/* ---------- datos ---------- */
+const W={
+ ivan:{nm:'Tú',sm:'Iván',sp:'ivan',cls:'ivan',info:{Papel:'Dirección: objetivos, aprobaciones y decisiones de impacto',Recibe:'Preguntas cerradas con 2–3 opciones',Coste:'Tu tiempo: se pide solo cuando cambia el resultado'}},
+ orq:{nm:'Claude',sm:'Opus 5.5 · orquesta',sp:'claude',cls:'claude',big:true,info:{Papel:'Entiende, planifica, reparte, revisa y decide con evidencia',Modelo:'claude-opus-5-5 al planificar; con opusplan ejecuta Sonnet 5.5',Esfuerzo:'high al planificar; medium al ejecutar (verificar con /effort)',Coste:'En Pro, Opus es lo que más rápido gasta la ventana de 5 h. Por eso planifica y no hace el trabajo pesado'}},
+ haiku:{nm:'Haiku 5.5',sm:'claude-haiku-5-5',sp:'haiku',cls:'claude',info:{Para:'Preguntas rápidas, formatos, resúmenes cortos',Esfuerzo:'low–medium',Coste:'Bajo',No:'Decisiones o código delicado'}},
+ sonnet:{nm:'Sonnet 5.5',sm:'claude-sonnet-5-5',sp:'sonnet',cls:'claude',info:{Para:'La mayoría del trabajo de Claude: textos, docs, ejecución en opusplan',Esfuerzo:'medium',Coste:'Medio',No:'Trabajo de código largo que Codex puede hacer con su propio cupo'}},
+ opus:{nm:'Opus 5.5',sm:'claude-opus-5-5',sp:'opus',cls:'claude',info:{Para:'Planificar, arquitectura, decisiones importantes, dirección creativa difícil',Esfuerzo:'high (xhigh puntual)',Coste:'Alto: úsalo para pensar, no para teclear',No:'Tareas mecánicas'}},
+ codex:{nm:'Codex',sm:'trabajador',sp:'codex',cls:'codex',info:{Papel:'Ejecuta: implementa, investiga código, prueba, corrige y revisa',Recibe:'Contrato: objetivo, fuentes, alcance, aceptación, cuándo parar',Devuelve:'Hecho · probado · fallido · pendiente',Coste:'Gasta el cupo de tu ChatGPT, no el de Claude'}},
+ sol:{nm:'Sol 6.1',sm:'gpt-6.1-sol',sp:'sol',cls:'sun',info:{Para:'Implementación y corrección habituales',Esfuerzo:'low por defecto; probar medium en el piloto',Coste:'Medio (cupo de Codex)',No:'No hace falta Astra si Sol pasa las pruebas'}},
+ terra:{nm:'Terra 6.1',sm:'gpt-6.1-terra',sp:'terra',cls:'codex',info:{Para:'Comparar con Sol en el piloto; contexto de 500 k (Sol tiene 272 k)',Esfuerzo:'low por defecto',Coste:'Por medir',No:'No hay evidencia de que sea mejor que Sol'}},
+ luna:{nm:'Luna 6',sm:'gpt-6-luna',sp:'luna',cls:'codex',info:{Para:'Tareas simples y rápidas',Esfuerzo:'medium por defecto; no tiene ultra',Coste:'Bajo',No:'Bugs difíciles o cambios críticos'}},
+ astra:{nm:'Astra 6',sm:'gpt-6-astra',sp:'astra',cls:'codex',info:{Para:'Trabajo complejo, bugs duros, y el relevo cuando Claude está en reserva',Esfuerzo:'medium en el relevo; high en bugs duros; nunca ultra por costumbre',Coste:'Alto (cupo de Codex)',No:'Tareas que Sol resuelve'}},
+ script:{nm:'Plantilla',sm:'script, sin IA',sp:'gear',cls:'tool',info:{Para:'Extraer datos, convertir formatos, informes fijos',Coste:'≈ 0 tokens',Nota:'Si una plantilla lo resuelve, no se llama a ningún modelo'}},
+ wait:{nm:'Esperar',sm:'recarga de Claude',sp:'wait',cls:'wait',info:{Para:'Trabajo creativo o con decisiones pendientes cuando Claude está en reserva',Cuándo:'La hora de reinicio aparece en /usage',Coste:'Ninguno; solo tiempo'}},
+ tu:{nm:'Decides tú',sm:'pregunta cerrada',sp:'ivan',cls:'ivan',info:{Para:'Dinero, publicación, marca, economía del juego, cosas irreversibles',Registro:'Decisiones.md del proyecto'}},
+ rev:{nm:'Revisión',sm:'/codex:adversarial-review',sp:'scale',cls:'codex',info:{Para:'Solo riesgo alto o crítico',Coste:'Cupo de Codex; no se repite en bucle',Regla:'Si discrepan, deciden las pruebas o tú; no hay votación'}}
+};
+const TYPES=[
+ {id:'pregunta',nm:'Pregunta',sm:'rápida',sp:'q',route:{nm:'Claude responde',sm:'sin delegar',owner:'claude'},workers:['haiku','sonnet'],why:'Delegar una pregunta cuesta más que contestarla.'},
+ {id:'datos',nm:'Datos',sm:'informe, Excel',sp:'gear',route:{nm:'Plantilla primero',sm:'IA solo si hace falta',owner:'tool'},workers:['script','haiku','luna'],why:'Un script o una plantilla no gastan tokens. Si hay que redactar, basta un modelo ligero.'},
+ {id:'sencilla',nm:'Tarea sencilla',sm:'bien definida',sp:'check',route:{nm:'Codex directo',sm:'o Claude si es texto',owner:'codex'},workers:['luna','sol','sonnet'],why:'Está clara y se puede comprobar. Coordinarla no aporta nada.'},
+ {id:'definido',nm:'Trabajo definido',sm:'código, con pruebas',sp:'codex',route:{nm:'Codex directo',sm:'/codex:rescue',owner:'codex'},workers:['sol','terra'],why:'Hay objetivo, contexto y pruebas, así que Codex lo hace de principio a fin aunque sea grande. Se usa el cupo de ChatGPT.'},
+ {id:'complejo',nm:'Trabajo complejo',sm:'varias piezas',sp:'opus',route:{nm:'Claude coordina',sm:'plan + contrato',owner:'claude'},workers:['opus','sol','astra','rev'],why:'Hay ambigüedad o dependencias. Opus planifica una vez, Codex ejecuta las piezas y la revisión depende del riesgo.'},
+ {id:'creativo',nm:'Creativo',sm:'guion, marca',sp:'note',route:{nm:'Claude solo',sm:'tu flujo actual',owner:'claude'},workers:['sonnet','opus'],why:'La dirección creativa se queda en Claude (Hecho de Nada). Codex solo entra si hay un problema técnico concreto.'},
+ {id:'decision',nm:'Decisión',sm:'importante',sp:'scale',route:{nm:'Claude prepara',sm:'opciones + impacto',owner:'claude'},workers:['opus','rev','tu'],why:'Claude resume las opciones con su evidencia, se pide segunda opinión solo si hay riesgo y decides tú. Se apunta en Decisiones.md.'}
+];
+const SUPPORT=[
+ {nm:'Bóveda',sm:'Obsidian',sp:'vault',cls:'vault',info:{Qué:'Tu contexto por proyecto: índice, estado, decisiones, procedimientos',Cómo:'Índice → búsqueda → notas concretas; nunca la bóveda entera',Ambas:'Claude y Codex leen las mismas notas'}},
+ {nm:'Pruebas',sm:'del proyecto',sp:'check',cls:'tool',info:{Qué:'Lo que dice «terminado» sin otra opinión',Regla:'Máximo 2 correcciones; después se replantea la causa'}},
+ {nm:'Memoria',sm:'al cerrar',sp:'note',cls:'vault',info:{Qué:'De 0 a 3 aprendizajes propuestos, que tú apruebas',Regla:'Actualizar la nota existente; la anterior pasa a «sustituido»'}}
+];
+
+const st={mode:'normal',pref:'relevo',cx:'si',open:false,type:null,sel:'orq'};
+
+/* ---------- lógica de capacidad ---------- */
+function effective(t){
+  const reserve = st.mode==='reserva' || st.mode==='ausente';
+  if(!reserve) return {route:t.route,workers:t.workers.filter(w=>!(st.cx==='no'&&['sol','terra','luna','astra','rev'].includes(w))).concat(st.cx==='no'&&t.route.owner==='codex'?['sonnet']:[]),note:st.cx==='no'&&t.route.owner==='codex'?'Codex sin cupo: lo hace Claude (Sonnet) o se pospone. Nunca se pasa a una API de pago.':null};
+  const creative = t.id==='creativo' || t.id==='decision';
+  if(st.cx==='no') return {route:{nm:'En pausa',sm:'nadie con cupo',owner:'wait'},workers:['wait'],note:'Ni Claude ni Codex tienen cupo. Se guarda el contrato y se espera.'};
+  if(st.mode==='ausente'){
+    if(t.id==='decision') return {route:{nm:'Tú + Codex',sm:'solo si tú decides',owner:'ivan'},workers:['tu','astra'],note:'Sin Claude, hablas directamente con Codex. Las decisiones importantes las tomas tú; Codex aporta análisis.'};
+    return {route:{nm:'Tú hablas con Codex',sm:'mismo AGENTS.md',owner:'codex'},workers:t.id==='complejo'?['astra']:t.id==='pregunta'||t.id==='datos'?['luna']:['sol'],note:'Codex lee las mismas reglas y la misma bóveda. Retomas con codex resume o /codex:transfer.'};
+  }
+  if(st.pref==='esperar' || creative) return {route:{nm:'Esperar recarga',sm:creative?'creativo o decisión':'elegiste esperar',owner:'wait'},workers:creative?['wait','tu']:['wait'],note:creative?'Lo creativo y las decisiones no se delegan a Codex. Claude usa su reserva solo para dejarlo anotado.':'Se pausa hasta que se recargue la ventana. Claude guarda el contrato con su reserva.'};
+  return {route:{nm:'Relevo a Codex',sm:'Claude solo envía',owner:'codex'},workers:t.id==='complejo'?['astra']:t.id==='pregunta'||t.id==='datos'?['luna']:['sol'],note:'Claude usa su 5 % de reserva solo para enviar el contrato y revisar al final. Codex sigue con lo ya especificado; las decisiones nuevas esperan.'};
+}
+
+/* ---------- render ---------- */
+function nodeHTML(key,o,extra){ const d=o||W[key];
+  return `<button class="node ${d.cls||''} ${d.big?'big':''} ${extra||''}" data-k="${key}" type="button">${sprite(d.sp,d.big?6:4)}<span class="nm">${d.nm}</span><span class="sm">${d.sm||''}</span>${d.badge||''}</button>`; }
+
+function render(){
+  const reserve=st.mode==='reserva', absent=st.mode==='ausente', prep=st.mode==='prep';
+  // fila 0: tú
+  $('#r0').innerHTML=nodeHTML('ivan');
+  // fila 1: orquestador
+  const orq=Object.assign({},W.orq);
+  if(absent){ orq.badge='<span class="pill bad">NO DISPONIBLE</span>'; }
+  else if(reserve){ orq.badge='<span class="pill warn">RESERVA 5 % · SOLO COORDINA</span>'; }
+  else if(prep){ orq.badge='<span class="pill warn">88 % · PREPARA TRASPASO</span>'; }
+  else if(!st.open){ orq.badge='<span class="press">PULSA</span>'; }
+  $('#r1').innerHTML=nodeHTML('orq',orq,absent?'dim':'')+(absent?nodeHTML('codex',Object.assign({},W.codex,{sm:'te atiende directo',badge:'<span class="pill ok">ACTIVO</span>'})):'');
+  // fila 2: tipos
+  if(st.open||absent){
+    $('#r2').innerHTML=TYPES.map(t=>`<button class="node type pop ${st.type===t.id?'sel':''}" data-t="${t.id}" type="button" aria-pressed="${st.type===t.id}">${sprite(t.sp,3)}<span class="nm">${t.nm}</span><span class="sm">${t.sm}</span></button>`).join('');
+  } else $('#r2').innerHTML='';
+  // filas 3-4
+  if(st.type){
+    const t=TYPES.find(x=>x.id===st.type); const e=effective(t);
+    const ow=e.route.owner; const cls={claude:'claude',codex:'codex',tool:'tool',wait:'wait',ivan:'ivan'}[ow];
+    const spr={claude:'claude',codex:'codex',tool:'gear',wait:'wait',ivan:'ivan'}[ow];
+    $('#l3').innerHTML='<span>RUTA</span>';
+    $('#r3').innerHTML=`<button class="node ${cls} pop" data-k="route" type="button">${sprite(spr,4)}<span class="nm">${e.route.nm}</span><span class="sm">${e.route.sm}</span></button>`;
+    $('#l4').innerHTML='<span>QUIÉN LO HACE</span>';
+    const showCodexHub = e.workers.some(w=>['sol','terra','luna','astra'].includes(w)) && ow!=='codex';
+    $('#r4').innerHTML=e.workers.map(w=>nodeHTML(w,null,'pop')).join('');
+    st._route={t,e,showCodexHub};
+  } else { $('#r3').innerHTML=''; $('#r4').innerHTML=''; $('#l3').textContent=''; $('#l4').textContent=''; st._route=null; }
+  // fila 5: soporte
+  if(st.open||absent){
+    $('#l5').innerHTML='<span>SIEMPRE PRESENTES</span>';
+    $('#r5').innerHTML=SUPPORT.map((s,i)=>`<button class="node ${s.cls} pop" data-s="${i}" type="button">${sprite(s.sp,3)}<span class="nm">${s.nm}</span><span class="sm">${s.sm}</span></button>`).join('')+(prep?`<button class="node claude pop" data-k="contrato" type="button">${sprite('note',3)}<span class="nm">Contrato</span><span class="sm">de traspaso</span></button>`:'');
+  } else { $('#r5').innerHTML=''; $('#l5').textContent=''; }
+  // selección
+  document.querySelectorAll('.node[data-k]').forEach(n=>n.classList.toggle('sel',n.dataset.k===st.sel&&st.sel!=='route'));
+  detail(); requestAnimationFrame(wires);
+}
+
+function detail(){
+  let h=''; const reserve=st.mode==='reserva', absent=st.mode==='ausente';
+  if(st.sel==='route' && st._route){
+    const {t,e}=st._route;
+    h=`<div class="hd">${sprite(t.sp,4)}<h2>${t.nm.toUpperCase()}</h2></div><p>${t.why}</p><dl><dt>Ruta</dt><dd>${e.route.nm}</dd><dt>Modelos</dt><dd>${e.workers.map(w=>/^(gpt|claude)/.test(W[w].sm)?W[w].sm:W[w].nm).join(', ')}</dd></dl>`;
+    if(e.note) h+=`<p class="note ${absent||st.cx==='no'?'bad':''}">${e.note}</p>`;
+  } else if(st.sel && st.sel.startsWith('s:')){
+    const s=SUPPORT[+st.sel.slice(2)]; h=`<div class="hd">${sprite(s.sp,4)}<h2>${s.nm.toUpperCase()}</h2></div><dl>${Object.entries(s.info).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+  } else if(st.sel==='contrato'){
+    h=`<div class="hd">${sprite('note',4)}<h2>CONTRATO DE TRASPASO</h2></div><p>Claude lo escribe al pasar del 85 % (5 h) o del 92 % (semanal), mientras aún tiene margen.</p><dl><dt>Incluye</dt><dd>Hecho, pendiente, criterios de aceptación, archivos, qué NO puede decidir Codex</dd><dt>Por qué antes</dt><dd>Escribirlo también gasta, y un turno grande puede saltar de 90 % a 100 %</dd></dl>`;
+  } else {
+    const k=st.sel||'orq'; const d=W[k]; if(!d) return;
+    h=`<div class="hd">${sprite(d.sp,5)}<h2>${d.nm.toUpperCase()}</h2></div><p class="muted">${d.sm||''}</p><dl>${Object.entries(d.info).map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`;
+    if(k==='orq'){
+      if(reserve) h+=`<p class="note">Reserva: Claude conserva ~5 % de 5 h o ~3 % semanal. Solo envía contratos y revisa resultados.</p>`;
+      if(absent) h+=`<p class="note bad">Claude no está disponible. Hablas con Codex directamente y las decisiones importantes las tomas tú.</p>`;
+      if(!st.open && !absent) h+=`<p class="note">Pulsa a Claude en el árbol para abrir las ramas.</p>`;
+    }
+  }
+  $('#detail').innerHTML=h;
+}
+
+/* ---------- cables ---------- */
+function center(el,tree,side){ const r=el.getBoundingClientRect(), t=tree.getBoundingClientRect(); return {x:r.left-t.left+r.width/2, y:(side==='top'?r.top:r.bottom)-t.top}; }
+function wires(){
+  const tree=$('#tree'), svg=$('#wires'); const W_=tree.clientWidth, H=tree.clientHeight;
+  svg.setAttribute('viewBox',`0 0 ${W_} ${H}`); let out='';
+  const line=(a,b,col,dash)=>{ if(!a||!b) return; const p=center(a,tree,'bottom'), q=center(b,tree,'top'); const my=Math.round((p.y+q.y)/2);
+    out+=`<path d="M${Math.round(p.x)} ${Math.round(p.y)} V${my} H${Math.round(q.x)} V${Math.round(q.y)}" fill="none" stroke="${col}" stroke-width="3" ${dash?'stroke-dasharray="6 6"':''} shape-rendering="crispEdges"/>`; };
+  const ivan=$('#r0 .node'), orq=$('#r1 [data-k="orq"]'), cx=$('#r1 [data-k="codex"]');
+  const absent=st.mode==='ausente';
+  line(ivan,absent?cx:orq,absent?'#55D98B':'#FCEE0A');
+  if(absent) line(ivan,orq,'#2A3446',true);
+  const hub=absent?cx:orq;
+  document.querySelectorAll('#r2 .node').forEach(n=>line(hub,n,st.type===n.dataset.t?(absent?'#55D98B':'#F08A5D'):'#2A3446',st.type!==n.dataset.t));
+  const sel=$('#r2 .node.sel'), route=$('#r3 .node');
+  if(sel&&route) line(sel,route,'#EDF2F7');
+  if(route) document.querySelectorAll('#r4 .node').forEach(n=>{ const k=n.dataset.k; const col=W[k]?({claude:'#F08A5D',codex:'#55D98B',sun:'#FCEE0A',tool:'#00E5FF',ivan:'#FCEE0A',wait:'#7E8CA0'}[W[k].cls]):'#EDF2F7'; line(route,n,col,k==='rev'||k==='terra'); });
+  svg.innerHTML=out;
+}
+
+/* ---------- eventos ---------- */
+document.querySelectorAll('.seg[data-g]').forEach(g=>g.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); st[g.dataset.g]=b.dataset.v;
+  if(st.mode!=='normal') st.open=true; if(st.mode==='ausente'||st.mode==='reserva') st.sel=st.type?'route':(st.mode==='ausente'?'codex':'orq'); render(); }));
+$('#tree').addEventListener('click',e=>{ const n=e.target.closest('.node'); if(!n) return;
+  if(n.dataset.t){ st.type=n.dataset.t; st.sel='route'; render(); const r=$('#r3 .node'); if(r) r.focus({preventScroll:true}); return; }
+  if(n.dataset.s!==undefined){ st.sel='s:'+n.dataset.s; render(); return; }
+  const k=n.dataset.k; if(k==='orq'){ st.open=true; } st.sel=k; render();
+  const again=document.querySelector(`.node[data-k="${k}"]`); if(again) again.focus({preventScroll:true});
+});
+if('ResizeObserver' in window) new ResizeObserver(()=>wires()).observe($('#tree')); else window.addEventListener('resize',wires);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(wires);
+
+/* estado inicial: abierto con un ejemplo para que la primera vista ya muestre el árbol */
+st.open=true; st.type='complejo'; st.sel='route';
+render();
+})();
+</script>
+
+</body>
+</html>

@@ -184,7 +184,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:v
   <h1>Claude + Codex + Obsidian, <span class="hl">sin construir otra app</span></h1>
   <p class="lede">Para Iván. Esta página explica qué probar, cómo se reparte el trabajo y qué se guarda en la memoria. <b>No está conectada a nada.</b> Las rutas y las tarjetas son simulaciones y las cifras de ejemplo están marcadas como tales.</p>
   <nav class="toc" aria-label="Secciones">
-    <a href="#veredicto">Veredicto</a><a href="#ruta">Simulador de ruta</a><a href="#modelos">Modelos</a><a href="#memoria">Memoria</a><a href="#tarjeta">Tarjeta</a><a href="#herramientas">Herramientas</a><a href="#piloto">Piloto</a><a href="#fuentes">Fuentes</a>
+    <a href="#veredicto">Veredicto</a><a href="#construimos">Qué construimos</a><a href="#capacidad">Capacidad y relevo</a><a href="#ruta">Simulador de ruta</a><a href="#modelos">Modelos</a><a href="#memoria">Memoria</a><a href="#tarjeta">Tarjeta</a><a href="#herramientas">Herramientas</a><a href="#auditoria">Autoauditoría</a><a href="#piloto">Piloto</a><a href="#fuentes">Fuentes</a>
   </nav>
 </header>
 
@@ -201,6 +201,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:v
         <li><span class="ag tool"><svg><use href="#i-tool"/></svg>Memoria</span><span>Una bóveda de Obsidian usada como carpeta Markdown, con un <code>AGENTS.md</code> breve que leen <span class="ag claude"><svg><use href="#i-claude"/></svg>Claude</span> y <span class="ag codex"><svg><use href="#i-codex"/></svg>Codex</span>.</span></li>
       </ul>
       <p class="small">El plugin reutiliza tu sesión local de Codex, así que su uso cuenta contra el cupo de tu ChatGPT. Las cuotas de Claude y Codex no se suman.</p>
+      <p class="small"><b>Con tu plan Pro:</b> Claude Code usa Opus 5.5 por defecto, que es lo que más rápido gasta la ventana de 5 h. Con <code>opusplan</code> Claude planifica con Opus y ejecuta con Sonnet.</p>
     </div>
     <div class="panel stack">
       <h3>Alternativas</h3>
@@ -217,6 +218,51 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:v
     <div class="finding"><b>Ejemplos de modelos desfasados en el plugin</b><span class="small"><code>gpt-5.4-mini</code> y <code>spark</code> no figuran en el catálogo actual. Hay que usar los IDs del catálogo o los valores por defecto de Codex.</span></div>
     <div class="finding"><b>Fable 5.1 no se usa por defecto</b><span class="small">Existe <code>claude-fable-5-1</code>, pero en algunos planes pide créditos de uso y tiene un límite semanal propio. Solo se elige a mano.</span></div>
   </div>
+</section>
+
+<!-- QUÉ CONSTRUIMOS -->
+<section id="construimos" aria-labelledby="h-con">
+  <div class="sec-h"><span class="tag">1b</span><h2 id="h-con">Qué estamos construyendo</h2></div>
+  <p class="intro"><b>No es una aplicación.</b> Es un <b>kit de oficina</b>: unos pocos archivos que se copian en cualquier proyecto (Roblox, Pragmat o uno nuevo) para que Claude y Codex trabajen con las mismas reglas. Más adelante te daré un prompt para adaptarlo a cada proyecto.</p>
+  <div class="tbl"><table style="min-width:640px">
+    <thead><tr><th>Pieza</th><th>Qué hace</th><th>Gasto de contexto</th></tr></thead>
+    <tbody>
+      <tr><td><code>AGENTS.md</code> universal</td><td>Quién hace qué, cuándo delegar, contrato de tarea, límites, dónde está la bóveda. Lo leen <span class="ag claude"><svg><use href="#i-claude"/></svg>Claude</span> y <span class="ag codex"><svg><use href="#i-codex"/></svg>Codex</span></td><td>Se carga siempre, así que debe ser <b>corto</b> (menos de 200 líneas)</td></tr>
+      <tr><td><code>CLAUDE.md</code> mínimo</td><td>Importa <code>AGENTS.md</code> y añade solo lo exclusivo de Claude</td><td>Casi nulo</td></tr>
+      <tr><td>Skill «oficina»</td><td>Procedimientos largos: enrutar, contrato, relevo, cierre de memoria</td><td>Solo su descripción, hasta que se usa</td></tr>
+      <tr><td>2 scripts pequeños</td><td>La barra de estado guarda el % de cupo de Claude; un hook avisa <b>solo</b> al cruzar el umbral</td><td>Cero mientras no hay aviso</td></tr>
+      <tr><td>Bóveda de Obsidian</td><td>Tu contexto ordenado, que puedes ver y editar</td><td>Solo lo que se busca</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small"><b>Lo que verás tú:</b> <code>claude agents</code> (quién trabaja y quién espera tu respuesta), la barra con el cupo de Claude, <code>/codex:status</code> para Codex y la bóveda en Obsidian. Esas son las «tarjetitas» reales. La tarjeta de la sección 5 es una maqueta.</p>
+</section>
+
+<!-- CAPACIDAD -->
+<section id="capacidad" aria-labelledby="h-cap">
+  <div class="sec-h"><span class="tag">1c</span><h2 id="h-cap">Capacidad y relevo</h2><span class="chip c-sim">Simulación</span></div>
+  <p class="intro">Claude orquesta, así que conserva siempre una reserva para coordinar: <b>~5 % de la ventana de 5 h</b> y <b>~3 % de la semanal</b>. Hace falta porque incluso delegar a Codex pasa por un pequeño subagente de Claude: con un 0 % no podría ni delegar ni revisar. Mueve los controles.</p>
+  <div class="sim">
+    <div class="panel controls" role="group" aria-label="Simular cupo">
+      <div class="field"><label for="c-5h">Claude · 5 h usado: <b id="c-5h-v">60 %</b></label><input type="range" id="c-5h" min="0" max="100" value="60" style="width:100%;accent-color:var(--claude)"></div>
+      <div class="field"><label for="c-7d">Claude · semanal usado: <b id="c-7d-v">40 %</b></label><input type="range" id="c-7d" min="0" max="100" value="40" style="width:100%;accent-color:var(--claude)"></div>
+      <div class="field"><label for="c-cx">Cupo de Codex</label><select id="c-cx"><option value="alto">Amplio</option><option value="bajo">Bajo</option><option value="nd">Sin dato (no se ve desde Claude)</option><option value="agotado">Agotado</option></select></div>
+      <div class="field"><label for="c-job">Trabajo en curso</label><select id="c-job"><option value="contrato">Código con contrato definido</option><option value="complejo">Complejo, ya planificado</option><option value="creativo">Creativo (Hecho de Nada)</option><option value="decision">Falta una decisión</option></select></div>
+      <div class="field"><label for="c-pref">En reserva</label><select id="c-pref"><option value="auto">Relevo automático si hay contrato (propuesto)</option><option value="preguntar">Preguntarme siempre</option><option value="esperar">Esperar siempre la recarga</option></select></div>
+    </div>
+    <div class="stack" id="cap-out" aria-live="polite"></div>
+  </div>
+  <details>
+    <summary>Cómo funcionaría técnicamente (confirmado en la documentación, no instalado)</summary>
+    <div class="small">
+      <ul class="plain">
+        <li>La barra de estado recibe <code>rate_limits.five_hour.used_percentage</code>, <code>seven_day.used_percentage</code> y <code>resets_at</code>. Está disponible en <b>Pro</b> y aparece tras la primera respuesta de la sesión.</li>
+        <li>El script de la barra guarda esas cifras. Un hook <code>UserPromptSubmit</code> las lee y solo escribe una línea para Claude cuando se cruza un umbral.</li>
+        <li><b>Hueco:</b> Claude Code no ve el cupo de Codex. Se mira con <code>/status</code> en Codex o con un lector de <code>account/rateLimits/read</code> (por evaluar).</li>
+        <li>El % se actualiza en cada respuesta, y un turno grande puede saltar de 90 a 100. Por eso el traspaso se prepara antes de llegar a la reserva.</li>
+        <li>Si Claude no está disponible, hablas con Codex directamente: lee el mismo <code>AGENTS.md</code> y la misma bóveda, y retomas con <code>codex resume</code> o <code>/codex:transfer</code>.</li>
+      </ul>
+    </div>
+  </details>
 </section>
 
 <!-- 2-3. SIMULADOR -->
@@ -449,6 +495,37 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:v
   </table></div>
 </section>
 
+<!-- AUTOAUDITORÍA -->
+<section id="auditoria" aria-labelledby="h-aud">
+  <div class="sec-h"><span class="tag">6b</span><h2 id="h-aud">Autoauditoría y ahorro real</h2></div>
+  <p class="intro">Lo que fallaba en el primer plan y cómo se ahorra de verdad. Las herramientas de «ahorro» rinden mucho menos de lo que anuncian. Lo que más ahorra es <b>no hacer el trabajo dos veces</b>.</p>
+  <div class="verdict">
+    <div class="panel stack">
+      <h3>Correcciones al plan anterior</h3>
+      <ul class="plain small">
+        <li>No tuve en cuenta que en <b>Pro el modelo por defecto es Opus 5.5</b>. Ahora Opus planifica y Sonnet ejecuta (<code>opusplan</code>).</li>
+        <li>No dije que <b>delegar también gasta Claude</b>. Por eso la reserva y el traspaso se preparan antes del límite.</li>
+        <li>El simulador mandaba demasiado a «Claude coordina». Ahora prima «Codex directo» cuando hay contrato.</li>
+        <li>Revisión adversarial solo con riesgo alto. Con riesgo medio basta una revisión corta y dirigida.</li>
+        <li>Usar <code>medium</code> en Sol era una hipótesis. El piloto compara <code>low</code> (por defecto) con <code>medium</code>.</li>
+        <li>Faltaba medir el «impuesto fijo» de cada mensaje: <code>/context</code>, <code>/usage</code> (desglose por skill, plugin o MCP) y <code>claude plugin details</code>.</li>
+        <li>Los artifacts sirven para entender, no ahorran tokens, y no se meten en el contexto de trabajo.</li>
+      </ul>
+    </div>
+    <div class="panel stack">
+      <h3>Palancas de ahorro, por impacto</h3>
+      <ol class="plain small">
+        <li><b>Dos depósitos.</b> Lo que gasta muchos tokens (leer mucho código, ciclos de prueba, implementar) va a Codex, que tiene su propio cupo. Claude piensa y revisa.</li>
+        <li><b>Modelo según la fase:</b> <code>opusplan</code>; Haiku para tareas mecánicas.</li>
+        <li><b>Sesiones limpias:</b> <code>/clear</code> entre tareas y <code>/compact</code> con instrucciones.</li>
+        <li><b>Impuesto fijo pequeño:</b> <code>AGENTS.md</code> breve, pocos MCP activos.</li>
+        <li><b>Memoria selectiva:</b> índice, luego búsqueda, luego nota concreta.</li>
+        <li><b>Sin bucles:</b> 2 correcciones como máximo, review gate apagado, nada de <code>ultra</code>.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
 <!-- 8. PILOTO -->
 <section id="piloto" aria-labelledby="h-pil">
   <div class="sec-h"><span class="tag">7</span><h2 id="h-pil">Piloto y pendientes</h2></div>
@@ -543,7 +620,9 @@ function decide(p,w,amb,risk){
   if(w==='creativo') return {route:'solo',why:'Trabajo de dirección creativa. Claude lo hace directamente.'};
   if((w==='implementacion'||w==='bug'||w==='revision') && a===0 && r<=1)
     return {route:'directo',why:'Hay objetivo, contexto y una forma de comprobarlo. Codex puede hacerlo de principio a fin, aunque sea un trabajo grande; meter a Claude de intermediario solo añade lecturas y traspasos.'};
-  if((w==='implementacion'||w==='bug') && (a===1||r===2))
+  if((w==='implementacion'||w==='bug') && a===1 && r<=1)
+    return {route:'directo',why:'Quedan detalles menores. Claude escribe un contrato corto con los criterios de aceptación y Codex hace el resto. Coordinar más no aportaría.'};
+  if((w==='implementacion'||w==='bug') && r===2)
     return {route:'coordina',why:'Quedan detalles por cerrar o el riesgo es alto. Claude fija los criterios de aceptación y Codex ejecuta la parte definida.'};
   return {route:'solo',why:'Tarea acotada sin riesgo especial. Coordinar costaría más de lo que aporta.'};
 }
@@ -651,7 +730,14 @@ const TOOLS=[
  ['no','Vibe Kanban','Tablero de agentes','«Vibe Kanban is sunsetting»','En cierre'],
  ['no','Claude Squad','Varios agentes en tmux','tmux + gh; para Codex documenta una API key','No es el primer paso'],
  ['no','CC Switch','Gestión de proveedores, MCP y prompts','Resuelve otro problema','No aplica'],
- ['no','Mod propio','Panel a medida','API de acceso temprano; mantenimiento en cada versión','Solo tras el piloto']
+ ['no','Mod propio','Panel a medida','API de acceso temprano; mantenimiento en cada versión','Solo tras el piloto'],
+ ['ok','opusplan (nativo)','Opus en modo plan, Sonnet al ejecutar','Comprobar en /model','Oficial · clave en Pro'],
+ ['no','JEV (TypeSafe)','Modelo de juicio rápido: clasifica, puntúa o verifica muchos elementos. No es un «cerebro» de estrategia','Otra cuenta y cobro por API (TYPESAFE_API_KEY); acceso temprano','Las decisiones se resuelven con un protocolo'],
+ ['eval','Graphify','Grafo de una carpeta (código, docs, imágenes); exporta a Obsidian','Anuncia 71x con 52 archivos, ~1x con 6; un revisor midió 7–8 %. Usa Claude para extraer y gasta cupo','Solo si una carpeta crece mucho'],
+ ['eval','codebase-memory-mcp','Índice local del código sin LLM; incluye Luau','Un tester midió 8–10x (el autor anuncia ~99 %). Toca la configuración global de Claude y Codex y arranca un daemon','MIT · para repos grandes'],
+ ['no','RTK','Comprime la salida de comandos','JetBrains: sin ahorro; +7,6 % de coste con esfuerzo bajo. No cubre Read, Grep ni Glob','Apache-2.0 + BUSL-1.1'],
+ ['eval','Ponytail','Reglas para escribir solo el código necesario','Prueba independiente: ~10 %; bug en Windows; se inyecta en subagentes','Medir si ya lo tienes'],
+ ['no','Caveman','Respuestas telegráficas','JetBrains: ~8,5 % de la salida frente al 65 % anunciado','Marginal']
 ];
 const TL={ok:['Recomendada','c-ok'],opt:['Opcional','c-opt'],eval:['Evaluar','c-eval'],no:['Descartada','c-no']};
 function renderTools(){
@@ -741,6 +827,43 @@ $('#examples').addEventListener('click',e=>{ const b=e.target.closest('button');
 $$('.tabs button').forEach(b=>b.addEventListener('click',()=>{ $$('.tabs button').forEach(x=>x.setAttribute('aria-selected',String(x===b))); $('#p-lvl').innerHTML=LVL[b.dataset.lvl]; $('#p-lvl').setAttribute('aria-labelledby',b.id); }));
 $('.tabs').addEventListener('keydown',e=>{ if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return; const t=$$('.tabs button'); const i=t.findIndex(x=>x.getAttribute('aria-selected')==='true'); const n=t[(i+(e.key==='ArrowRight'?1:t.length-1))%t.length]; n.click(); n.focus(); });
 $('#rtest').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) $('#rtest-out').innerHTML=RT[+b.dataset.r]; });
+
+/* ---------- capacidad ---------- */
+function cap(){
+  const h=+$('#c-5h').value, d=+$('#c-7d').value, cx=$('#c-cx').value, job=$('#c-job').value, pref=$('#c-pref').value;
+  $('#c-5h-v').textContent=h+' %'; $('#c-7d-v').textContent=d+' %';
+  const codexOK = cx==='alto' || cx==='bajo';
+  let lvl, title, body=[], who='claude';
+  if(h>=100||d>=100){ lvl='c-no'; title='Claude no disponible'; who='codex';
+    body.push('Hablas con Codex directamente. Lee el mismo AGENTS.md y la misma bóveda.');
+    body.push(job==='decision'?'La decisión la tomas tú; Codex puede aportar análisis.':'Sigue lo que ya está especificado; lo nuevo y lo creativo espera.');
+    if(!codexOK) { body.push('Codex tampoco tiene cupo confirmado: se pausa todo y se guarda el contrato. Nunca se activa una API de pago.'); who='ivan'; }
+  } else if(h>=95||d>=97){ lvl='c-eval'; title='Reserva: Claude solo coordina';
+    const creative = job==='creativo'||job==='decision';
+    if(pref==='esperar' || creative || !codexOK){ who='ivan';
+      body.push(creative?'Lo creativo y las decisiones no se delegan: se espera a que se recargue Claude.':!codexOK?'Codex no tiene cupo confirmado: se espera la recarga.':'Elegiste esperar siempre la recarga.');
+      body.push('Claude usa su reserva solo para dejar anotado el estado.');
+    } else if(pref==='preguntar'){ who='ivan'; body.push('Claude te pregunta: ¿relevo a Codex o esperar? Con su reserva solo envía la pregunta.'); }
+    else { who='codex';
+      body.push('Relevo a Codex con el contrato ya escrito: '+(job==='complejo'?'gpt-6-astra · medium':'gpt-6.1-sol')+'.');
+      body.push('Claude solo envía el contrato y revisa al final. Las decisiones nuevas esperan.');
+      if(cx==='bajo') body.push('Codex tiene poco cupo: se prioriza la pieza más importante y se para al terminarla.');
+    }
+  } else if(h>=85||d>=92){ lvl='c-eval'; title='Preparar traspaso';
+    body.push('Claude escribe ya el contrato de lo pendiente (hecho, pendiente, aceptación, qué no puede decidir Codex) mientras aún tiene margen.');
+    body.push('Termina lo pequeño; no empieza bloques grandes.');
+  } else { lvl='c-ok'; title='Normal';
+    body.push('Ruta habitual: Codex directo para trabajo definido, Claude coordina lo ambiguo o de riesgo y Claude solo para lo creativo.');
+  }
+  if(cx==='nd') body.push('Aviso: el cupo de Codex no se ve desde Claude Code. Compruébalo con /status en Codex.');
+  $('#cap-out').innerHTML=`<div class="panel route-head"><span class="eyebrow">5 h: ${h} % · semanal: ${d} % · umbrales 85/95 % y 92/97 %</span>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="route-name">${esc(title)}</span><span class="chip ${lvl}">${lvl==='c-ok'?'OK':lvl==='c-no'?'Límite':'Atención'}</span>${ag(who, who==='ivan'?'Tú decides':null)}</div>
+    ${body.map(b=>`<p class="why">${esc(b)}</p>`).join('')}</div>
+    <p class="small">Cifras de ejemplo. En la realidad, el % lo da la barra de estado de Claude Code y la hora de reinicio aparece en <code>/usage</code>.</p>`;
+}
+['#c-5h','#c-7d'].forEach(s=>$(s).addEventListener('input',cap));
+['#c-cx','#c-job','#c-pref'].forEach(s=>$(s).addEventListener('change',cap));
+cap();
 
 /* ---------- inicio ---------- */
 $('#p-lvl').innerHTML=LVL[1]; $('#p-lvl').setAttribute('aria-labelledby','t-n1'); $('#time-out').innerHTML=TIME.ini;
