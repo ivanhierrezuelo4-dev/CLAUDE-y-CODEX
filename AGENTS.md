@@ -1,5 +1,13 @@
 # Trabajar en Nexo
 
+## Criterio de asesoramiento: aprovechar lo que ya existe
+
+Iván ha reevaluado el proyecto y prefiere partir de Claude Code con el plugin oficial de Codex, usando el seguimiento existente y añadiendo únicamente una vista pequeña si falta algo concreto. No continuar ampliando Nexo por inercia.
+
+Antes de recomendar una aplicación nueva, buscar primero una integración oficial, producto existente o configuración sencilla que cubra la necesidad. Explicar qué resuelve, qué falta, qué configuración requiere y su coste real de tiempo, consumo y mantenimiento. Probar una tarea representativa antes de proponer una construcción mayor. Recomendar la alternativa existente cuando sea suficiente, aunque implique escribir menos código. No presentar «ya existe» como «no requiere ningún esfuerzo» sin comprobarlo.
+
+La preferencia es conservar la calidad con menos complejidad, intervención y contexto repetido. Antes de crear un mod o minidashboard, comprobar las vistas de agentes y los comandos de seguimiento del plugin. Construir solo la parte faltante con un beneficio claro. Distinguir siempre las pruebas internas del acceso que el usuario realmente puede abrir.
+
 ## Arquitectura
 
 - `src/`: React + TypeScript, interfaz en español. Sin fuentes externas ni telemetría.

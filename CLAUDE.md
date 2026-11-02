@@ -2,6 +2,8 @@
 
 Nexo es la oficina personal de Iván. Él no programa: resuelve la instalación y explica únicamente las acciones que necesiten su intervención, una por una. Lee README.md y AGENTS.md antes de actuar.
 
+**Preferencia actualizada:** antes de retomar la instalación o ampliar esta aplicación, aplicar el criterio de asesoramiento de AGENTS.md. Iván prefiere probar Claude Code con el plugin oficial de Codex y su seguimiento existente; solo añadir un panel pequeño si hay una necesidad sin cubrir. Priorizar soluciones ya hechas y explicar su configuración y mantenimiento antes de construir. Las instrucciones técnicas que siguen describen Nexo y no implican que haya que continuar desarrollándolo.
+
 ## Objetivo y preferencias
 
 - Proyectos ilimitados en concepto (no restringir la interfaz a los tres iniciales).
