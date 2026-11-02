@@ -1017,7 +1017,12 @@ function App() {
             </p>
           </div>
           <div className="modal-actions">
-            <a className="button secondary" href="/api/export" download>
+            <a
+              className="button secondary"
+              href={state.preview ? undefined : '/api/export'}
+              aria-disabled={state.preview}
+              download
+            >
               Descargar respaldo
             </a>
             <button

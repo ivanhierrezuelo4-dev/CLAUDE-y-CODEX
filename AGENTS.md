@@ -3,6 +3,7 @@
 ## Arquitectura
 
 - `src/`: React + TypeScript, interfaz en español. Sin fuentes externas ni telemetría.
+- `web/index.html`: entrada fuente de Vite para la oficina completa. El `index.html` de la raíz es una vista autónoma generada, que el visor de archivos puede mostrar sin servidor. No editar ni enviar a modelos su bundle minificado; modificar `src/`, `web/` y `scripts/build-portable.mjs`. `npm run build` actualiza ese HTML y genera también `Nexo.html` como descarga local ignorada por Git.
 - `server/`: Node.js 24, Express y `node:sqlite`. `store.mjs` define la persistencia; `context.mjs` la recuperación; `providers.mjs` las CLI; `app.mjs` las operaciones.
 - `.nexo/`: datos privados ignorados por Git. Nunca subirlos ni vaciarlos para hacer pasar una prueba.
 - `tests/`: pruebas de backend sin IA; `tests/browser/`: recorridos Playwright con datos temporales.

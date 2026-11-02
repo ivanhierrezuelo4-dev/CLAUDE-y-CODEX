@@ -8,6 +8,8 @@ Esta es una primera versión funcional. La organización, la memoria y las expor
 
 [Ver la interfaz móvil](docs/imagenes/nexo-movil.png) · [Comprobaciones y límites de esta entrega](docs/VERIFICACION.md)
 
+**Para ver el diseño sin instalación:** abre el `index.html` de la raíz en el visor o en un navegador. Es una vista autónoma con CSS y JavaScript incluidos; no necesita puertos ni servidor. Permite navegar por las pantallas, con las conexiones y el guardado desactivados. `npm run build` la actualiza y genera una copia descargable llamada `Nexo.html`. La entrada fuente de la aplicación completa está en `web/index.html`.
+
 ## Para Iván: llévalo a tu ordenador
 
 Puedes darle esto a Claude Code:

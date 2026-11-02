@@ -30,3 +30,9 @@ La automatización de GitHub está configurada; una validación local no estable
 ## Vista web incrustada
 
 Se añadieron dos pruebas del modo de demostración: rechaza bases de datos persistentes y bloquea guardado, consultas a modelos e inspección de sesiones. El conjunto pasa con 21 pruebas. Se sirve el build en el puerto 3000, separado de la oficina personal. La disponibilidad del botón de la plataforma necesita su ruta al puerto; una comprobación dentro de Chromium no verifica por sí sola ese botón externo.
+
+## HTML autónomo para el visor de archivos
+
+El `index.html` de la raíz contiene ahora la vista empaquetada con CSS, JavaScript y datos iniciales, sin peticiones al backend. La entrada fuente de Vite está en `web/index.html`. El build genera también `Nexo.html` como copia local para abrir o descargar.
+
+Pasaron los 5 recorridos de navegador: los 3 de la oficina y 2 adicionales para el documento autónomo sin red, navegación por proyectos, inserción mediante `srcdoc` y contenido visible con JavaScript desactivado. La política del navegador administrado bloquea navegar a `file://`: se comprobó el mismo contenido HTML con `setContent` y `srcdoc`, sin desactivar esa política. Esta comprobación no implica control del visor externo de la aplicación del usuario.

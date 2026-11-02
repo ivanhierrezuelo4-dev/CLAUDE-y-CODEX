@@ -1,4 +1,25 @@
+import type { State, Provider } from './types';
+
+declare global {
+  interface Window {
+    __NEXO_PORTABLE_PREVIEW__?: { state: State; providers: Provider[] };
+  }
+}
+
 export async function api<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
+  const portable = window.__NEXO_PORTABLE_PREVIEW__;
+  if (portable) {
+    if (method !== 'GET')
+      throw new Error(
+        'Esta vista permite explorar Nexo. El guardado y las consultas a IA están desactivados.',
+      );
+    if (path === '/state') return structuredClone(portable.state) as T;
+    if (path.startsWith('/providers')) return structuredClone(portable.providers) as T;
+    if (/^\/projects\/[^/]+\/documents$/.test(path)) return [] as T;
+    throw new Error(
+      'Esta operación necesita la oficina local. La vista autónoma no se conecta a servidores.',
+    );
+  }
   const response = await fetch('/api' + path, {
     method,
     headers: { 'Content-Type': 'application/json', 'X-Nexo-Client': 'local' },

@@ -8,14 +8,15 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run build:portable",
     "start": "node server/index.mjs",
     "setup": "npm ci && npm run build",
     "test": "node --test tests/*.test.mjs",
     "check": "npm run test && npm run build",
     "doctor": "node scripts/doctor.mjs",
     "test:browser": "playwright test",
-    "preview": "node server/preview.mjs"
+    "preview": "node server/preview.mjs",
+    "build:portable": "node scripts/build-portable.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",
