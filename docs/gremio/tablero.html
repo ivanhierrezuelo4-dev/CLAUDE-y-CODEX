@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
 <title>Gremio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -364,6 +364,64 @@ body[data-skin="cosmos"] .deco .dside{display:none}
 .wstats i{font-style:normal;font-family:var(--f-pix);font-size:.36rem;color:var(--muted);line-height:1.4}
 .wstats b{font-size:.95rem;font-variant-numeric:tabular-nums}
 .wline{font-size:.78rem;color:var(--muted)} .wline b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ---------- teléfono ---------- */
+:root{--sab:env(safe-area-inset-bottom,0px)}
+@media (max-width:600px){
+  html{font-size:17px}
+  .top{padding-block:10px 6px;gap:8px}
+  .brand small{display:none}
+  .brand h1{font-size:.85rem}
+  .tabs{order:3;width:100%}
+  .tabs button{flex:1;justify-content:center;padding:10px 6px;min-height:44px}
+  .conn{font-size:.42rem;padding:5px 6px}
+  .log{display:none}
+  .bar{cursor:default;padding:6px 8px;gap:5px}
+  .bar .grip{display:none}
+  .bar .id{font-size:.42rem}
+  .ibtn{min-width:38px;height:36px}
+  .st{font-size:.42rem;padding:4px 5px}
+  .body{padding:12px;gap:12px}
+  .ttl h2{font-size:.68rem}
+  .ttl .edit{min-width:38px;min-height:38px}
+  .ef{min-height:38px;min-width:66px}
+  .pick{font-size:.95rem;padding-bottom:3px}
+  .seg button{padding:11px 4px;min-height:48px}
+  .reset{min-height:32px}
+  .menu{left:-8px;right:-8px;min-width:0}
+  .menu button{padding:9px 8px;min-height:46px}
+  .sw{width:62px;height:34px} .sw::after{width:20px;height:20px} .astrabox.on .sw::after{left:33px}
+  .metabtn{min-height:44px}
+  .go{padding:13px 8px;font-size:.52rem}
+  .mapbtn{min-height:46px}
+  .skins{right:-4px;width:calc(100vw - 40px)}
+  .skgrid{grid-template-columns:repeat(4,1fr)}
+  .skprev{width:46px;height:46px}
+  .pill{padding:8px 12px;max-width:calc(100vw - 24px)}
+  .pill span:last-child{overflow:hidden;text-overflow:ellipsis}
+  .wov{padding:14px 12px;gap:10px}
+  .wscene{transform:scale(.8);margin:-12px 0}
+  .wov h3{font-size:.62rem}
+  .wbtn{min-height:42px}
+  .ov{padding:calc(6px + env(safe-area-inset-top,0px)) 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .plan header{padding:10px}
+  .plan header h2{font-size:.5rem}
+  .plan .in{padding:12px;gap:14px}
+  .pstep{grid-template-columns:44px minmax(0,1fr);gap:10px}
+  .pstep .ic{width:44px;height:44px}
+  .pstep .ic svg{width:32px;height:32px}
+  .dash{left:20px;top:46px}
+  .pbody{padding:9px 10px}
+  .who .ef{min-height:34px}
+  .chest{gap:10px;padding:8px 10px}
+  .chest .box{width:48px;height:48px} .chest .box svg{width:44px;height:44px}
+  .loot button{min-height:48px}
+  .spechead{padding:10px}
+  .vbox{max-height:calc(100vh - 32px)}
+  .hgrid{grid-template-columns:1fr}
+  .hall{padding-bottom:40px}
+  .desk{padding-block:12px 40px}
+}
 /* ---------- pestañas ---------- */
 .tabs{display:flex;gap:6px;background:var(--bg2);border:3px solid #000;box-shadow:0 0 0 2px var(--line);padding:4px}
 .tabs button{display:flex;gap:8px;align-items:center;background:none;border:2px solid transparent;padding:7px 10px;font-family:var(--f-pix);font-size:.5rem;color:var(--muted);transition:background .25s ease,color .25s ease,border-color .25s ease}
@@ -626,14 +684,16 @@ const CLK={clasico:{rim:'#E0B23A',rimL:'#F7DC7A',rimD:'#9A6F12',face:'#FFFFFF',m
  bosque:{rim:'#7CB342',rimL:'#C5E1A5',rimD:'#33691E',face:'#FFFFF4',mark:'#795548',hand:'#2F2A1F',hand2:'#E53935'},
  cosmos:{rim:'#B07CFF',rimL:'#D9C2FF',rimD:'#6A3FCB',face:'#FFFFFF',mark:'#7FD6FF',hand:'#1E1240',hand2:'#FF5C7C'}};
 let skin='clasico'; try{ const s=localStorage.getItem('gremio-skin'); if(SK[s]) skin=s; }catch(_){}
-const cardPad=()=>skin==='clasico'?{t:8,s:8,b:8}:{t:64,s:42,b:30};
+const MQ=window.matchMedia('(max-width:600px)'); const isMob=()=>MQ.matches;
+const cardPad=()=>skin==='clasico'?{t:8,s:8,b:8}:(isMob()?{t:18,s:14,b:18}:{t:64,s:42,b:30});
 function buildDeco(){ const d=$('#deco'); const k=SK[skin]; if(!k||!k.pal){ d.innerHTML=''; return; }
-  const S=3, side=transpose(k.bot), sw=k.bot.length*S;
+  const S=isMob()?2:3, C=isMob()?3:4, side=transpose(k.bot), sw=k.bot.length*S;
   let h=`<div class="dside l" style="background-image:${pxUri(side.map(r=>[...r].reverse().join('')),k.pal,S)};width:${sw}px;left:-${sw-2}px"></div><div class="dside r" style="background-image:${pxUri(side,k.pal,S)};width:${sw}px;right:-${sw-2}px"></div>`;
   h+=`<div class="dtop" style="background-image:${pxUri(k.top,k.pal,S)};height:${k.top.length*S}px;top:-${k.top.length*S-3}px;left:-${sw-2}px;right:-${sw-2}px"></div>`;
   h+=`<div class="dbot ${k.flow?'flow':''}" style="background-image:${pxUri(k.bot,k.pal,S)};height:${k.bot.length*S}px;bottom:-${k.bot.length*S-3}px;left:-${sw-2}px;right:-${sw-2}px"></div>`;
   const cr=k.cr||mirror(k.cl);
-  h+=`<div class="dcorner l ${k.anim||''}">${pxSvg(k.cl,k.pal,4)}</div><div class="dcorner r ${k.anim||''}">${pxSvg(cr,k.pal,4)}</div>`;
+  const ct=`top:-${16*C-(isMob()?6:4)}px`, cs=Math.round(12*C*(isMob()?.55:.8));
+  h+=`<div class="dcorner l ${k.anim||''}" style="${ct};left:-${cs}px">${pxSvg(k.cl,k.pal,C)}</div><div class="dcorner r ${k.anim||''}" style="${ct};right:-${cs}px">${pxSvg(cr,k.pal,C)}</div>`;
   const P=k.part; if(P&&!RM){ for(let i=0;i<P.n;i++){ const side=i%2?'right':'left', off=6+((i*7)%14), col=P.cols[i%P.cols.length], dur=(5+((i*13)%7)).toFixed(1), dl=(-(i*1.37)%dur).toFixed(2);
     const dot=`<i class="dpi ${P.glow?'glow':''}" style="width:${P.s}px;height:${P.s}px;background:${col};color:${col}"></i>`;
     if(P.type==='fall'||P.type==='rise') h+=`<span class="dpw ${P.type}" style="${side}:-${off+P.s}px;--d:${dur}s;animation-delay:${dl}s">${dot}</span>`;
@@ -958,20 +1018,25 @@ let pos=null; try{ pos=JSON.parse(localStorage.getItem('gremio-pos')||'null'); }
 function clampPos(el,x,y){ const P=el.id==='card'?cardPad():{t:8,s:8,b:8}; const mx=window.innerWidth-el.offsetWidth-P.s, my=window.innerHeight-el.offsetHeight-P.b; return [Math.max(P.s,Math.min(Math.max(P.s,mx),x)),Math.max(P.t,Math.min(Math.max(P.t,my),y))]; }
 let pillPos=null, openedAt=null; try{ pillPos=JSON.parse(localStorage.getItem('gremio-pill')||'null'); }catch(_){}
 function savePill(r,t){ pillPos={r,t}; try{ localStorage.setItem('gremio-pill',JSON.stringify(pillPos)); }catch(_){} }
-function place(){ const c=$('#card'); let x,y; if(pos){ [x,y]=clampPos(c,pos.x,pos.y); } else { x=window.innerWidth-c.offsetWidth-24; y=80; [x,y]=clampPos(c,x,y); } c.style.left=x+'px'; c.style.top=y+'px'; }
+function headerBottom(){ const t=document.querySelector('.top'); return t?Math.round(t.getBoundingClientRect().bottom):60; }
+function dockPill(){ const p=$('#pill'); const sb=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sab'))||0; p.style.left=Math.max(8,Math.round((window.innerWidth-p.offsetWidth)/2))+'px'; p.style.top=Math.round(window.innerHeight-p.offsetHeight-16-sb)+'px'; }
+function place(){ const c=$('#card');
+  if(isMob()){ const P=cardPad(); const top=headerBottom()+P.t; c.style.width=(window.innerWidth-2*P.s)+'px'; c.style.left=P.s+'px'; c.style.top=top+'px'; c.style.maxHeight=Math.max(240,window.innerHeight-top-P.b)+'px'; return; }
+  c.style.width=''; c.style.maxHeight=''; let x,y; if(pos){ [x,y]=clampPos(c,pos.x,pos.y); } else { x=window.innerWidth-c.offsetWidth-24; y=80; [x,y]=clampPos(c,x,y); } c.style.left=x+'px'; c.style.top=y+'px'; }
 function savePos(x,y){ pos={x,y}; try{ localStorage.setItem('gremio-pos',JSON.stringify(pos)); }catch(_){} }
 /* la píldora aparece en la esquina superior derecha de la tarjeta, junto al botón de minimizar */
 function placePill(){ const c=$('#card'), p=$('#pill'); const right=c.offsetLeft+c.offsetWidth; const [x,y]=clampPos(p,right-p.offsetWidth,c.offsetTop); p.style.left=x+'px'; p.style.top=y+'px'; }
 function minimize(){ const c=$('#card'); if(c.hidden||c.dataset.busy) return; c.dataset.busy='1'; savePos(c.offsetLeft,c.offsetTop); toggleSkins(false); openMenu=null;
   let right=c.offsetLeft+c.offsetWidth, top=c.offsetTop;
   if(pillPos&&openedAt&&openedAt.x===c.offsetLeft&&openedAt.y===c.offsetTop){ right=pillPos.r; top=pillPos.t; }
-  animOut(c,'shrink',()=>{ c.hidden=true; delete c.dataset.busy; const p=$('#pill'); p.hidden=false; const [x,y]=clampPos(p,right-p.offsetWidth,top); p.style.left=x+'px'; p.style.top=y+'px'; savePill(x+p.offsetWidth,y); animIn(p,'popin'); p.focus(); },320); }
+  const mob=isMob();
+  animOut(c,'shrink',()=>{ c.hidden=true; delete c.dataset.busy; const p=$('#pill'); p.hidden=false; if(mob){ dockPill(); animIn(p,'popin'); p.focus(); return; } const [x,y]=clampPos(p,right-p.offsetWidth,top); p.style.left=x+'px'; p.style.top=y+'px'; savePill(x+p.offsetWidth,y); animIn(p,'popin'); p.focus(); },320); }
 function restore(){ const p=$('#pill'), c=$('#card'); if(p.dataset.busy) return; p.dataset.busy='1'; const right=p.offsetLeft+p.offsetWidth, top=p.offsetTop; savePill(right,top);
-  animOut(p,'popout',()=>{ p.hidden=true; delete p.dataset.busy; c.hidden=false;
+  animOut(p,'popout',()=>{ p.hidden=true; delete p.dataset.busy; c.hidden=false; if(isMob()){ place(); animIn(c,'grow'); return; }
     const [x,y]=clampPos(c,right-c.offsetWidth,top); c.style.left=x+'px'; c.style.top=y+'px'; savePos(x,y); openedAt={x,y}; animIn(c,'grow'); const mb=$('#minBtn'); if(mb) mb.focus({preventScroll:true}); },200); }
 function dragger(handle,el,onClick,onMoved){ let sx,sy,ox,oy,on=false,moved=false;
   handle.addEventListener('pointerdown',e=>{ if(e.target.closest('.ibtn')||e.target.closest('.skins')) return; on=true; moved=false; sx=e.clientX; sy=e.clientY; ox=el.offsetLeft; oy=el.offsetTop; handle.setPointerCapture(e.pointerId); });
-  handle.addEventListener('pointermove',e=>{ if(!on) return; const dx=e.clientX-sx, dy=e.clientY-sy; if(Math.abs(dx)+Math.abs(dy)>4) moved=true; if(!moved) return; const [x,y]=clampPos(el,ox+dx,oy+dy); el.style.left=x+'px'; el.style.top=y+'px'; });
+  handle.addEventListener('pointermove',e=>{ if(!on||isMob()) return; const dx=e.clientX-sx, dy=e.clientY-sy; if(Math.abs(dx)+Math.abs(dy)>4) moved=true; if(!moved) return; const [x,y]=clampPos(el,ox+dx,oy+dy); el.style.left=x+'px'; el.style.top=y+'px'; });
   handle.addEventListener('pointerup',()=>{ if(!on) return; on=false; if(moved){ onMoved&&onMoved(); } else if(onClick) onClick(); });
   handle.addEventListener('pointercancel',()=>{on=false;}); }
 dragger($('#bar'),$('#card'),null,()=>{ savePos($('#card').offsetLeft,$('#card').offsetTop); openedAt=null; });
@@ -979,7 +1044,10 @@ dragger($('#pill'),$('#pill'),restore,()=>{ const p=$('#pill'); savePill(p.offse
 $('#pill').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); restore(); } });
 $('#card').addEventListener('keydown',e=>{ const k={ArrowLeft:[-20,0],ArrowRight:[20,0],ArrowUp:[0,-20],ArrowDown:[0,20]}[e.key]; if(k&&e.altKey){ e.preventDefault(); const c=$('#card'); const [x,y]=clampPos(c,c.offsetLeft+k[0],c.offsetTop+k[1]); c.style.left=x+'px'; c.style.top=y+'px'; savePos(x,y);} });
 $('#minBtn').addEventListener('click',minimize);
-window.addEventListener('resize',()=>{ if(!$('#card').hidden) place(); else if(!$('#pill').hidden){ const p=$('#pill'); const [x,y]=clampPos(p,p.offsetLeft,p.offsetTop); p.style.left=x+'px'; p.style.top=y+'px'; } });
+let wasMob=isMob(), rzT=null;
+window.addEventListener('resize',()=>{ clearTimeout(rzT); rzT=setTimeout(()=>{ if(isMob()!==wasMob){ wasMob=isMob(); buildDeco(); }
+  if(!$('#card').hidden) place(); else if(!$('#pill').hidden){ if(isMob()) dockPill(); else { const p=$('#pill'); const [x,y]=clampPos(p,p.offsetLeft,p.offsetTop); p.style.left=x+'px'; p.style.top=y+'px'; } }
+  const w=$('#wov'); if(w&&!w.hidden) w.style.setProperty('--bar-h',$('#bar').offsetHeight+'px'); },80); });
 
 /* ---------- partículas ---------- */
 function burst(el,cols,n){ if(RM||!el) return; const c=el.getBoundingClientRect(); n=n||22;
