@@ -39,12 +39,13 @@ La tarjeta flota aparte del chat y **es donde Iván edita la misión**. Una conf
 En la tarjeta:
 - **Meta · resultado:** una frase con lo que existirá al terminar.
 - **Tipo:** viene marcado el sugerido (✦); un toque lo cambia y el equipo y los pasos se ajustan. **↺ Sugerido** lo deja todo como lo propuso el sistema.
-- **Equipo:** tocar el modelo abre la lista de modelos permitidos para ese papel (Haiku y Luna no aparecen; Fable avisa de que en Pro pide créditos). Tocar el esfuerzo lo rota `low → medium → high → xhigh`.
-- **★ Astra** (solo compleja): interruptor; activa, la estrella titila y aparece su paso en el plan. Avisa de que es cara.
-- **Estimación** (orientativa): tiempo, % de la ventana de 5 h de Claude y nivel de uso de Codex. Se recalcula con cada cambio.
+- **Equipo:** tocar el modelo abre la lista de modelos para ese papel. Haiku y Luna aparecen con aviso («solo tareas mecánicas») y Fable avisa de que en Pro pide créditos. Tocar el esfuerzo lo rota `low → medium → high → xhigh`.
+- **★ Astra** (solo compleja): se activa solo con su interruptor; activa, la estrella titila y aparece su paso en el plan. Avisa de que es cara.
+- **Estimación** (orientativa): tiempo, % de la ventana de 5 h de Claude y % de la ventana de 5 h de Codex, calculados paso a paso según modelo y esfuerzo. Se recalcula con cada cambio.
 - **Cupo antes:** % real de la barra de estado (en la demo, simulado).
 - **Confirmar misión:** guarda y **avisa a Claude** por un comentario del artefacto, sin escribir en el chat. Si el aviso no puede salir, la tarjeta pide escribir «empezar».
-- **Mapa:** abre el plan. Cada paso tiene una **caja de nota** que se guarda sola; Claude las lee al empezar. El **cofre de la bóveda** muestra las únicas notas de memoria que usará la misión.
+- **Mapa:** abre el plan. Cada paso permite cambiar **su propio modelo y esfuerzo** (marcado «PROPIO») y tiene una **caja de nota**; todo se guarda solo y Claude lo lee al empezar. El **cofre de la bóveda** muestra las únicas notas de memoria que usará la misión (no la bóveda entera); cada nota se puede abrir y llevar a Obsidian. Al final, la **especificación completa** desplegable (propósito, contexto, alcance, hitos, aceptación, detente si, riesgos) es editable.
+- **Skins:** 7 aspectos (Gremio, Pergamino, Neón, Bosque, Glaciar, Volcán, Arcano), guardados en tu navegador.
 
 Tras confirmar, los ajustes se bloquean. Estado: propuesta → confirmada → trabajando (paso N de M) → revisión → completada · pausa · bloqueada. Nunca porcentajes de avance inventados ni tiempo restante.
 
