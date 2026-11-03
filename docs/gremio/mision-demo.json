@@ -1,0 +1,27 @@
+{"id":"M-001","simulada":true,"cupoSimulado":true,"titulo":"Sistema de personajes para tu juego de Roblox",
+"meta":"Al terminar, añades un personaje nuevo rellenando una ficha, sin tocar código, y el juego lo guarda y lo muestra solo.",
+"porque":"Toca varias piezas a la vez (datos, habilidades, interfaz y guardado) y una mala decisión al principio se arrastra a todo.",
+"mejora":"Personajes nuevos sin programar.",
+"tipoSugerido":"compleja","tipo":"compleja","tipoConfirmado":false,"estado":"propuesta","paso":-1,"inicio":null,"actualizado":"2026-11-03T12:00:00Z",
+"equipos":{},"astra":{"activa":false,"pieza":"Diseña el sistema de habilidades, la pieza más delicada"},
+"cupoAntes":35,"notas":{},
+"boveda":[{"titulo":"Brief del proyecto Roblox","ruta":"Proyectos/Roblox/_brief.md"},{"titulo":"Decisiones: economía y monedas","ruta":"Proyectos/Roblox/decisiones.md"},{"titulo":"Estilo visual de personajes","ruta":"Proyectos/Roblox/estilo-personajes.md"},{"titulo":"Reglas del Gremio","ruta":"Gremio/REGLAS.md"}],
+"planes":{
+"compleja":[
+{"titulo":"Plan vivo de la misión","rol":"orquesta","recibe":"Tu petición + brief del proyecto + notas de la bóveda","entrega":"PLAN.md con hitos, aceptación y decisiones","comprueba":"Tú apruebas el plan antes de seguir"},
+{"titulo":"Diseño de habilidades","rol":"astra","recibe":"Plan + pieza asignada","entrega":"Diseño del sistema de habilidades y recargas","comprueba":"Opus lo valida contra el plan"},
+{"titulo":"Ficha de datos de personajes","rol":"ejecuta","recibe":"Contrato del hito 1","entrega":"Módulo de datos + 2 personajes de ejemplo","comprueba":"Se cargan sin errores en Studio"},
+{"titulo":"Habilidades y combate","rol":"ejecuta","recibe":"Contrato del hito 2","entrega":"Habilidades con tiempos de recarga","comprueba":"Cada habilidad se activa y respeta su recarga"},
+{"titulo":"Selección y guardado","rol":"ejecuta","recibe":"Contrato del hito 3","entrega":"Menú de selección + guardado del personaje","comprueba":"Sales y vuelves: sigue el mismo personaje"},
+{"titulo":"Revisión cruzada","rol":"revisa","recibe":"Cambios + plan + aceptación","entrega":"Problemas por gravedad","comprueba":"Nada crítico abierto"},
+{"titulo":"Cierre y aprendizajes","rol":"orquesta","recibe":"Resultado + revisión","entrega":"Resumen + 0–3 aprendizajes","comprueba":"Tú apruebas qué se guarda"}],
+"definida":[
+{"titulo":"Contrato de la misión","rol":"orquesta","recibe":"Tu petición + brief + bóveda","entrega":"Contrato nivel 3 con aceptación","comprueba":"Tú lo apruebas"},
+{"titulo":"Ficha, habilidades y guardado","rol":"ejecuta","recibe":"Contrato","entrega":"Sistema completo en una pasada","comprueba":"Pruebas del contrato en Studio"},
+{"titulo":"Revisión cruzada","rol":"revisa","recibe":"Cambios + contrato","entrega":"Problemas por gravedad","comprueba":"Nada crítico abierto"},
+{"titulo":"Tu visto bueno","rol":"ivan","entrega":"Lo pruebas en Studio"}],
+"sencilla":[
+{"titulo":"Ficha de un personaje","rol":"ejecuta","recibe":"Petición + brief","entrega":"Un personaje de ejemplo","comprueba":"Aparece en Studio"},
+{"titulo":"Revisión rápida","rol":"revisa"},
+{"titulo":"Tu visto bueno","rol":"ivan","entrega":"Lo miras en Studio"}]}
+}

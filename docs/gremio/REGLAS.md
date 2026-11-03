@@ -18,9 +18,9 @@
 
 Claude «conoce» a Iván porque lee sus reglas y su bóveda, no por el modelo. Codex lee lo mismo (`AGENTS.md` y bóveda), así que también puede conocerlo.
 
-## 2. Tipos de misión (los confirma Iván)
+## 2. Tipos de misión
 
-Claude **sugiere** el tipo en la tarjeta; Iván lo confirma o lo cambia. **Sin confirmación no se empieza.**
+El sistema **marca por defecto** el tipo que cree correcto; Iván lo cambia en la tarjeta si quiere. **Sin pulsar «Confirmar» no se empieza.**
 
 | Tipo | Tarjeta | Ruta | Modelos por defecto | Revisión cruzada |
 |---|---|---|---|---|
@@ -32,23 +32,25 @@ Claude **sugiere** el tipo en la tarjeta; Iván lo confirma o lo cambia. **Sin c
 
 **Haiku 5.5 y Luna 6:** prohibidos salvo para ordenar, renombrar o tareas mecánicas sin criterio. **Fable:** nunca por defecto (en Pro pide créditos). **`ultra` / `max`:** nunca por costumbre.
 
-## 3. La tarjeta de misión
+## 3. La tarjeta de misión (panel de mando)
 
-Una confirmación por misión. La tarjeta flota aparte del chat; Iván la mira y responde **en el chat** («sí», «cambia X», «empieza»).
+La tarjeta flota aparte del chat y **es donde Iván edita la misión**. Una confirmación por misión.
 
-Contenido:
-- **Misión**, **por qué** y **qué mejora**
-- **Tipo sugerido** (pendiente de confirmar)
-- **Equipo:** orquestador, ejecutor(es), revisor sugerido, con modelo y esfuerzo
-- **★ Astra** (solo compleja): «¿Añadir a Astra 6 como mano derecha? Caro»
-- **Estimación** (rango, marcada como estimación): tiempo y **% de la ventana de 5 h**
-- **Cupo antes** (% real de la barra de estado)
-- **Plan:** pasos con responsable; se despliega al pulsar la tarjeta
-- **Estado:** propuesta → trabajando (paso N de M) → revisión → completada · pausa · bloqueada
+En la tarjeta:
+- **Meta · resultado:** una frase con lo que existirá al terminar.
+- **Tipo:** viene marcado el sugerido (✦); un toque lo cambia y el equipo y los pasos se ajustan. **↺ Sugerido** lo deja todo como lo propuso el sistema.
+- **Equipo:** tocar el modelo abre la lista de modelos permitidos para ese papel (Haiku y Luna no aparecen; Fable avisa de que en Pro pide créditos). Tocar el esfuerzo lo rota `low → medium → high → xhigh`.
+- **★ Astra** (solo compleja): interruptor; activa, la estrella titila y aparece su paso en el plan. Avisa de que es cara.
+- **Estimación** (orientativa): tiempo, % de la ventana de 5 h de Claude y nivel de uso de Codex. Se recalcula con cada cambio.
+- **Cupo antes:** % real de la barra de estado (en la demo, simulado).
+- **Confirmar misión:** guarda y **avisa a Claude** por un comentario del artefacto, sin escribir en el chat. Si el aviso no puede salir, la tarjeta pide escribir «empezar».
+- **Mapa:** abre el plan. Cada paso tiene una **caja de nota** que se guarda sola; Claude las lee al empezar. El **cofre de la bóveda** muestra las únicas notas de memoria que usará la misión.
 
-Nunca muestra porcentajes de avance inventados ni tiempo restante. El avance es «paso N de M» de un plan real.
+Tras confirmar, los ajustes se bloquean. Estado: propuesta → confirmada → trabajando (paso N de M) → revisión → completada · pausa · bloqueada. Nunca porcentajes de avance inventados ni tiempo restante.
 
-**Estimaciones:** al principio son rangos orientativos por tipo. Cada misión cerrada guarda el % real gastado, y con unas cuantas misiones del mismo tipo las estimaciones pasan a basarse en tu historial. Así es como el Gremio aprende a estimar.
+**Estimaciones:** fórmula por tipo, modelo y esfuerzo. Cada misión cerrada guarda el % real gastado, y con varias misiones del mismo tipo las estimaciones pasan a basarse en tu historial.
+
+**Coste:** editar en la tarjeta no gasta cupo de Claude; Claude lee la tarjeta una vez al empezar (unos pocos miles de tokens).
 
 ## 4. Revisión cruzada
 
