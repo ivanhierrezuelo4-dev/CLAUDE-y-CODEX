@@ -39,7 +39,8 @@ svg.px{image-rendering:pixelated;display:block;flex:none}
 .brand small{display:block;color:var(--muted);font-size:.78rem;margin-top:4px}
 .conn{font-family:var(--f-pix);font-size:.55rem;padding:6px 8px;border:2px solid currentColor;line-height:1.3}
 .conn.live{color:var(--codex)} .conn.local{color:var(--astra)} .conn.wait{color:var(--muted)}
-.desk{max-width:1200px;margin:0 auto;min-height:calc(100vh - 90px);display:grid;place-items:center;padding-block:20px 120px}
+.desk{max-width:1200px;margin:0 auto;min-height:calc(100vh - 90px);display:grid;place-items:center;padding-block:20px 60px}
+.desk:has(.idle[hidden]){min-height:0;padding:0}
 .idle[hidden]{display:none}
 .idle{display:grid;justify-items:center;gap:14px;text-align:center;max-width:46ch;color:var(--muted)}
 .idle h2{font-family:var(--f-pix);font-weight:400;font-size:.8rem;color:var(--text);line-height:1.6;margin:0}
@@ -309,6 +310,78 @@ textarea:disabled{border-style:solid;border-color:var(--line);opacity:.85}
 .vbody pre{margin:0;white-space:pre-wrap;font:inherit;font-size:.86rem;line-height:1.6;background:var(--bg2);border:2px solid var(--line);padding:10px 12px}
 .obs{display:inline-flex;gap:8px;align-items:center;justify-self:start;background:var(--astra2);color:#fff;border:3px solid #000;box-shadow:3px 3px 0 #000;padding:7px 10px;font-family:var(--f-pix);font-size:.46rem;text-decoration:none}
 .obs:hover{filter:brightness(1.15)}
+
+/* ---------- halo y trabajo ---------- */
+.card.t-compleja{--tc:var(--claude)} .card.t-definida{--tc:var(--codex)} .card.t-sencilla{--tc:var(--cyan)}
+.card::after{content:"";position:absolute;inset:-6px;pointer-events:none;z-index:-1;opacity:0}
+.card.s-trabajando::after,.card.s-revision::after{opacity:1;box-shadow:0 0 18px 6px var(--tc),0 0 0 3px var(--tc)}
+@media (prefers-reduced-motion:no-preference){
+  .card.s-trabajando::after,.card.s-revision::after{animation:breathe 2.2s steps(8) infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 10px 2px var(--tc),0 0 0 3px var(--tc);opacity:.65}50%{box-shadow:0 0 30px 10px var(--tc),0 0 0 5px var(--tc);opacity:1}}
+  .card.haloin::after{animation:haloin .9s steps(9) forwards!important}
+  @keyframes haloin{0%{opacity:1;box-shadow:0 0 0 0 var(--tc),0 0 0 3px #fff}40%{opacity:1;box-shadow:0 0 50px 22px var(--tc),0 0 0 10px var(--tc)}100%{opacity:.8;box-shadow:0 0 18px 6px var(--tc),0 0 0 3px var(--tc)}}
+  .wov.wovin{animation:wovin .45s steps(7) both} .wov.wovout{animation:wovout .35s steps(6) forwards}
+  @keyframes wovin{0%{clip-path:inset(100% 0 0 0);filter:brightness(2)}100%{clip-path:inset(0 0 0 0);filter:none}}
+  @keyframes wovout{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(100% 0 0 0);filter:brightness(2)}}
+}
+.wov{position:absolute;left:0;right:0;bottom:0;top:var(--bar-h,47px);z-index:5;display:grid;align-content:center;justify-items:center;gap:12px;padding:18px 16px;text-align:center;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--tc) 22%,transparent),transparent 62%),linear-gradient(180deg,var(--bg2),var(--panel))}
+.wov[hidden]{display:none}
+.wov .stars i{position:absolute;width:3px;height:3px;background:#fff;opacity:.2;animation:tw 2.4s steps(4) infinite}
+.wscene{position:relative;width:200px;height:130px}
+.wscene .wk{position:absolute;left:28px;bottom:26px;animation:hammer .7s steps(2) infinite;transform-origin:70% 90%}
+@keyframes hammer{0%,100%{transform:rotate(0)}50%{transform:rotate(-10deg) translateY(-4px)}}
+.wscene .anv{position:absolute;right:20px;bottom:10px}
+.wscene .spark{left:128px;top:62px;width:6px;height:6px}
+.wscene .spark:nth-child(4){animation-delay:.15s} .wscene .spark:nth-child(5){animation-delay:.35s}
+.wscene .floor{position:absolute;left:0;right:0;bottom:6px;height:4px;background:repeating-linear-gradient(90deg,var(--hi) 0 8px,transparent 8px 12px)}
+.wov .wt{font-family:var(--f-pix);font-size:.48rem;color:var(--tc);letter-spacing:.06em}
+.wov h3{font-family:var(--f-pix);font-weight:400;font-size:.72rem;line-height:1.6;margin:0;max-width:30ch}
+.wov .wm{font-size:.82rem;color:var(--muted)}
+.xp{width:min(320px,100%);display:grid;gap:5px}
+.xp .xl{display:flex;justify-content:space-between;font-family:var(--f-pix);font-size:.42rem;color:#7FF6FF}
+.xp .xb{height:16px;border:3px solid #000;background:#06222a;box-shadow:0 0 0 2px #1d6b7a;position:relative;overflow:hidden}
+.xp .xb i{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(90deg,#00E5FF 0 8px,#7FF6FF 8px 10px);box-shadow:0 0 10px #00E5FF;transition:width .6s steps(8)}
+.xp .xb i::after{content:"";position:absolute;top:0;bottom:0;width:14px;right:0;background:rgba(255,255,255,.55);animation:xpglint 1.2s steps(4) infinite}
+@keyframes xpglint{50%{opacity:.15}}
+.xp .xb b{position:absolute;top:0;bottom:0;width:30%;background:linear-gradient(90deg,transparent,rgba(127,246,255,.35),transparent);animation:xpscan 1.6s steps(10) infinite}
+@keyframes xpscan{0%{left:-30%}100%{left:100%}}
+.wov .wn{font-size:.78rem;color:var(--muted)}
+.wbtn{background:var(--panel2);border:3px solid #000;box-shadow:0 0 0 2px var(--hi),3px 3px 0 2px #000;padding:7px 10px;font-family:var(--f-pix);font-size:.46rem;color:var(--text)}
+.wbtn:hover{box-shadow:0 0 0 2px var(--sun),3px 3px 0 2px #000}
+.work .wbtn{justify-self:start;font-size:.42rem;padding:5px 8px}
+/* mapa: líneas que se llenan como XP */
+.pstep::after{content:"";position:absolute;left:30px;top:60px;width:4px;height:0;background:repeating-linear-gradient(180deg,#00E5FF 0 6px,#7FF6FF 6px 10px);box-shadow:0 0 8px #00E5FF}
+.pstep:last-child::after{display:none}
+.pstep.done::after{height:calc(100% - 60px)}
+.pstep.act::after{animation:xpline 2.4s steps(12) infinite}
+@keyframes xpline{0%{height:0}85%,100%{height:calc(100% - 60px)}}
+.pstep.done .tag.hecho{box-shadow:0 0 8px rgba(85,217,139,.5)}
+.pbody .h .here{margin-left:auto}
+.here{font-family:var(--f-pix);font-size:.42rem;color:var(--ink);background:var(--sun);padding:4px 6px;animation:pulse 1s steps(2) infinite}
+/* reloj de la píldora */
+.clk g{opacity:0;animation:clk 1.6s steps(1) infinite}
+@keyframes clk{0%{opacity:1}12.5%,100%{opacity:0}}
+/* Salón del gremio */
+.hall{max-width:1200px;margin:0 auto;padding:10px 0 120px;display:grid;gap:14px}
+.hall[hidden]{display:none}
+@media (min-width:1000px){ .hall,.desk{padding-right:480px} }
+.hallh{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hallh h2{font-family:var(--f-pix);font-weight:400;font-size:.8rem;margin:0;color:var(--sun)}
+.hallh small{display:block;color:var(--muted);font-size:.78rem;margin-top:4px}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.hcard{display:grid;gap:8px;text-align:left;background:var(--panel);border:3px solid var(--hi);box-shadow:0 0 0 3px #000,4px 4px 0 3px #000;padding:12px;position:relative}
+.hcard:hover{border-color:var(--sun);transform:translate(-1px,-1px)}
+.hcard.t-compleja{border-left:8px solid var(--claude)} .hcard.t-definida{border-left:8px solid var(--codex)} .hcard.t-sencilla{border-left:8px solid var(--cyan)}
+.hcard .hh{display:flex;gap:10px;align-items:center}
+.hcard b{font-size:.9rem;line-height:1.3}
+.hcard small{color:var(--muted);font-size:.74rem}
+.hcard .hd{display:grid;gap:4px;font-size:.8rem;color:var(--muted);border-top:2px dashed var(--line);padding-top:8px}
+.hcard .hd[hidden]{display:none}
+.hcard .hd b{font-size:.8rem;color:var(--text)}
+.medal{position:absolute;right:8px;top:8px}
+@media (prefers-reduced-motion:no-preference){ .hcard.new{animation:popin .5s steps(6) both} .hd.in{animation:lootIn .35s steps(5) both} }
+.hempty{color:var(--muted);font-size:.84rem;border:2px dashed var(--line);padding:12px}
 @media (max-width:440px){ .est{grid-template-columns:1fr 1fr} .est .kv:nth-child(3){grid-column:1/-1} .acts{grid-template-columns:1fr} }
 </style>
 
@@ -326,6 +399,11 @@ textarea:disabled{border-style:solid;border-color:var(--line);opacity:.85}
   </div>
 </main>
 
+<section class="hall" id="hall" hidden aria-labelledby="hallT">
+  <div class="hallh"><span id="hallIco"></span><div><h2 id="hallT">SALÓN DEL GREMIO</h2><small>Misiones completadas. Solo para verlas: Claude no las usa como contexto.</small></div></div>
+  <div class="hgrid" id="hgrid"></div>
+</section>
+
 <div class="log" id="log" aria-live="polite"></div>
 
 <section class="card" id="card" hidden aria-label="Tarjeta de misión">
@@ -341,6 +419,7 @@ textarea:disabled{border-style:solid;border-color:var(--line);opacity:.85}
     <div class="skins" id="skins" hidden role="radiogroup" aria-label="Skins de la tarjeta"></div>
   </div>
   <div class="body" id="cbody"></div>
+  <div class="wov" id="wov" hidden aria-live="polite"></div>
 </section>
 
 <button class="pill" id="pill" hidden type="button" aria-label="Restaurar tarjeta"><span id="pillIco"></span><span id="pillTxt">MISIÓN</span></button>
@@ -388,11 +467,19 @@ chest:["............","............","..NNNNNNNN..",".NnnnnnnnnN.",".NnnnnnnnnN.
 chestOpen:["..NNNNNNNN..",".NnnnnnnnnN.",".YYYYYYYYYY.","..pvvwwvvp..",".pvwwyywwvp.",".YYYYYYYYYY.",".NnnnyyynnN.",".NnnnykynnN.",".NnnnnnnnnN.",".NnnnnnnnnN.",".YYYYYYYYYY.","............"],
 note:["oooooooooo..","owwwwwwwwoo.","owkkkkkkwwo.","owwwwwwwwwo.","owkkkkkkkwo.","owwwwwwwwwo.","owkkkkkwwwo.","owwwwwwwwwo.","owkkkkkkkwo.","owwwwwwwwwo.","ooooooooooo.","............"],
 scroll:["..TTTTTTTT..",".TttttttttT.","..tkkkkkkt..","..tttttttt..","..tkkkkktt..","..tttttttt..","..tkkkkkkt..","..tttttttt..","..tkkkkttt..","..tttttttt..",".TttttttttT.","..TTTTTTTT.."],
+anvil:["............","............","............","............","MMMMMMMMMM..","MllllllllLMM",".MMLLLLLMM..","...MLLLM....","...MLLLM....","..MMLLLMM...",".MMMMMMMMM..","............"],
+trophy:["yyyyyyyyyyyy","yYyyyyyyyyYy","yY.yyyyyy.Yy",".yy.yyyy.yy.","..yyyyyyyy..","...yyyyyy...","....yYYy....",".....YY.....",".....YY.....","....yyyy....","...YYYYYY...","...yyyyyy..."],
 palette:["....tttt....","..tttttttt..",".ttrrttyytt.",".ttrrttyytt.","tttttttttttt","tttttkkttttt","ttggtkkttttt","ttggttttbbtt",".tttttttbbt.",".ttpptttttt.","..tpptttt...","....tttt...."]
 };
 function sprite(name,px){ const m=SP[name]||SP.sonnet; px=px||3; let r='';
   m.forEach((row,y)=>{ for(let x=0;x<row.length;x++){ const ch=row[x]; if(ch!=='.'&&PAL[ch]) r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[ch]}"/>`; } });
   return `<svg class="px" width="${12*px}" height="${12*px}" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`; }
+function clock(px){ px=px||2; const ring=["...yyyyyy...","..y......y..",".y........y.","y..........y","y..........y","y..........y","y..........y","y..........y","y..........y",".y........y.","..y......y..","...yyyyyy..."];
+  let r=''; ring.forEach((row,y)=>{ for(let x=0;x<12;x++) if(row[x]==='y') r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#FCEE0A"/>`; });
+  r+=`<rect x="5" y="5" width="2" height="2" fill="#EEF2F7"/>`;
+  const F=[[[5,4],[5,3],[5,2]],[[7,4],[8,3],[9,2]],[[7,5],[8,5],[9,5]],[[7,7],[8,8],[9,9]],[[6,7],[6,8],[6,9]],[[4,7],[3,8],[2,9]],[[4,6],[3,6],[2,6]],[[4,4],[3,3],[2,2]]];
+  F.forEach((f,i)=>{ r+=`<g style="animation-delay:${(i*0.2-1.6).toFixed(1)}s">${f.map(([x,y])=>`<rect x="${x}" y="${y}" width="1" height="1" fill="#00E5FF"/>`).join('')}</g>`; });
+  return `<svg class="px clk" width="${12*px}" height="${12*px}" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`; }
 function who(model){ const m=String(model||'').toLowerCase();
   if(m.includes('sin revis')) return {sp:'none',cls:'none'};
   if(m.includes('astra')) return {sp:'astra',cls:'astra'};
@@ -532,7 +619,7 @@ function renderCard(){
   if(activeStep||st==='lista'){ const p=activeStep; const w=who(p?p.modelo:'Opus 5.5');
     h+=`<div class="work"><div class="now"><div class="forge">${sprite(w.sp,3).replace('<svg','<svg style="position:absolute;left:2px;top:2px"')}${p?'<i class="spark"></i><i class="spark"></i><i class="spark"></i><i class="spark"></i>':''}</div>
       <div><b>${p?esc(p.titulo):'Preparando…'}</b><div style="font-size:.8rem;color:var(--muted)">${p?esc(p.modelo||'')+' · paso '+(pi+1)+' de '+steps.length+' · <span id="el">'+elapsed()+'</span>':'Claude ha recibido la confirmación'}</div></div></div>
-      <div class="steps">${steps.map((x,i)=>`<i class="${i<pi||st==='completada'?'done':i===pi?'act':''}"></i>`).join('')}</div></div>`; }
+      <div class="steps">${steps.map((x,i)=>`<i class="${i<pi||st==='completada'?'done':i===pi?'act':''}"></i>`).join('')}</div>${p&&wovMin()?'<button class="wbtn" type="button" id="wovShow">▲ VER ANIMACIÓN</button>':''}</div>`; }
   if(st==='completada'&&M.resultado) h+=`<div class="work" style="border-color:var(--codex)"><b style="color:var(--codex)">Resultado</b><span style="font-size:.85rem">${esc(M.resultado)}</span></div>`;
   h+=`<div class="acts"><button class="mapbtn" type="button" id="mapBtn">${sprite('map',2)}MAPA</button>`;
   if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Al confirmar, Claude recibe el aviso y empieza. Puedes cambiar todo antes, también en el mapa.</span>`;
@@ -541,12 +628,36 @@ function renderCard(){
   h+=`</div>`;
   const body=$('#cbody'); const sc=body.scrollTop; body.innerHTML=h; body.scrollTop=sc;
   animateNums(e);
-  $('#pillIco').innerHTML=sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2); $('#pillTxt').textContent=(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
+  $('#pillIco').innerHTML=activeStep?clock(2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2);
+  renderWov(activeStep,steps,pi,st); $('#pillTxt').textContent=(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
   if(card.hidden && $('#pill').hidden){ card.hidden=false; place(); animIn(card,'enter'); }
+  if(prevState && prevState!==st && (st==='trabajando'||st==='lista') && (prevState==='propuesta'||prevState==='lista')) animIn(card,'haloin');
   if(prevState && prevState!==st){ animIn(card,'flash'); log('Estado: '+(ST[st]||st)); if(st==='completada') burst(card,['#FCEE0A','#55D98B','#F08A5D','#B07CFF','#00E5FF']); }
   prevState=st;
-  clearInterval(tick); if(activeStep) tick=setInterval(()=>{ const x=$('#el'); if(x) x.textContent=elapsed(); },1000);
+  clearInterval(tick); if(activeStep) tick=setInterval(()=>{ const x=$('#el'); if(x) x.textContent=elapsed(); const y=$('#wel'); if(y) y.textContent=elapsed(); },1000);
 }
+/* animación de trabajo superpuesta a la tarjeta (se puede minimizar) */
+const wovKey=()=>'gremio-wovmin-'+((M&&M.id)||'');
+function wovMin(){ try{ return localStorage.getItem(wovKey())==='1'; }catch(_){ return !!window.__wovmin; } }
+function setWovMin(v){ try{ localStorage.setItem(wovKey(),v?'1':'0'); }catch(_){ window.__wovmin=v; } }
+let wovSig='';
+function renderWov(p,steps,pi,st){ const w=$('#wov'); const show=!!p&&!wovMin();
+  if(!show){ wovSig=''; if(!w.hidden&&!w.dataset.closing){ w.dataset.closing='1'; animOut(w,'wovout',()=>{ w.hidden=true; delete w.dataset.closing; },350); } return; }
+  w.style.setProperty('--bar-h',$('#bar').offsetHeight+'px');
+  const sig=[p.key,pi,st,p.modelo,p.esfuerzo,steps.length].join('|');
+  if(sig!==wovSig){ wovSig=sig; const wh=who(p.modelo); const next=steps[pi+1];
+    let stars=''; for(let i=0;i<14;i++) stars+=`<i style="left:${(i*37)%100}%;top:${(i*53)%60}%;animation-delay:${(i%7)*.3}s"></i>`;
+    const done=pi, tot=steps.length, pct=Math.round(done/tot*100);
+    w.innerHTML=`<div class="stars" aria-hidden="true">${stars}</div>
+      <div class="wt">${st==='revision'?'EN REVISIÓN':'TRABAJANDO'} · PASO ${pi+1} DE ${tot}</div>
+      <div class="wscene" aria-hidden="true"><span class="wk">${sprite(wh.sp,6)}</span><span class="anv">${sprite('anvil',6)}</span><i class="spark"></i><i class="spark"></i><i class="spark"></i><i class="spark"></i><i class="floor"></i></div>
+      <h3>${esc(p.titulo)}</h3>
+      <div class="wm">${esc(p.quien)} · ${esc(p.modelo||'')}${p.esfuerzo?' · '+esc(p.esfuerzo):''} · <span id="wel">${elapsed()}</span></div>
+      <div class="xp"><div class="xl"><span>XP DE LA MISIÓN</span><span>${done}/${tot} PASOS</span></div><div class="xb"><i style="width:${Math.max(4,pct)}%"></i><b></b></div></div>
+      <div class="wn">${next?'Siguiente: '+esc(next.titulo)+' · '+esc(next.modelo||''):'Último paso'}</div>
+      <button class="wbtn" type="button" id="wovHide">▼ MINIMIZAR ANIMACIÓN</button>`; }
+  if(w.hidden){ w.hidden=false; animIn(w,'wovin'); } }
+$('#wov').addEventListener('click',e=>{ if(e.target.closest('#wovHide')){ setWovMin(true); renderCard(); const b=$('#wovShow'); if(b) b.focus(); } });
 function animateNums(e){ ['t0','t1','c0','c1','x0','x1'].forEach(k=>{ const el=document.querySelector(`#cbody [data-n="${k}"]`); if(!el) return; const from=prevEst[k], to=e[k];
   if(from==null||from===to||RM){ el.textContent=to; return; } animIn(el.closest('.kv'),'bump');
   let i=0; const n=8; const iv=setInterval(()=>{ i++; el.textContent=Math.round(from+(to-from)*i/n); if(i>=n) clearInterval(iv); },35); });
@@ -558,6 +669,7 @@ $('#cbody').addEventListener('click',ev=>{
   const b=ev.target.closest('button'); if(!b){ if(openMenu) closeMenuAnimated(); return; }
   if(b.id==='mapBtn') return openPlan();
   if(b.id==='goBtn') return confirmMission(b);
+  if(b.id==='wovShow'){ setWovMin(false); renderCard(); const h=$('#wovHide'); if(h) h.focus(); return; }
   if(!editable()) return;
   const t=tipoOf();
   if(b.dataset.tipo){ if(b.dataset.tipo!==t){ openMenu=null; save({tipo:b.dataset.tipo}); log('Tipo: '+TIPO[b.dataset.tipo]); } return; }
@@ -590,7 +702,7 @@ async function confirmMission(btn){
     (cust.length?`Pasos con modelo propio: ${cust.join('; ')}. `:'')+(notas?`Notas: ${notas}. `:'')+`Estimación: ${e.tiempo}, Claude ${e.cupo5h}, Codex ${e.codex5h}.`;
   let anchor=null; try{ if(comments) anchor=await comments.anchorFor(btn); }catch(_){}
   await save({estado:'lista',tipo:t,tipoConfirmado:true,confirmadoEn:new Date().toISOString()});
-  burst($('#card'),['#55D98B','#FCEE0A','#FFFFFF']);
+  burst($('#card'),['#55D98B','#FCEE0A','#FFFFFF']); animIn($('#card'),'haloin');
   let ok=false, why='';
   if(comments&&anchor){ try{ const c=await comments.canSendToClaude();
       if(c==='available'){ await comments.sendToClaude({anchor,text:resumen.slice(0,3900)}); ok=true; }
@@ -623,7 +735,7 @@ function renderPlan(soft){
   steps.forEach((p,i)=>{ const w=who(p.modelo); const e=fin||i<pi?'hecho':(i===pi&&(st==='trabajando'||st==='revision'))?'activo':'pendiente'; const key=p.key;
     const opts=p.rol==='ivan'?[]:optsFor(p.rol,t); const canPick=ed&&opts.length>1;
     h+=`<div class="pstep ${w.cls} ${e==='activo'?'act':''} ${e==='hecho'?'done':''}" data-step="${key}"><div class="ic">${sprite(w.sp,4)}</div><div class="pbody">
-      <div class="h"><b>${i+1}. ${esc(p.titulo)}</b><span class="tag ${e}">${e.toUpperCase()}</span></div>
+      <div class="h"><b>${i+1}. ${esc(p.titulo)}</b>${e==='activo'?'<span class="here">▶ AQUÍ VA</span>':''}<span class="tag ${e}">${e.toUpperCase()}</span></div>
       <div class="who"><b style="color:var(--text)">${esc(p.quien)}</b>${p.rol==='ivan'?'':` · <button class="pick ${w.cls}" type="button" data-spick="${key}" ${canPick?'':'disabled'}>${esc(p.modelo)}${canPick?' ▾':''}</button>
         <button class="ef ${p.esfuerzo}" type="button" data-sef="${key}" ${ed?'':'disabled'} aria-label="Esfuerzo ${p.esfuerzo} de este paso">${String(p.esfuerzo||'').toUpperCase()}</button>${p.cust?`<span class="cust">PROPIO</span>${ed?`<button class="reset" type="button" data-sreset="${key}" title="Volver al modelo del equipo">↺</button>`:''}`:''}`}
         ${planMenu===key?menuHtml(opts,p.modelo,'data-sset'):''}</div>
@@ -662,7 +774,8 @@ $('#planIn').addEventListener('input',ev=>{ const ta=ev.target; if(ta.tagName!==
       document.querySelectorAll('#planIn textarea[data-spec]').forEach(x=>{ const j=+x.dataset.spec; if(cur[j]) cur[j].texto=x.value.slice(0,3000); });
       save({spec:cur},false).then(()=>{ const o=document.getElementById('sok-'+i); if(o) o.textContent='guardado ✓'; }); },800); } });
 $('#planIn').addEventListener('focusout',ev=>{ if(ev.target.tagName==='TEXTAREA') setTimeout(()=>{ const a=document.activeElement; if(!(a&&a.tagName==='TEXTAREA')&&!$('#ov').hidden) renderPlan(true); },1000); });
-function openPlan(){ if(!M) return; openMenu=null; planMenu=null; renderPlan(); const ov=$('#ov'); ov.hidden=false; animIn(ov,'fadein'); animIn($('#planBox'),'unroll'); $('#closePlan').focus(); }
+function openPlan(){ if(!M) return; openMenu=null; planMenu=null; renderPlan(); const ov=$('#ov'); ov.hidden=false; animIn(ov,'fadein'); animIn($('#planBox'),'unroll'); $('#closePlan').focus();
+  const a=document.querySelector('#planIn .pstep.act'); if(a) setTimeout(()=>{ const pb=$('#planBox'); pb.scrollTop=Math.max(0,a.offsetTop-pb.clientHeight/3); },RM?0:560); }
 function closePlan(){ const ov=$('#ov'); if(ov.hidden||ov.dataset.closing) return; ov.dataset.closing='1'; planMenu=null;
   animOut($('#planBox'),'rollup',null,420); animOut(ov,'fadeout',()=>{ ov.hidden=true; delete ov.dataset.closing; const m=$('#mapBtn'); if(m) m.focus({preventScroll:true}); },420); }
 $('#closePlan').addEventListener('click',closePlan);
@@ -717,6 +830,20 @@ function burst(el,cols,n){ if(RM||!el) return; const c=el.getBoundingClientRect(
 function setMission(d,src){ const had=!!M; const newId=d&&M&&d.id!==M.id; M=d?JSON.parse(JSON.stringify(d)):null; if(!had||newId){ notice=null; prevEst={}; }
   if(M&&M.estado==='propuesta') notice=null;
   renderCard(); if(!$('#ov').hidden) renderPlan(true); if(d&&(!had||newId)) log((src==='live'?'Nueva misión: ':'Ejemplo: ')+(d.titulo||'')); }
+/* ---------- Salón del gremio (solo lectura; no es contexto para Claude) ---------- */
+$('#hallIco').innerHTML=sprite('trophy',4);
+let H=[], hallOpen={}, hallSeen=null;
+function renderHall(){ const hall=$('#hall'); hall.hidden=false;
+  if(!H.length){ $('#hgrid').innerHTML='<div class="hempty">Aún no hay misiones completadas. Cuando cierres una, aparecerá aquí con su trofeo.</div>'; return; }
+  const items=[...H].sort((a,b)=>String(b.completadaEn||'').localeCompare(String(a.completadaEn||'')));
+  $('#hgrid').innerHTML=items.map(m=>{ const t=TIPOS.includes(m.tipo)?m.tipo:'sencilla'; const open=!!hallOpen[m.id]; const isNew=hallSeen&&!hallSeen.has(m.id);
+    const f=m.completadaEn?new Date(m.completadaEn).toLocaleDateString([], {day:'2-digit',month:'short'}):'';
+    return `<button type="button" class="hcard t-${t} ${isNew?'new':''}" data-h="${esc(m.id)}" aria-expanded="${open}"><span class="medal">${sprite('trophy',2)}</span>
+      <span class="hh">${sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',3)}<span><b>${esc(m.titulo)}</b><br><small>${TIPO[t]} · ${esc(f)}${m.simulada?' · SIMULADA':''}</small></span></span>
+      <small>${esc(m.meta||'')}</small>
+      <span class="hd ${open?'in':''}" ${open?'':'hidden'}><span><b>Equipo:</b> ${esc(m.equipo||'—')}</span><span><b>Duración:</b> ${esc(m.duracion||'—')}</span><span><b>Gasto real:</b> Claude ${esc(m.gastoClaude||'—')} · Codex ${esc(m.gastoCodex||'—')}</span><span><b>Resultado:</b> ${esc(m.resultado||'—')}</span></span></button>`; }).join('');
+  hallSeen=new Set(H.map(m=>m.id)); }
+$('#hgrid').addEventListener('click',e=>{ const b=e.target.closest('[data-h]'); if(!b) return; const id=b.dataset.h; hallOpen[id]=!hallOpen[id]; renderHall(); const nb=document.querySelector(`[data-h="${CSS.escape(id)}"]`); if(nb) nb.focus(); });
 const EXAMPLE={id:'EJ',simulada:true,cupoSimulado:true,titulo:'Ejemplo: sistema de personajes',meta:'Ejemplo sin conexión: podrás añadir personajes rellenando una ficha.',tipoSugerido:'compleja',tipo:'compleja',porque:'Ejemplo para ver la tarjeta sin conexión.',estado:'propuesta',astra:{activa:false},cupoAntes:35};
 let settled=false;
 const timer=setTimeout(()=>{ if(!settled){ settled=true; $('#conn').className='conn local'; $('#conn').textContent='SIN CONEXIÓN · EJEMPLO'; setMission(EXAMPLE,'local'); } },10000);
@@ -724,6 +851,7 @@ const timer=setTimeout(()=>{ if(!settled){ settled=true; $('#conn').className='c
 (async()=>{
   try{ db = window.claude && window.claude.use ? await window.claude.use('db') : null; }catch(_){ db=null; }
   if(!db){ if(!settled){ settled=true; clearTimeout(timer); $('#conn').className='conn local'; $('#conn').textContent='SIN CONEXIÓN · EJEMPLO'; setMission(EXAMPLE,'local'); } return; }
+  try{ db.collection('completadas').onSnapshot(qs=>{ H=qs.docs.map(d=>d.data()).filter(Boolean); renderHall(); },()=>{}); }catch(_){}
   db.doc('gremio/mision').onSnapshot(snap=>{
     if(!settled){ settled=true; clearTimeout(timer); }
     $('#conn').className='conn live'; $('#conn').textContent='EN VIVO · DEMO';
