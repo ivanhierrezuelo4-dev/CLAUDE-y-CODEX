@@ -47,7 +47,9 @@ En la tarjeta:
 - **Mapa:** abre el plan. Cada paso permite cambiar **su propio modelo y esfuerzo** (marcado «PROPIO») y tiene una **caja de nota**; todo se guarda solo y Claude lo lee al empezar. El **cofre de la bóveda** muestra las únicas notas de memoria que usará la misión (no la bóveda entera); cada nota se puede abrir y llevar a Obsidian. Al final, la **especificación completa** desplegable (propósito, contexto, alcance, hitos, aceptación, detente si, riesgos) es editable.
 - **Trabajando:** halo del color del tipo alrededor de la tarjeta y una animación de forja encima (se puede minimizar) con el paso actual y la barra de XP (pasos hechos / total). Minimizada, la píldora muestra un reloj pixel y «TRABAJANDO · título». En el mapa, el paso activo lleva «▶ AQUÍ VA» y la línea entre pasos se llena en celeste.
 - **Salón del Gremio** (pestaña propia): las misiones completadas se guardan aparte para verlas (equipo, duración, gasto real, resultado). **No son contexto:** Claude no las carga; lo útil de cada misión pasa a la bóveda solo como aprendizajes aprobados.
-- **Skins:** 7 aspectos (Gremio, Pergamino, Neón, Bosque, Glaciar, Volcán, Arcano), guardados en tu navegador.
+- **Skins:** 8 decorados pixel alrededor de la tarjeta (Clásico, Castillo, Dulcelandia, Hawái, Glaciar, Volcán, Bosque encantado, Cosmos), con figuras en las esquinas, bandas, laterales y partículas; el reloj cambia con cada skin. Se guardan en tu navegador.
+- **Meta** plegable con trofeo y **nombre de la misión** editable (✎).
+- **Tiempo y tokens** en la animación de trabajo: el tiempo es exacto; los tokens, aproximados.
 
 Tras confirmar, los ajustes se bloquean. Estado: propuesta → confirmada → trabajando (paso N de M) → revisión → completada · pausa · bloqueada. Nunca porcentajes de avance inventados ni tiempo restante.
 
