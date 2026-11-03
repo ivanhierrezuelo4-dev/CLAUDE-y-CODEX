@@ -200,20 +200,37 @@ Hoy la tarjeta vive en claude.ai y solo Claude puede escribir en ella con su con
 
 ## 12. Instalación (Windows, paso a paso)
 
-> Agente: haz tú todo lo que puedas. Pide a Iván solo los inicios de sesión y las aprobaciones. No leas archivos de autenticación ni actives APIs de pago.
+> Agente: haz tú todo lo que puedas. Pide a Iván solo los inicios de sesión y las aprobaciones. No leas archivos de autenticación ni actives APIs de pago. Los archivos listos para copiar están en `kit/`.
 
-1. **Comprobar herramientas:** Claude Code (versión), Node.js, Git, Codex CLI o app (versión ≥ 0.153), Obsidian (instalador ≥ 1.12 si se usa su CLI).
-2. **Plugin oficial de Codex en Claude Code:** instalar `openai/codex-plugin-cc` siguiendo su README actual y ejecutar `/codex:setup`. Comprobar `/codex:review`, `/codex:rescue --model … --effort …` y `/codex:status`. **Verificar si `/codex:review` permite elegir modelo.**
-3. **Modelos:** `/model` en Claude Code y en Codex; anotar los disponibles en el plan de Iván (Claude Pro, ChatGPT Plus) y ajustar la tabla de la sección 4.
-4. **Bóveda de Obsidian:** encontrar su carpeta (Obsidian → «Abrir otra bóveda» muestra la ruta; o buscar `.obsidian`). Crear `Gremio/` y `Proyectos/<Nombre>/_brief.md`.
-5. **Reglas globales:**
-   - `~/.claude/CLAUDE.md`: resumen del Gremio (papeles, tipos, protocolo de tarjeta, ahorro) y la ruta de la bóveda.
-   - `~/.codex/AGENTS.md`: las mismas reglas vistas desde Codex (contratos, actualizar `mision.json`, relevo).
-6. **Skill `gremio`** en Claude Code: crear misión, actualizar la tarjeta, cerrar misión, plantillas de `PROMPTS.md`.
-7. **Statusline:** script (PowerShell o Node) según la sección 8, que escriba `~/.gremio/estado.json`. Configurarlo en los ajustes de Claude Code.
-8. **Tablero:** publicar `tablero.html` como artefacto con las capacidades `db` y `comments` (o reutilizar el de Iván) y guardar su URL en `CLAUDE.md`.
-9. **Ahorradores:** revisar que Ponytail, RTK y Caveman estén configurados según la sección 11.
-10. **Piloto:** una misión sencilla, una definida y una compleja reales, cortas; medir.
+**A. Conectar Codex a Claude Code** (lo escribe Iván en el chat de Claude Code o lo ejecuta el agente; comandos del README oficial de `openai/codex-plugin-cc`):
+
+```
+/plugin marketplace add openai/codex-plugin-cc
+/plugin install codex@openai-codex
+/reload-plugins
+/codex:setup
+```
+
+- Si `/codex:setup` dice que falta iniciar sesión: `!codex login`. Abre el navegador e Iván entra con su cuenta de ChatGPT.
+- Requisitos: Node.js 18.18 o superior y la suscripción de ChatGPT de Iván (Plus). El uso cuenta para los límites de Codex.
+- Prueba: `/codex:rescue --wait di en una línea qué hay en esta carpeta` y después `/codex:status`. En `/agents` debe aparecer `codex:codex-rescue`.
+- **Modelo y esfuerzo:** `/codex:rescue` acepta `--model` y `--effort`. `/codex:review` no los acepta: usa los de `~/.codex/config.toml` (copiar `kit/codex/config.toml.ejemplo`). `/codex:transfer` pasa la sesión actual de Claude a Codex.
+
+**B. Instalar el Gremio:**
+
+1. **Herramientas:** comprobar Claude Code, Node.js, Git y Codex (`codex --version`). Comprobar los modelos con `/model` en ambos y ajustar la sección 4.
+2. **Kit en una carpeta fija:** copiar `gremio/` a `%USERPROFILE%\.gremio\kit\` (o donde Iván prefiera) y crear `%USERPROFILE%\.gremio\`.
+3. **Claude, reglas globales:** añadir `kit/claude/CLAUDE-gremio.md` a `%USERPROFILE%\.claude\CLAUDE.md`, rellenando `<…>`.
+4. **Claude, skill:** copiar `kit/claude/skills/gremio/` a `%USERPROFILE%\.claude\skills\gremio\`.
+5. **Claude, barra de estado:** copiar `kit/claude/statusline-gremio.cjs` a `%USERPROFILE%\.gremio\` y añadir a `%USERPROFILE%\.claude\settings.json`:
+   `"statusLine": { "type": "command", "command": "node \"%USERPROFILE%\\.gremio\\statusline-gremio.cjs\"" }`
+   (con la ruta real escrita entera). Comprobar que la barra muestra `5h …% · sem …%` y que se crea `estado.json`.
+6. **Codex, reglas:** añadir `kit/codex/AGENTS-gremio.md` a `%USERPROFILE%\.codex\AGENTS.md` y `kit/codex/config.toml.ejemplo` a `config.toml`, sin borrar lo que ya haya.
+7. **Bóveda de Obsidian:** encontrar su carpeta (en Obsidian, el selector de bóvedas muestra la ruta; o buscar la carpeta `.obsidian`). Copiar `kit/obsidian/Gremio/` y crear `Proyectos/<Nombre>/` a partir de `kit/obsidian/Proyectos/_plantilla/`.
+8. **Tablero:** usar el de Iván (URL en `CLAUDE-gremio.md`) o publicar `tablero.html` como artefacto con las capacidades `db` y `comments`. Guardar la URL.
+9. **Por proyecto:** crear `<proyecto>/gremio/misiones/` (plantilla en `kit/misiones/`), escribir el *brief* (sección 13) y añadir 3–5 líneas al `AGENTS.md` del proyecto que apunten al brief.
+10. **Ahorradores:** revisar Ponytail, RTK y Caveman según la sección 11.
+11. **Piloto:** una misión sencilla, una definida y una compleja reales y cortas. Comparar lo estimado con lo real.
 
 ## 13. Adaptar el Gremio a cada proyecto: el *brief*
 
@@ -232,7 +249,7 @@ El brief aprobado se guarda como `Proyectos/<Nombre>/_brief.md` y en el `AGENTS.
 
 - [ ] Leí GREMIO.md, REGLAS.md, PROMPTS.md y AUDITORIA.md.
 - [ ] Comprobé herramientas, versiones y modelos disponibles (`/model`).
-- [ ] Plugin de Codex instalado y probado (`/codex:setup`, `/codex:status`).
+- [ ] Plugin de Codex instalado y probado (`/codex:setup`, `/codex:rescue --wait …`, `/codex:status`); `config.toml` con el modelo por defecto.
 - [ ] Bóveda localizada; `Gremio/` y `Proyectos/<X>/_brief.md` creados.
 - [ ] `CLAUDE.md` global y `AGENTS.md` de Codex escritos.
 - [ ] Skill `gremio` creada.
@@ -289,5 +306,5 @@ Todo el flujo funciona desde el móvil. Lo único que cambia es **dónde corre C
 
 - El tablero y el flujo están **probados en demo** (misiones simuladas). El sistema real **no está instalado**.
 - Los nombres y precios de modelos se tomaron del catálogo de Codex y de la documentación de Claude Code en noviembre de 2026: **verificar en la instalación**.
-- Pendiente de verificar: la lectura del uso de Codex, que el tablero lea archivos locales (`host:filesystem`) y la elección de modelo en `/codex:review`.
+- Pendiente de verificar: la lectura del uso de Codex y que el tablero lea archivos locales (`host:filesystem`). Ya verificado en el README del plugin: `/codex:review` no acepta modelo y usa `config.toml`.
 - La tarjeta flota dentro del tablero, no sobre todo el escritorio. Que flote sobre el escritorio requeriría otra herramienta (por ejemplo PowerToys «Siempre visible» con la ventana del tablero).
