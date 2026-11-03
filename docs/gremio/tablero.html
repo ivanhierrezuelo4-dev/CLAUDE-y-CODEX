@@ -183,7 +183,17 @@ svg.px{image-rendering:pixelated;display:block;flex:none}
 /* minimizada */
 .pill{position:fixed;z-index:40;display:flex;gap:8px;align-items:center;background:var(--barbg);color:var(--text);border:3px solid var(--hi);box-shadow:0 0 0 3px var(--frame),4px 4px 0 3px #000,0 0 22px 2px var(--glow);padding:6px 10px;touch-action:none;white-space:nowrap}
 .pill[hidden]{display:none!important}
-.pill span{font-family:var(--f-pix);font-size:.5rem}
+.pill #pillTxt{font-family:var(--f-pix);font-size:.5rem;overflow:hidden;text-overflow:ellipsis}
+.pill .ptxt{display:grid;gap:4px;min-width:0;text-align:left;overflow:hidden}
+.pill{max-width:calc(100vw - 48px)}
+.pill .pstats{overflow:hidden;text-overflow:ellipsis}
+.pill .pstats{font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.pill .pstats[hidden]{display:none}
+.pill .pstats b{color:var(--text);font-weight:600}
+.pill #pillIco{display:grid;place-items:center}
+.pdeco{position:absolute;inset:0;pointer-events:none;z-index:2}
+.pdeco .pt{position:absolute;left:-6px;right:-6px;background-repeat:repeat-x;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
+.pdeco .pc{position:absolute;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.5))}
 .pill:hover{border-color:var(--sun)}
 
 /* ---------- animaciones de entrada y salida ---------- */
@@ -397,8 +407,8 @@ body[data-skin="cosmos"] .deco .dside{display:none}
   .skins{right:-4px;width:calc(100vw - 40px)}
   .skgrid{grid-template-columns:repeat(4,1fr)}
   .skprev{width:46px;height:46px}
-  .pill{padding:8px 12px;max-width:calc(100vw - 24px)}
-  .pill span:last-child{overflow:hidden;text-overflow:ellipsis}
+  .pill{padding:8px 12px;max-width:calc(100vw - 40px)}
+
   .wov{padding:14px 12px;gap:10px}
   .wscene{transform:scale(.8);margin:-12px 0}
   .wov h3{font-size:.62rem}
@@ -551,7 +561,7 @@ body[data-tab="salon"] .card,body[data-tab="salon"] .pill{opacity:0;visibility:h
   <div class="wov" id="wov" hidden aria-live="polite"></div>
 </section>
 
-<button class="pill" id="pill" hidden type="button" aria-label="Restaurar tarjeta"><span id="pillIco"></span><span id="pillTxt">MISIÓN</span></button>
+<button class="pill" id="pill" hidden type="button" aria-label="Restaurar tarjeta"><span class="pdeco" id="pillDeco" aria-hidden="true"></span><span id="pillIco"></span><span class="ptxt"><span id="pillTxt">MISIÓN</span><span class="pstats" id="pillStats" hidden></span></span></button>
 
 <div class="ov" id="ov" hidden role="dialog" aria-modal="true" aria-labelledby="planTitle">
   <div class="plan" id="planBox">
@@ -686,7 +696,7 @@ const CLK={clasico:{rim:'#E0B23A',rimL:'#F7DC7A',rimD:'#9A6F12',face:'#FFFFFF',m
 let skin='clasico'; try{ const s=localStorage.getItem('gremio-skin'); if(SK[s]) skin=s; }catch(_){}
 const MQ=window.matchMedia('(max-width:600px)'); const isMob=()=>MQ.matches;
 const cardPad=()=>skin==='clasico'?{t:8,s:8,b:8}:(isMob()?{t:18,s:14,b:18}:{t:64,s:42,b:30});
-function buildDeco(){ const d=$('#deco'); const k=SK[skin]; if(!k||!k.pal){ d.innerHTML=''; return; }
+function buildDeco(){ const d=$('#deco'); const k=SK[skin]; if(!k||!k.pal){ d.innerHTML=''; const pd=$('#pillDeco'); if(pd) pd.innerHTML=''; return; }
   const S=isMob()?2:3, C=isMob()?3:4, side=transpose(k.bot), sw=k.bot.length*S;
   let h=`<div class="dside l" style="background-image:${pxUri(side.map(r=>[...r].reverse().join('')),k.pal,S)};width:${sw}px;left:-${sw-2}px"></div><div class="dside r" style="background-image:${pxUri(side,k.pal,S)};width:${sw}px;right:-${sw-2}px"></div>`;
   h+=`<div class="dtop" style="background-image:${pxUri(k.top,k.pal,S)};height:${k.top.length*S}px;top:-${k.top.length*S-3}px;left:-${sw-2}px;right:-${sw-2}px"></div>`;
@@ -698,7 +708,8 @@ function buildDeco(){ const d=$('#deco'); const k=SK[skin]; if(!k||!k.pal){ d.in
     const dot=`<i class="dpi ${P.glow?'glow':''}" style="width:${P.s}px;height:${P.s}px;background:${col};color:${col}"></i>`;
     if(P.type==='fall'||P.type==='rise') h+=`<span class="dpw ${P.type}" style="${side}:-${off+P.s}px;--d:${dur}s;animation-delay:${dl}s">${dot}</span>`;
     else { const top=((i*37)%100); h+=`<span class="dpf ${P.type}" style="${side}:-${off+P.s}px;top:${top}%;animation-delay:${dl}s">${dot}</span>`; } } }
-  d.innerHTML=h; }
+  d.innerHTML=h;
+  const pd=$('#pillDeco'); if(pd){ const s2=2; pd.innerHTML=`<span class="pt" style="background-image:${pxUri(k.top,k.pal,s2)};height:${k.top.length*s2}px;top:-${k.top.length*s2-3}px"></span><span class="pt" style="background-image:${pxUri(k.bot,k.pal,s2)};height:${k.bot.length*s2}px;bottom:-${k.bot.length*s2-3}px"></span><span class="pc ${k.anim||''}" style="left:-14px;top:-26px">${pxSvg(k.cl,k.pal,2)}</span><span class="pc ${k.anim||''}" style="right:-14px;top:-26px">${pxSvg(cr,k.pal,2)}</span>`; } }
 function applySkin(){ document.body.dataset.skin=skin; buildDeco(); ['#pillIco','#tabMIco'].forEach(s=>{ const e=$(s); if(e) e.dataset.k=''; }); if(M) renderCard(); const c=$('#card'); if(c&&!c.hidden){ const [x,y]=clampPos(c,c.offsetLeft,c.offsetTop); c.style.left=x+'px'; c.style.top=y+'px'; } }
 function renderSkins(){ $('#skins').innerHTML=`<div class="lbl"><span>SKIN DE LA TARJETA</span><em>solo en tu navegador</em></div><div class="skgrid">${SKIN_IDS.map(id=>{ const k=SK[id]; const prev=k.pal?pxSvg(k.cl,k.pal,2):clock(2,id); return `<button type="button" class="sk" role="radio" aria-checked="${id===skin}" data-skin="${id}"><span class="skprev">${prev}</span>${k.n}</button>`; }).join('')}</div>`; }
 function toggleSkins(force){ const el=$('#skins'); const open=force!=null?force:el.hidden; $('#skinBtn').setAttribute('aria-expanded',open);
@@ -817,7 +828,7 @@ function renderCard(){
   if(activeStep||st==='lista'){ const p=activeStep; const w=who(p?p.modelo:'Opus 5.5');
     h+=`<div class="work"><div class="now"><div class="forge">${sprite(w.sp,3).replace('<svg','<svg style="position:absolute;left:2px;top:2px"')}${p?'<i class="spark"></i><i class="spark"></i><i class="spark"></i><i class="spark"></i>':''}</div>
       <div><b>${p?esc(p.titulo):'Preparando…'}</b><div style="font-size:.8rem;color:var(--muted)">${p?esc(p.modelo||'')+' · paso '+(pi+1)+' de '+steps.length+' · <span id="el"></span>':'Claude ha recibido la confirmación'}</div></div></div>
-      <div class="steps">${steps.map((x,i)=>`<i class="${i<pi||st==='completada'?'done':i===pi?'act':''}"></i>`).join('')}</div>${p?`<div class="wline">⏱ <b class="elx"></b> · Claude ${fmtTok((M.tokens||{}).claude)} tok · Codex ${fmtTok((M.tokens||{}).codex)} tok</div>`:''}${p&&wovMin()?'<button class="wbtn" type="button" id="wovShow">▲ VER ANIMACIÓN</button>':''}</div>`; }
+      <div class="steps">${steps.map((x,i)=>`<i class="${i<pi||st==='completada'?'done':i===pi?'act':''}"></i>`).join('')}</div>${p&&wovMin()?'<button class="wbtn" type="button" id="wovShow">▲ VER ANIMACIÓN</button>':''}</div>`; }
   if(st==='completada'&&M.resultado) h+=`<div class="work" style="border-color:var(--codex)"><b style="color:var(--codex)">Resultado</b><span style="font-size:.85rem">${esc(M.resultado)}</span></div>`;
   h+=`<div class="acts"><button class="mapbtn" type="button" id="mapBtn">${sprite('map',2)}MAPA</button>`;
   if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Al confirmar, Claude recibe el aviso y empieza. Puedes cambiar todo antes, también en el mapa.</span>`;
@@ -830,11 +841,12 @@ function renderCard(){
   renderWov(activeStep,steps,pi,st);
   const tmi=activeStep?'clk':t; if($('#tabMIco').dataset.k!==tmi){ $('#tabMIco').dataset.k=tmi; $('#tabMIco').innerHTML=activeStep?clock(2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2); }
   $('#tabMTxt').textContent=activeStep?'MISIÓN · TRABAJANDO':'MISIÓN'; $('#pillTxt').textContent=(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
+  const ps=$('#pillStats'); if(activeStep){ const tk=isObj(M.tokens)?M.tokens:{}; ps.innerHTML=`⏱ <b class="pel">${elapsed()}</b> · Claude <b>${fmtTok(tk.claude)}</b> · Codex <b>${fmtTok(tk.codex)}</b>`; ps.hidden=false; } else { ps.hidden=true; ps.innerHTML=''; }
   if(card.hidden && $('#pill').hidden){ card.hidden=false; place(); animIn(card,'enter'); }
   if(prevState && prevState!==st && (st==='trabajando'||st==='lista') && (prevState==='propuesta'||prevState==='lista')) animIn(card,'haloin');
   if(prevState && prevState!==st){ animIn(card,'flash'); log('Estado: '+(ST[st]||st)); if(st==='completada') burst(card,['#FCEE0A','#55D98B','#F08A5D','#B07CFF','#00E5FF']); }
   prevState=st;
-  clearInterval(tick); if(activeStep) tick=setInterval(()=>{ const t=elapsed(); document.querySelectorAll('#el,#wel,#cbody .elx').forEach(x=>x.textContent=t); },1000);
+  clearInterval(tick); if(activeStep) tick=setInterval(()=>{ const t=elapsed(); document.querySelectorAll('#el,#wel,#cbody .elx,#pillStats .pel').forEach(x=>x.textContent=t); },1000);
 }
 /* animación de trabajo superpuesta a la tarjeta (se puede minimizar) */
 const wovKey=()=>'gremio-wovmin-'+((M&&M.id)||'');
@@ -1015,7 +1027,7 @@ $('#viewer').addEventListener('click',e=>{ if(e.target.id==='viewer') closeViewe
 
 /* ---------- posición, arrastre y minimizar ---------- */
 let pos=null; try{ pos=JSON.parse(localStorage.getItem('gremio-pos')||'null'); }catch(_){}
-function clampPos(el,x,y){ const P=el.id==='card'?cardPad():{t:8,s:8,b:8}; const mx=window.innerWidth-el.offsetWidth-P.s, my=window.innerHeight-el.offsetHeight-P.b; return [Math.max(P.s,Math.min(Math.max(P.s,mx),x)),Math.max(P.t,Math.min(Math.max(P.t,my),y))]; }
+function clampPos(el,x,y){ const isC=el.id==='card', P=isC?cardPad():(skin!=='clasico'&&el.id==='pill'?{t:30,s:18,b:12}:{t:8,s:8,b:8}); const mx=window.innerWidth-el.offsetWidth-P.s, my=isC?window.innerHeight-Math.max(90,($('#bar').offsetHeight||48)+40):window.innerHeight-el.offsetHeight-P.b; return [Math.max(P.s,Math.min(Math.max(P.s,mx),x)),Math.max(P.t,Math.min(Math.max(P.t,my),y))]; }
 let pillPos=null, openedAt=null; try{ pillPos=JSON.parse(localStorage.getItem('gremio-pill')||'null'); }catch(_){}
 function savePill(r,t){ pillPos={r,t}; try{ localStorage.setItem('gremio-pill',JSON.stringify(pillPos)); }catch(_){} }
 function headerBottom(){ const t=document.querySelector('.top'); return t?Math.round(t.getBoundingClientRect().bottom):60; }
