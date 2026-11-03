@@ -1,0 +1,104 @@
+{
+ "id": "M-003",
+ "simulada": true,
+ "cupoSimulado": true,
+ "titulo": "Tutorial para jugadores nuevos",
+ "meta": "Un jugador que entra por primera vez aprende a moverse, elegir personaje y usar una habilidad en menos de 2 minutos, guiado paso a paso.",
+ "porque": "Toca varias piezas que ya existen (personajes, ajustes, interfaz) y hay que decidir el orden y el ritmo: conviene que Opus coordine.",
+ "tipoSugerido": "compleja",
+ "tipo": "compleja",
+ "tipoConfirmado": false,
+ "estado": "propuesta",
+ "paso": -1,
+ "inicio": null,
+ "actualizado": "2026-11-03T18:00:00Z",
+ "equipos": {},
+ "pasosCfg": {},
+ "notas": {},
+ "astra": {
+  "activa": false,
+  "esfuerzo": "medium",
+  "pieza": "Diseña el ritmo del tutorial (cuándo aparece cada aviso)"
+ },
+ "cupoAntes": 28,
+ "vault": "Gremio",
+ "boveda": [
+  {
+   "titulo": "Brief del proyecto Roblox",
+   "ruta": "Proyectos/Roblox/_brief.md",
+   "contenido": "Juego de aventura con combate ligero. Público 10–16 años. Luau + Rojo."
+  },
+  {
+   "titulo": "Estilo de interfaz",
+   "ruta": "Proyectos/Roblox/estilo-ui.md",
+   "contenido": "Botones grandes, legibles en móvil. Fondos semitransparentes."
+  },
+  {
+   "titulo": "Aprendizajes",
+   "ruta": "Proyectos/Roblox/aprendizajes.md",
+   "contenido": "- M-001: guardar con reintentos.\n- M-002: guardar al cerrar el menú, no en cada cambio."
+  }
+ ],
+ "planes": {
+  "compleja": [
+   {
+    "titulo": "Plan vivo del tutorial",
+    "rol": "orquesta",
+    "entrega": "PLAN.md con hitos y aceptación",
+    "comprueba": "Tú lo apruebas"
+   },
+   {
+    "titulo": "Ritmo y guion del tutorial",
+    "rol": "astra",
+    "entrega": "Orden de pasos y textos",
+    "comprueba": "Opus lo valida"
+   },
+   {
+    "titulo": "Avisos y flechas en pantalla",
+    "rol": "ejecuta",
+    "entrega": "Sistema de avisos guiados",
+    "comprueba": "Aparecen en orden en Studio"
+   },
+   {
+    "titulo": "Detección de cada paso",
+    "rol": "ejecuta",
+    "entrega": "El tutorial avanza al moverse, elegir personaje y usar habilidad",
+    "comprueba": "Un jugador nuevo lo completa"
+   },
+   {
+    "titulo": "Revisión cruzada",
+    "rol": "revisa",
+    "entrega": "Problemas por gravedad",
+    "comprueba": "Nada crítico abierto"
+   },
+   {
+    "titulo": "Cierre y aprendizajes",
+    "rol": "orquesta",
+    "entrega": "Resumen + aprendizajes",
+    "comprueba": "Apruebas qué se guarda"
+   }
+  ]
+ },
+ "spec": [
+  {
+   "id": "proposito",
+   "titulo": "Propósito",
+   "texto": "Primer minuto de juego guiado: moverse, elegir personaje, usar una habilidad."
+  },
+  {
+   "id": "alcance",
+   "titulo": "Alcance",
+   "texto": "Puede tocar: src/client/Tutorial/, avisos de UI. No tocar: economía, guardado existente (solo leer si el jugador es nuevo)."
+  },
+  {
+   "id": "aceptacion",
+   "titulo": "Aceptación",
+   "texto": "- Jugador nuevo: el tutorial aparece solo.\n- Jugador antiguo: no aparece.\n- Se puede saltar.\n- Funciona en móvil."
+  },
+  {
+   "id": "detente",
+   "titulo": "Detente si",
+   "texto": "Hay que cambiar el guardado o falta decidir textos del juego."
+  }
+ ]
+}

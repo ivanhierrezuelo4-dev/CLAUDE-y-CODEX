@@ -43,6 +43,14 @@ Fecha: 3 nov 2026. Estado: **demo del tablero terminada; el sistema real aún no
 9. **Actualizaciones agrupadas:** Claude escribe en la tarjeta solo al cambiar de paso; unas 4–6 escrituras por misión.
 10. **Calibrar:** tras 5 misiones reales, comparar lo estimado con lo real y ajustar la fórmula.
 
+## Ya aplicado (3 nov 2026)
+
+- **Misión compacta:** la M-003 pesa 2,7 KB frente a 5,4 KB de la M-002 (−50 %). Solo trae el plan del tipo sugerido.
+- **Confirmar lo envía todo:** el aviso incluye las notas de Iván y si editó la especificación.
+- **Fluidez:** se quitaron los filtros animados, la capa de rayas a pantalla completa y las animaciones que movían `left`. Se redujeron las partículas y las animaciones se pausan si la pestaña no se ve. Prueba: ~60 fps.
+- **Diseño congelado** desde aquí, salvo cambios que pida Iván.
+- Todo lo demás está documentado en `GREMIO.md` para la instalación.
+
 ## Qué falta para que sea «completo»
 
 - Instalación real: `AGENTS.md` y `CLAUDE.md` del Gremio, la skill, los scripts de barra de estado y del hook, y la plantilla de misión compacta.
