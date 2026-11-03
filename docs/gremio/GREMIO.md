@@ -252,6 +252,28 @@ El brief aprobado se guarda como `Proyectos/<Nombre>/_brief.md` y en el `AGENTS.
 4. Al final: lee el resultado, aprueba o no los aprendizajes y, si te lo pregunta, elige revisión.
 5. Si Claude se queda sin cupo: abre Codex y dile «continúa la misión M-XXX».
 
+## 15b. Usarlo desde el teléfono
+
+Todo el flujo funciona desde el móvil. Lo único que cambia es **dónde corre Claude**.
+
+| Pieza | En el teléfono |
+|---|---|
+| **Tablero / tarjeta** | Se abre el enlace del tablero en la app de Claude o en el navegador. La tarjeta se acopla al ancho, la píldora queda abajo y los botones están pensados para el dedo. Confirmar, el mapa, las notas, el cofre, la especificación y las skins funcionan igual |
+| **Claude** | Sesión de **Claude Code en la nube** desde la app de Claude (claude.ai/code), con el repositorio del proyecto conectado. Es la misma forma en que se construyó este kit. La sesión escucha la tarjeta: al pulsar Confirmar le llega el aviso |
+| **Codex** | Codex en la nube desde la app de ChatGPT, con el repositorio conectado. Lee `AGENTS.md` y el archivo de plan de la misión (sección 7) para retomar o ejecutar piezas |
+| **Bóveda** | Obsidian para móvil con la bóveda sincronizada (Obsidian Sync u otra sincronización que Iván ya use). Si la bóveda vive en el repositorio, Claude y Codex en la nube la leen directamente |
+| **Cupo** | La barra de estado (sección 8) solo existe en el PC. En la nube, Claude no ve el % de 5 h. Iván lo mira en la app (Ajustes → Uso) y lo dice si quiere, o se usa el último valor guardado en `~/.gremio/estado.json` si se sincroniza. La tarjeta muestra «—» cuando no hay dato real |
+
+**Rutina en el teléfono:**
+1. Abrir la sesión de Claude del proyecto en la app y escribir la tarea.
+2. Abrir el tablero (enlace fijo, guardado en favoritos o anclado) y ajustar la tarjeta.
+3. Pulsar ✔ Confirmar y mirar el avance en la tarjeta o en la píldora.
+4. Si Claude se queda sin cupo: abrir Codex en la app de ChatGPT y decir «continúa la misión M-XXX».
+
+**Límites en el móvil:**
+- La sesión en la nube no tiene acceso a programas del PC (Roblox Studio, Obsidian de escritorio). Las misiones que necesitan probar en Studio quedan como «pendiente de probar en el PC».
+- Las animaciones se pausan cuando la pestaña no está a la vista, para no gastar batería.
+
 ## 16. Problemas frecuentes
 
 | Síntoma | Causa probable | Arreglo |
@@ -259,7 +281,8 @@ El brief aprobado se guarda como `Proyectos/<Nombre>/_brief.md` y en el `AGENTS.
 | La tarjeta dice «SIN CONEXIÓN · EJEMPLO» | La base de datos del artefacto no respondió | Recargar; comprobar que el artefacto tiene la capacidad `db` |
 | Confirmar no avisa a Claude | No hay sesión de Claude escuchando, o no diste permiso para comentar | La tarjeta pide escribir «empezar» en el chat; aceptar el permiso la próxima vez |
 | Los % salen «—» | La statusline no está configurada o la fuente de Codex no está verificada | Sección 8 |
-| Va lento | Muchas animaciones en un PC modesto | Elegir la skin «Clásico»; minimizar la animación de trabajo |
+| Va lento | Muchas animaciones en un PC o teléfono modesto | Elegir la skin «Clásico»; minimizar la animación de trabajo |
+| En el teléfono no veo el % de cupo | La barra de estado solo existe en el PC | Sección 15b: mirarlo en la app o usar el último valor guardado |
 | Codex no retoma | La misión no tiene archivo de plan | Sección 7: un solo documento por misión |
 
 ## 17. Estado actual y límites honestos

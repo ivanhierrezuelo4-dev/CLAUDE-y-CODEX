@@ -2,7 +2,7 @@
 
 **Gremio** es el sistema de trabajo de Iván: Claude orquesta, Codex ejecuta y cada encargo es una **misión** con su tarjeta. Es universal: se instala una vez en el PC y cada proyecto añade un adaptador corto. No es una aplicación.
 
-> Estado: diseño aprobado en conversación (2 nov 2026). No instalado. Los nombres de modelo vienen del catálogo oficial de Codex y del changelog de Claude Code; el acceso de la cuenta se comprueba con `/model`.
+> Estado: diseño aprobado y demo del tablero probada (3 nov 2026), también en teléfono. No instalado. **Documento maestro: `GREMIO.md`** (instalación, móvil, datos de la tarjeta y protocolo). Los nombres de modelo vienen del catálogo oficial de Codex y del changelog de Claude Code; el acceso de la cuenta se comprueba con `/model`.
 
 ---
 
@@ -50,6 +50,8 @@ En la tarjeta:
 - **Skins:** 8 decorados pixel alrededor de la tarjeta (Clásico, Castillo, Dulcelandia, Hawái, Glaciar, Volcán, Bosque encantado, Cosmos), con figuras en las esquinas, bandas, laterales y partículas; el reloj cambia con cada skin. Se guardan en tu navegador.
 - **Meta** plegable con trofeo y **nombre de la misión** editable (✎).
 - **Tiempo y tokens** en la animación de trabajo: el tiempo es exacto; los tokens, aproximados.
+
+Claude crea la misión **compacta**: solo el plan del tipo sugerido. Si Iván confirma otro tipo, Claude escribe ese plan entonces. El aviso de Confirmar trae las notas de Iván, así que Claude no relee la misión salvo que la especificación se haya editado. Las tareas de menos de ~10 min van sin tarjeta, salvo que Iván la pida. En el teléfono la tarjeta se acopla al ancho y la píldora va abajo.
 
 Tras confirmar, los ajustes se bloquean. Estado: propuesta → confirmada → trabajando (paso N de M) → revisión → completada · pausa · bloqueada. Nunca porcentajes de avance inventados ni tiempo restante.
 
