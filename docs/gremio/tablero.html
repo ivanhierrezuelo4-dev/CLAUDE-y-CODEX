@@ -34,8 +34,37 @@ svg.px{image-rendering:pixelated;display:block;flex:none}
 .conn{font-family:var(--f-pix);font-size:.63rem;padding:6px 8px;border:2px solid currentColor;line-height:1.3}
 .conn.live{color:var(--codex)} .conn.local{color:var(--astra)} .conn.wait{color:var(--muted)}
 .desk{max-width:1200px;margin:0 auto;min-height:calc(100vh - 90px);display:grid;place-items:center;padding-block:20px 60px}
-.desk:has(.idle[hidden]){min-height:0;padding:0}
+.desk:has(.idle[hidden]){min-height:0}
 .desk[hidden]{display:none}
+.desk.haslist{place-items:start stretch;min-height:0;padding-block:14px 60px}
+.plist{display:grid;gap:14px;width:100%}
+.plist[hidden]{display:none}
+.psum{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.psum .sc{display:flex;gap:8px;align-items:center;background:var(--panel);border:2px solid var(--line);box-shadow:3px 3px 0 #000;padding:7px 10px;font-size:.84rem;color:var(--muted)}
+.psum .sc b{color:var(--text);font-variant-numeric:tabular-nums}
+.psum .sc.hot{border-color:var(--cyan)} .psum .sc.wait{border-color:var(--sun)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.pcard{display:grid;gap:8px;text-align:left;background:var(--panel);border:3px solid var(--hi);box-shadow:0 0 0 3px #000,5px 5px 0 3px #000;padding:12px 12px 12px 16px;position:relative;transition:transform .2s cubic-bezier(.22,1,.36,1),border-color .2s ease}
+.pcard:hover{transform:translate(-2px,-2px);border-color:var(--sun)}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--pc,var(--hi))}
+.pcard.t-compleja{--pc:var(--claude)} .pcard.t-definida{--pc:var(--codex)} .pcard.t-sencilla{--pc:var(--cyan)}
+.pcard[aria-current="true"]{border-color:var(--text);box-shadow:0 0 0 3px #000,5px 5px 0 3px #000,0 0 22px 2px color-mix(in srgb,var(--pc,var(--hi)) 45%,transparent)}
+.pcard.s-trabajando,.pcard.s-revision{border-color:var(--cyan)}
+.pcard .ph{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.pcard .pn{font-family:var(--f-pix);font-size:.6rem;letter-spacing:.04em;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .pm{display:flex;gap:10px;align-items:center;min-width:0}
+.pcard .pm b{font-size:.92rem;line-height:1.3}
+.pcard .pi{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+.pcard .pi b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
+.pcard .pbar{display:flex;gap:3px}
+.pcard .pbar i{flex:1;height:6px;background:var(--line)} .pcard .pbar i.done{background:var(--codex)} .pcard .pbar i.act{background:var(--sun);animation:pulse 1s steps(2) infinite}
+.pcard .empty{font-size:.84rem;color:var(--muted)}
+.pcard .go3{font-size:.76rem;color:var(--sun)}
+@media (prefers-reduced-motion:no-preference){ .pcard.new{animation:popin .45s cubic-bezier(.22,1,.36,1) both} }
+.hfil{display:flex;flex-wrap:wrap;gap:6px}
+.hfil button{background:var(--panel);border:2px solid var(--line);padding:6px 10px;font-size:.8rem;color:var(--muted)}
+.hfil button[aria-pressed="true"]{border-color:var(--sun);color:var(--text)}
+.hcard .htag{font-family:var(--f-pix);font-size:.46rem;color:var(--sun);letter-spacing:.04em}
 .idle[hidden]{display:none}
 .idle{display:grid;justify-items:center;gap:14px;text-align:center;max-width:46ch;color:var(--muted)}
 .idle h2{font-family:var(--f-pix);font-weight:400;font-size:.8rem;color:var(--text);line-height:1.6;margin:0}
@@ -433,7 +462,8 @@ body.paused *,body[data-tab="salon"] .card *,body[data-tab="salon"] .pill *{anim
   .loot button{min-height:48px}
   .spechead{padding:10px}
   .vbox{max-height:calc(100vh - 32px)}
-  .hgrid{grid-template-columns:1fr}
+  .hgrid,.pgrid{grid-template-columns:1fr}
+  .psum .sc{font-size:.78rem;padding:6px 8px}
   .hall{padding-bottom:40px}
   .desk{padding-block:12px 40px}
 }
@@ -536,14 +566,15 @@ body[data-tab="salon"] .card,body[data-tab="salon"] .pill{opacity:0;visibility:h
 <main class="desk" id="desk" role="tabpanel" aria-labelledby="tabM">
   <div class="idle" id="idle">
     <span id="idleArt"></span>
-    <h2>Esperando misión</h2>
-    <p>Escribe en el chat con Claude, por ejemplo <code>hagamos un trabajo complejo</code>. La tarjeta aparecerá aquí: la ajustas, la confirmas y Claude empieza.</p>
-    <p style="font-size:.78rem">Demo: no hay conexión con Codex ni con tus proyectos. Las cifras son estimaciones.</p>
+    <h2>Esperando misiones</h2>
+    <p>Cuando el chat de un proyecto con el Gremio cree una misión, el proyecto aparecerá aquí con su tarjeta.</p>
   </div>
+  <section class="plist" id="plist" hidden aria-label="Proyectos del Gremio"><div class="psum" id="psum"></div><div class="pgrid" id="pgrid"></div></section>
 </main>
 
 <section class="hall" id="hall" hidden role="tabpanel" aria-labelledby="tabS">
   <div class="hallh"><span id="hallIco"></span><div><h2 id="hallT">SALÓN DEL GREMIO</h2><small>Misiones completadas. Solo para verlas: Claude no las usa como contexto.</small></div></div>
+  <div class="hfil" id="hfil" role="group" aria-label="Filtrar por proyecto"></div>
   <div class="hgrid" id="hgrid"></div>
 </section>
 
@@ -715,7 +746,7 @@ function buildDeco(){ const d=$('#deco'); const k=SK[skin]; if(!k||!k.pal){ d.in
     else { const top=((i*37)%100); h+=`<span class="dpf ${P.type}" style="${side}:-${off+P.s}px;top:${top}%;animation-delay:${dl}s">${dot}</span>`; } } }
   d.innerHTML=h;
   const pd=$('#pillDeco'); if(pd){ const s2=2; pd.innerHTML=`<span class="pt" style="background-image:${pxUri(k.top,k.pal,s2)};height:${k.top.length*s2}px;top:-${k.top.length*s2-3}px"></span><span class="pt" style="background-image:${pxUri(k.bot,k.pal,s2)};height:${k.bot.length*s2}px;bottom:-${k.bot.length*s2-3}px"></span><span class="pc ${k.anim||''}" style="left:-22px;bottom:-4px">${pxSvg(k.cl,k.pal,2)}</span><span class="pc ${k.anim||''}" style="right:-22px;bottom:-4px">${pxSvg(cr,k.pal,2)}</span>`; } }
-function applySkin(){ document.body.dataset.skin=skin; buildDeco(); ['#pillIco','#tabMIco'].forEach(s=>{ const e=$(s); if(e) e.dataset.k=''; }); if(M) renderCard(); const c=$('#card'); if(c&&!c.hidden){ const [x,y]=clampPos(c,c.offsetLeft,c.offsetTop); c.style.left=x+'px'; c.style.top=y+'px'; fitCard(); } }
+function applySkin(){ document.body.dataset.skin=skin; buildDeco(); ['#pillIco','#tabMIco'].forEach(s=>{ const e=$(s); if(e) e.dataset.k=''; }); if(M) renderCard(); listSig=''; if(typeof renderList==='function') renderList(); const c=$('#card'); if(c&&!c.hidden){ const [x,y]=clampPos(c,c.offsetLeft,c.offsetTop); c.style.left=x+'px'; c.style.top=y+'px'; fitCard(); } }
 function renderSkins(){ $('#skins').innerHTML=`<div class="lbl"><span>SKIN DE LA TARJETA</span><em>solo en tu navegador</em></div><div class="skgrid">${SKIN_IDS.map(id=>{ const k=SK[id]; const prev=k.pal?pxSvg(k.cl,k.pal,2):clock(2,id); return `<button type="button" class="sk" role="radio" aria-checked="${id===skin}" data-skin="${id}"><span class="skprev">${prev}</span>${k.n}</button>`; }).join('')}</div>`; }
 function toggleSkins(force){ const el=$('#skins'); const open=force!=null?force:el.hidden; $('#skinBtn').setAttribute('aria-expanded',open);
   if(open){ if(!el.hidden) return; renderSkins(); el.hidden=false; animIn(el,'in'); const c=el.querySelector('[aria-checked="true"]'); if(c) c.focus(); }
@@ -752,6 +783,8 @@ const PLAN_DEF={
 };
 
 /* ---------- estado ---------- */
+let startMin=false; let P={}, sel=null, G=null, firstLoad=true, seenMis={}; try{ sel=localStorage.getItem('gremio-sel'); }catch(_){}
+const docPath=()=>'proyectos/'+sel; const projName=id=>(P[id]&&P[id].proyecto)||id||'';
 let lastCardHtml='', lastPlanHtml='', editingTitle=false, metaOpen=false;
 try{ metaOpen=localStorage.getItem('gremio-meta')==='1'; }catch(_){}
 let M=null, prevState=null, tick=null, db=null, comments=null, openMenu=null, planMenu=null, notice=null, prevEst={};
@@ -783,7 +816,7 @@ function estimate(){ const t=tipoOf(); let tm=0, cl=1.5, cx=0;
 let q=Promise.resolve();
 function save(patch,withEst){ merge(M,patch); if(withEst!==false){ patch.estimacion=estimate(); M.estimacion=patch.estimacion; }
   patch.actualizado=new Date().toISOString(); M.actualizado=patch.actualizado; renderCard(); if(!$('#ov').hidden) renderPlan(true);
-  if(!db) return Promise.resolve(); const p=patch; q=q.then(()=>db.doc('gremio/mision').update(p)).catch(e=>{ log('No se pudo guardar ('+((e&&e.code)||'error')+')'); }); return q; }
+  if(!db) return Promise.resolve(); const p=patch; const path=docPath(); q=q.then(()=>db.doc(path).update(p)).catch(e=>{ log('No se pudo guardar ('+((e&&e.code)||'error')+')'); }); return q; }
 
 const logLines=[];
 function log(t){ const d=new Date(); logLines.unshift(`<span><b>${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</b> ${esc(t)}</span>`); logLines.length=Math.min(logLines.length,4); $('#log').innerHTML=logLines.join(''); }
@@ -801,11 +834,10 @@ function member(rol,o,t,act){ if(!o) return ''; const w=who(o.modelo); const ed=
 
 function renderCard(){
   const card=$('#card');
-  if(!M){ card.hidden=true; $('#pill').hidden=true; $('#idle').hidden=false; return; }
-  $('#idle').hidden=true;
+  if(!M||!M.id){ card.hidden=true; $('#pill').hidden=true; return; }
   const t=tipoOf(), st=M.estado||'propuesta', eq=team(t), ed=editable(), steps=stepsFor(t);
   card.className=`card t-${t} s-${st}`;
-  $('#cid').textContent=`MISIÓN ${M.id||''}${M.simulada!==false?' · SIMULADA':''}`;
+  $('#cid').textContent=`${projName(sel).toUpperCase()} · ${M.id||''}${M.simulada!==false?' · SIMULADA':''}`;
   const cst=$('#cst'); cst.className='st '+st; cst.textContent=ST[st]||st.toUpperCase();
   const pi=Number.isInteger(M.paso)?M.paso:-1; const activeStep=(st==='trabajando'||st==='revision')&&pi>=0&&pi<steps.length?steps[pi]:null;
   const actRol=activeStep?activeStep.rol:null;
@@ -844,17 +876,16 @@ function renderCard(){
   document.querySelectorAll('#el,#cbody .elx').forEach(x=>x.textContent=elapsed());
   const pk=activeStep?'clk':t; if($('#pillIco').dataset.k!==pk){ $('#pillIco').dataset.k=pk; $('#pillIco').innerHTML=activeStep?clock(2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2); }
   renderWov(activeStep,steps,pi,st);
-  const tmi=activeStep?'clk':t; if($('#tabMIco').dataset.k!==tmi){ $('#tabMIco').dataset.k=tmi; $('#tabMIco').innerHTML=activeStep?clock(2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2); }
-  $('#tabMTxt').textContent=activeStep?'MISIÓN · TRABAJANDO':'MISIÓN'; $('#pillTxt').textContent=(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
+$('#pillTxt').textContent=(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
   const ps=$('#pillStats'); if(activeStep){ const tk=isObj(M.tokens)?M.tokens:{}; ps.innerHTML=`⏱ <b class="pel">${elapsed()}</b> · Claude <b>${fmtTok(tk.claude)}</b> · Codex <b>${fmtTok(tk.codex)}</b>`; ps.hidden=false; } else { ps.hidden=true; ps.innerHTML=''; }
-  if(card.hidden && $('#pill').hidden){ card.hidden=false; place(); animIn(card,'enter'); }
+  if(card.hidden && $('#pill').hidden){ if(startMin){ startMin=false; const p=$('#pill'); p.hidden=false; dockPill(); } else { card.hidden=false; place(); animIn(card,'enter'); } }
   if(prevState && prevState!==st && (st==='trabajando'||st==='lista') && (prevState==='propuesta'||prevState==='lista')) animIn(card,'haloin');
   if(prevState && prevState!==st){ animIn(card,'flash'); log('Estado: '+(ST[st]||st)); if(st==='completada') burst(card,['#FCEE0A','#55D98B','#F08A5D','#B07CFF','#00E5FF']); }
   prevState=st;
   clearInterval(tick); if(activeStep) tick=setInterval(()=>{ const t=elapsed(); document.querySelectorAll('#el,#wel,#cbody .elx,#pillStats .pel').forEach(x=>x.textContent=t); },1000);
 }
 /* animación de trabajo superpuesta a la tarjeta (se puede minimizar) */
-const wovKey=()=>'gremio-wovmin-'+((M&&M.id)||'');
+const wovKey=()=>'gremio-wovmin-'+(sel||'')+'-'+((M&&M.id)||'');
 function wovMin(){ try{ return localStorage.getItem(wovKey())==='1'; }catch(_){ return !!window.__wovmin; } }
 function setWovMin(v){ try{ localStorage.setItem(wovKey(),v?'1':'0'); }catch(_){ window.__wovmin=v; } }
 let wovSig='';
@@ -923,7 +954,7 @@ async function confirmMission(btn){
   const t=tipoOf(), eq=team(t), e=estimate(), steps=stepsFor(t);
   const notas=isObj(M.notas)?Object.values(M.notas).filter(x=>String(x||'').trim()).length:0;
   const cust=steps.filter(s=>s.cust).map(s=>`${s.titulo}: ${s.modelo} ${s.esfuerzo||''}`.trim());
-  const resumen=`Gremio · misión ${M.id||''} CONFIRMADA desde la tarjeta → empezar. Tipo: ${TIPO[t]}. `+
+  const resumen=`Gremio · proyecto ${projName(sel)} (${sel}) · misión ${M.id||''} CONFIRMADA desde la tarjeta → empezar (solo el chat de ese proyecto). Tipo: ${TIPO[t]}. `+
     (eq.orquesta?`Orquesta: ${eq.orquesta.modelo} ${eq.orquesta.esfuerzo}. `:'')+`Ejecuta: ${eq.ejecuta.modelo} ${eq.ejecuta.esfuerzo}. `+
     `Revisión: ${eq.revisa.modelo}${eq.revisa.modelo!=='Sin revisión'?' '+eq.revisa.esfuerzo:''}. `+(t==='compleja'?`Astra: ${astraOn()?'sí':'no'}. `:'')+
     (cust.length?`Pasos con modelo propio: ${cust.join('; ')}. `:'')+`Estimación: ${e.tiempo}, Claude ${e.cupo5h}, Codex ${e.codex5h}.`+
@@ -939,7 +970,7 @@ async function confirmMission(btn){
     }catch(err){ why=(err&&err.code)==='consent_required'?'no diste permiso para avisar desde la tarjeta':'no se pudo enviar el aviso'; } }
   else why='el aviso automático no está disponible aquí';
   notice= ok?{ok:true,txt:'✓ Claude avisado. Empieza en cuanto lo reciba; no tienes que escribir nada.'}
-            :{ok:false,txt:`✓ Confirmada. ${why[0].toUpperCase()+why.slice(1)}: escribe «empezar» en el chat.`};
+            :{ok:false,txt:`✓ Confirmada. ${why[0].toUpperCase()+why.slice(1)}: escribe «empezar» en el chat de ${projName(sel)}.`};
   log(ok?'Confirmada y enviada a Claude':'Confirmada (falta avisar en el chat)'); renderCard();
 }
 
@@ -1076,10 +1107,51 @@ function burst(el,cols,n){ if(RM||!el) return; const c=el.getBoundingClientRect(
   for(let i=0;i<n;i++){ const d=document.createElement('i'); d.className='burst'; d.style.background=cols[i%cols.length]; d.style.left=(c.left+c.width/2)+'px'; d.style.top=(c.top+Math.min(c.height/2,40))+'px'; document.body.appendChild(d);
     const a=Math.random()*Math.PI*2, r=40+Math.random()*80; d.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r-30}px)`,opacity:0}],{duration:850,easing:'cubic-bezier(.15,.8,.3,1)'}).onfinish=()=>d.remove(); } }
 
+/* ---------- proyectos: vista de todos ---------- */
+const ORD={trabajando:0,revision:1,lista:2,propuesta:3,bloqueada:4,pausa:5,completada:6};
+function hace(iso){ if(!iso) return ''; const m=Math.max(0,Math.round((Date.now()-Date.parse(iso))/60000)); return m<1?'ahora':m<60?`hace ${m} min`:`hace ${Math.round(m/60)} h`; }
+function elapsedOf(ini){ if(!ini) return '0:00'; const s=Math.max(0,Math.floor((Date.now()-Date.parse(ini))/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+function stepsOf(d){ const t=TIPOS.includes(d.tipo)?d.tipo:'sencilla'; const src=(d.planes&&Array.isArray(d.planes[t])&&d.planes[t].length)?d.planes[t]:PLAN_DEF[t];
+  const eqR=(d.equipos&&d.equipos[t]&&d.equipos[t].revisa&&d.equipos[t].revisa.modelo)||DEF[t].revisa.modelo;
+  return src.filter(x=>x.rol==='astra'?(t==='compleja'&&d.astra&&d.astra.activa):x.rol==='revisa'?eqR!=='Sin revisión':true).length; }
+let listSig='';
+function renderList(){ const ids=Object.keys(P); const has=ids.length>0;
+  $('#idle').hidden=has; $('#plist').hidden=!has; $('#desk').classList.toggle('haslist',has); if(!has) return;
+  const act=ids.filter(id=>P[id]&&P[id].id);
+  const nT=act.filter(id=>['trabajando','revision'].includes(P[id].estado)).length, nP=act.filter(id=>['propuesta','lista'].includes(P[id].estado)).length;
+  const cupo=G&&G.cinco_h!=null?`<span class="sc"><span>Claude 5 h</span><b>${G.cinco_h} %</b><span>· sem</span><b>${G.semanal!=null?G.semanal+' %':'—'}</b><span>· ${hace(G.actualizado)}</span></span>`:'';
+  const sum=`<span class="sc"><b>${ids.length}</b> proyecto${ids.length!==1?'s':''}</span><span class="sc ${nT?'hot':''}">${nT?clock(1):''}<b>${nT}</b> trabajando</span><span class="sc ${nP?'wait':''}"><b>${nP}</b> por confirmar</span>${cupo}`;
+  const sorted=ids.sort((a,b)=>{ const da=P[a],db_=P[b]; const oa=da&&da.id?(ORD[da.estado]??9):10, ob=db_&&db_.id?(ORD[db_.estado]??9):10; return oa-ob||projName(a).localeCompare(projName(b)); });
+  const cards=sorted.map(id=>{ const d=P[id]||{}; const name=esc(projName(id));
+    if(!d.id) return `<button type="button" class="pcard" data-p="${esc(id)}" aria-current="${id===sel}"><span class="ph"><span class="pn">${name}</span></span><span class="empty">Sin misión activa</span></button>`;
+    const t=TIPOS.includes(d.tipo)?d.tipo:'sencilla', st=d.estado||'propuesta', n=stepsOf(d), pi=Number.isInteger(d.paso)?d.paso:-1, work=st==='trabajando'||st==='revision';
+    const bar=work||st==='completada'?`<span class="pbar">${Array.from({length:n},(_,i)=>`<i class="${st==='completada'||i<pi?'done':i===pi?'act':''}"></i>`).join('')}</span>`:'';
+    const tk=d.tokens||{};
+    const info=work?`<span class="pi"><span>Paso <b>${pi+1}/${n}</b></span><span>⏱ <b class="ptick" data-ini="${esc(d.inicio||'')}">${elapsedOf(d.inicio)}</b></span>${tk.claude!=null?`<span>Claude <b>${fmtTok(tk.claude)}</b></span>`:''}${tk.codex!=null?`<span>Codex <b>${fmtTok(tk.codex)}</b></span>`:''}</span>`
+      :st==='propuesta'?`<span class="go3">Esperando tu confirmación · toca para abrir</span>`:st==='completada'?`<span class="pi">Completada · ${esc(hace(d.actualizado))}</span>`:`<span class="pi">${esc(ST[st]||st)} · ${esc(hace(d.actualizado))}</span>`;
+    const isNew=seenMis[id]!==undefined&&seenMis[id]!==d.id;
+    return `<button type="button" class="pcard t-${t} s-${st} ${isNew?'new':''}" data-p="${esc(id)}" aria-current="${id===sel}"><span class="ph"><span class="pn">${name}</span><span class="st ${st}">${ST[st]||st}</span></span>
+      <span class="pm">${work?clock(2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2)}<b>${esc(d.titulo||'Misión')}</b></span>${bar}${info}</button>`; }).join('');
+  const sig=sum+cards; if(sig!==listSig){ listSig=sig; $('#psum').innerHTML=sum; $('#pgrid').innerHTML=cards; }
+  ids.forEach(id=>{ seenMis[id]=P[id]&&P[id].id; });
+  const k=nT?'clk':'m'; const ti=$('#tabMIco'); if(ti.dataset.k!==k){ ti.dataset.k=k; ti.innerHTML=nT?clock(2):sprite('opus',2); } $('#tabMTxt').textContent=nT?`MISIÓN · ${nT} TRABAJANDO`:'MISIÓN'; }
+setInterval(()=>{ document.querySelectorAll('#pgrid .ptick').forEach(x=>{ x.textContent=elapsedOf(x.dataset.ini); }); },1000);
+function resetView(){ notice=null; prevEst={}; prevState=null; lastCardHtml=''; lastPlanHtml=''; wovSig=''; openMenu=null; planMenu=null; chestOpen=false; specOpen=false; editingTitle=false; M=null;
+  const ov=$('#ov'); if(!ov.hidden){ ov.hidden=true; delete ov.dataset.closing; } const v=$('#viewer'); if(!v.hidden) v.hidden=true; }
+function selectProject(id,user){ if(!P[id]) return; const changed=id!==sel; if(changed){ sel=id; try{ localStorage.setItem('gremio-sel',id); }catch(_){} resetView(); }
+  setMission(P[id],'live'); listSig=''; renderList();
+  if(user&&P[id].id){ const c=$('#card'), p=$('#pill'); if(!p.hidden&&c.hidden){ restore(); } else if(!c.hidden&&changed){ animIn(c,'flash'); } } }
+$('#pgrid').addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(b) selectProject(b.dataset.p,true); });
+function onProjects(){ const ids=Object.keys(P);
+  ids.forEach(id=>{ const d=P[id]; if(d&&d.id&&seenMis[id]!==undefined&&seenMis[id]!==d.id) log(`Nueva misión en ${projName(id)}: ${d.titulo||d.id}`); });
+  if(!sel||!P[sel]){ const best=ids.filter(id=>P[id]&&P[id].id).sort((a,b)=>(ORD[P[a].estado]??9)-(ORD[P[b].estado]??9))[0]; if(best){ sel=best; resetView(); if(firstLoad&&isMob()) startMin=true; } }
+  else if(firstLoad&&isMob()) startMin=true;
+  firstLoad=false;
+  renderList(); setMission(sel&&P[sel]?P[sel]:null,'live'); }
 /* ---------- datos en vivo ---------- */
 function setMission(d,src){ const had=!!M; const newId=d&&M&&d.id!==M.id; M=d?JSON.parse(JSON.stringify(d)):null; if(!had||newId){ notice=null; prevEst={}; }
   if(M&&M.estado==='propuesta') notice=null;
-  renderCard(); if(!$('#ov').hidden) renderPlan(true); if(d&&(!had||newId)) log((src==='live'?'Nueva misión: ':'Ejemplo: ')+(d.titulo||'')); }
+  renderCard(); if(!$('#ov').hidden) renderPlan(true); }
 /* ---------- pestañas ---------- */
 let tab='mision'; try{ if(localStorage.getItem('gremio-tab')==='salon') tab='salon'; }catch(_){}
 function setTab(t,anim){ tab=t; try{ localStorage.setItem('gremio-tab',t); }catch(_){} document.body.dataset.tab=t;
@@ -1090,33 +1162,39 @@ document.querySelector('.tabs').addEventListener('keydown',e=>{ if(e.key==='Arro
 $('#tabSIco').innerHTML=sprite('trophy',2);
 /* ---------- Salón del gremio (solo lectura; no es contexto para Claude) ---------- */
 $('#hallIco').innerHTML=sprite('trophy',4);
-let H=[], hallOpen={}, hallSeen=null;
+let H=[], hallOpen={}, hallSeen=null, hallFil='todos';
+const hKey=m=>(m.proyectoId||'')+'-'+(m.id||'');
 function renderHall(){ $('#tabSN').textContent=H.length?'('+H.length+')':'';
   if(!H.length){ $('#hgrid').innerHTML='<div class="hempty">Aún no hay misiones completadas. Cuando cierres una, aparecerá aquí con su trofeo.</div>'; return; }
-  const items=[...H].sort((a,b)=>String(b.completadaEn||'').localeCompare(String(a.completadaEn||'')));
-  $('#hgrid').innerHTML=items.map(m=>{ const t=TIPOS.includes(m.tipo)?m.tipo:'sencilla'; const open=!!hallOpen[m.id]; const isNew=hallSeen&&!hallSeen.has(m.id);
+  const projs=[...new Set(H.map(m=>m.proyectoId).filter(Boolean))];
+  $('#hfil').innerHTML=projs.length>1?['todos',...projs].map(p=>`<button type="button" data-hf="${esc(p)}" aria-pressed="${hallFil===p}">${p==='todos'?'Todos':esc((H.find(m=>m.proyectoId===p)||{}).proyecto||p)}</button>`).join(''):'';
+  const items=[...H].filter(m=>hallFil==='todos'||m.proyectoId===hallFil).sort((a,b)=>String(b.completadaEn||'').localeCompare(String(a.completadaEn||'')));
+  $('#hgrid').innerHTML=items.map(m=>{ const t=TIPOS.includes(m.tipo)?m.tipo:'sencilla'; const k=hKey(m); const open=!!hallOpen[k]; const isNew=hallSeen&&!hallSeen.has(k);
     const f=m.completadaEn?new Date(m.completadaEn).toLocaleDateString([], {day:'2-digit',month:'short'}):'';
-    return `<button type="button" class="hcard t-${t} ${isNew?'new':''}" data-h="${esc(m.id)}" aria-expanded="${open}"><span class="medal">${sprite('trophy',2)}</span>
+    return `<button type="button" class="hcard t-${t} ${isNew?'new':''}" data-h="${esc(k)}" aria-expanded="${open}"><span class="medal">${sprite('trophy',2)}</span>${m.proyecto?`<span class="htag">${esc(String(m.proyecto).toUpperCase())}</span>`:''}
       <span class="hh">${sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',3)}<span><b>${esc(m.titulo)}</b><br><small>${TIPO[t]} · ${esc(f)}${m.simulada?' · SIMULADA':''}</small></span></span>
       <small>${esc(m.meta||'')}</small>
       <span class="hd ${open?'in':''}" ${open?'':'hidden'}><span><b>Equipo:</b> ${esc(m.equipo||'—')}</span><span><b>Duración:</b> ${esc(m.duracion||'—')}</span><span><b>Gasto real:</b> Claude ${esc(m.gastoClaude||'—')} · Codex ${esc(m.gastoCodex||'—')}</span><span><b>Resultado:</b> ${esc(m.resultado||'—')}</span></span></button>`; }).join('');
-  hallSeen=new Set(H.map(m=>m.id)); }
+  hallSeen=new Set(H.map(hKey)); }
+$('#hfil').addEventListener('click',e=>{ const b=e.target.closest('[data-hf]'); if(!b) return; hallFil=b.dataset.hf; renderHall(); animIn($('#hgrid'),'panelin'); });
 $('#hgrid').addEventListener('click',e=>{ const b=e.target.closest('[data-h]'); if(!b) return; const id=b.dataset.h; hallOpen[id]=!hallOpen[id]; renderHall(); const nb=document.querySelector(`[data-h="${CSS.escape(id)}"]`); if(nb) nb.focus(); });
 const EXAMPLE={id:'EJ',simulada:true,cupoSimulado:true,titulo:'Ejemplo: sistema de personajes',meta:'Ejemplo sin conexión: podrás añadir personajes rellenando una ficha.',tipoSugerido:'compleja',tipo:'compleja',porque:'Ejemplo para ver la tarjeta sin conexión.',estado:'propuesta',astra:{activa:false},cupoAntes:35};
 setTab(tab,false);
 applySkin();
 let settled=false;
-const timer=setTimeout(()=>{ if(!settled){ settled=true; $('#conn').className='conn local'; $('#conn').textContent='SIN CONEXIÓN · EJEMPLO'; setMission(EXAMPLE,'local'); } },10000);
+function offline(){ $('#conn').className='conn local'; $('#conn').textContent='SIN CONEXIÓN · EJEMPLO'; P={demo:{...EXAMPLE,proyecto:'Demo'}}; onProjects(); }
+const timer=setTimeout(()=>{ if(!settled){ settled=true; offline(); } },10000);
 (async()=>{ try{ comments = window.claude&&window.claude.use ? await window.claude.use('comments') : null; }catch(_){ comments=null; } })();
 (async()=>{
   try{ db = window.claude && window.claude.use ? await window.claude.use('db') : null; }catch(_){ db=null; }
-  if(!db){ if(!settled){ settled=true; clearTimeout(timer); $('#conn').className='conn local'; $('#conn').textContent='SIN CONEXIÓN · EJEMPLO'; setMission(EXAMPLE,'local'); } return; }
+  if(!db){ if(!settled){ settled=true; clearTimeout(timer); offline(); } return; }
   try{ db.collection('completadas').onSnapshot(qs=>{ H=qs.docs.map(d=>d.data()).filter(Boolean); renderHall(); },()=>{}); }catch(_){}
-  db.doc('gremio/mision').onSnapshot(snap=>{
+  try{ db.doc('gremio/estado').onSnapshot(snap=>{ G=snap.exists?snap.data():null; listSig=''; renderList(); },()=>{}); }catch(_){}
+  db.collection('proyectos').onSnapshot(qs=>{
     if(!settled){ settled=true; clearTimeout(timer); }
-    $('#conn').className='conn live'; $('#conn').textContent='EN VIVO · DEMO';
-    setMission(snap.exists? snap.data() : null,'live');
-  },err=>{ if(!settled){ settled=true; clearTimeout(timer); } db=null; $('#conn').className='conn local'; $('#conn').textContent='SIN CONEXIÓN · EJEMPLO'; setMission(EXAMPLE,'local'); });
+    $('#conn').className='conn live'; $('#conn').textContent='EN VIVO';
+    const np={}; qs.docs.forEach(d=>{ if(d.exists){ const v=d.data(); if(v) np[d.id]=v; } }); P=np; onProjects();
+  },err=>{ if(!settled){ settled=true; clearTimeout(timer); } db=null; offline(); });
 })();
 })();
 </script>

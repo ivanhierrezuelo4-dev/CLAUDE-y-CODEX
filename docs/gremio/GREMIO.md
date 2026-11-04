@@ -89,7 +89,9 @@ Iván pide algo en el chat
 
 `tablero.html` es una página (artefacto de claude.ai) con:
 
-- **Pestañas:** *Misión* (tarjeta activa) y *Salón* (misiones completadas, solo para verlas).
+- **Pestañas:** *Misión* y *Salón*.
+  - *Misión* muestra **todos los proyectos** con el Gremio: una tarjeta pequeña por proyecto con su misión, estado, paso, tiempo y tokens. Arriba hay un resumen (cuántos proyectos, cuántos trabajan, cuántos esperan confirmación y el cupo de Claude). Al tocar un proyecto se abre su tarjeta completa.
+  - *Salón* muestra las completadas de todos los proyectos, con filtro por proyecto. Es solo para verlas.
 - **Tarjeta flotante:** se arrastra por la barra y se minimiza en una píldora que vuelve al mismo sitio. En el teléfono se acopla al ancho y la píldora va abajo.
   - Nombre editable (✎) y **META** plegable con trofeo.
   - Tipo (✦ sugerido · ↺ volver a lo sugerido).
@@ -105,10 +107,14 @@ Iván pide algo en el chat
 
 ### 6.1 Datos de la tarjeta (contrato entre Claude y la página)
 
-La página lee un documento de su base de datos: colección `gremio`, documento `mision`. Las misiones cerradas van a la colección `completadas` (un documento por misión).
+La página lee su base de datos:
+- `proyectos/<slug>`: un documento por proyecto, con su misión activa. El `slug` es la carpeta del proyecto en la bóveda, en minúsculas, sin tildes y con guiones. Un proyecto sin misión es solo `{ "proyecto": "Nombre" }` y sale como «Sin misión activa».
+- `completadas/<slug>-<id>`: las cerradas, con `proyecto` y `proyectoId`.
+- `gremio/estado`: `{ cinco_h, semanal, actualizado }`, el cupo que muestra el resumen. Lo actualiza Claude desde `~/.gremio/estado.json`.
 
 ```jsonc
 {
+  "proyecto": "Roblox",            // nombre bonito del proyecto
   "id": "M-003", "simulada": false, "titulo": "…", "meta": "Qué existirá al terminar (1 frase)",
   "porque": "Por qué este tipo", "tipoSugerido": "compleja", "tipo": "compleja",
   "estado": "propuesta",            // propuesta | lista | trabajando | revision | completada | pausa | bloqueada
@@ -133,11 +139,12 @@ La página calcula sola el equipo por defecto, las estimaciones y las plantillas
 
 ### 6.2 Protocolo de Claude con la tarjeta (ahorro incluido)
 
-1. **Crear (misión compacta):** escribir con `set` solo el plan del **tipo sugerido** y una especificación de 3–5 apartados cortos. No escribir los planes de los otros tipos.
+1. **Crear (misión compacta):** escribir con `set` en `proyectos/<slug>` (nunca en otro proyecto) solo el plan del **tipo sugerido** y una especificación de 3–5 apartados cortos. No escribir los planes de los otros tipos.
 2. **Si Iván confirma otro tipo**, en ese momento escribir el plan de ese tipo (una sola vez).
 3. **Al confirmar**, el aviso que llega a Claude ya trae el tipo, el equipo, Astra, los pasos con modelo propio, la estimación, **las notas de Iván** y si editó la especificación. **No hace falta releer la misión**, salvo que diga «Especificación editada: sí».
 4. **Durante el trabajo:** un `update` solo al cambiar de paso o de estado (4–6 escrituras por misión), siempre con `if_version`.
-5. **Al cerrar:** `estado: completada`, `resultado`, tokens y % reales. En la siguiente misión, copiar un resumen a `completadas/<id>` y reemplazar `mision`.
+5. **Al cerrar:** `estado: completada`, `resultado`, tokens y % reales. En la siguiente misión del mismo proyecto, en un `batch`: copiar un resumen a `completadas/<slug>-<id>` y reemplazar `proyectos/<slug>`.
+7. **El aviso de Confirmar dice el proyecto:** cada chat actúa solo sobre el suyo. Si el aviso no llega a ese chat, Iván escribe «empezar» allí.
 6. **Tareas de menos de ~10 min:** sin tarjeta, salvo que Iván la pida.
 
 ## 7. Un solo documento por misión (especificación = contrato = plan)
@@ -227,7 +234,7 @@ Hoy la tarjeta vive en claude.ai y solo Claude puede escribir en ella con su con
    (con la ruta real escrita entera). Comprobar que la barra muestra `5h …% · sem …%` y que se crea `estado.json`.
 6. **Codex, reglas:** añadir `kit/codex/AGENTS-gremio.md` a `%USERPROFILE%\.codex\AGENTS.md` y `kit/codex/config.toml.ejemplo` a `config.toml`, sin borrar lo que ya haya.
 7. **Bóveda de Obsidian:** encontrar su carpeta (en Obsidian, el selector de bóvedas muestra la ruta; o buscar la carpeta `.obsidian`). Copiar `kit/obsidian/Gremio/` y crear `Proyectos/<Nombre>/` a partir de `kit/obsidian/Proyectos/_plantilla/`.
-8. **Tablero:** usar el de Iván (URL en `CLAUDE-gremio.md`) o publicar `tablero.html` como artefacto con las capacidades `db` y `comments`. Guardar la URL.
+8. **Tablero:** usar el de Iván (URL en `CLAUDE-gremio.md`) o publicar `tablero.html` como artefacto con las capacidades `db` y `comments`. Guardar la URL. Registrar cada proyecto que tenga brief en la bóveda con `set proyectos/<slug>` `{ "proyecto": "Nombre" }` (solo si no existe), para que salga en la lista.
 9. **Por proyecto:** crear `<proyecto>/gremio/misiones/` (plantilla en `kit/misiones/`), escribir el *brief* (sección 13) y añadir 3–5 líneas al `AGENTS.md` del proyecto que apunten al brief.
 10. **Ahorradores:** revisar Ponytail, RTK y Caveman según la sección 11.
 11. **Piloto:** una misión sencilla, una definida y una compleja reales y cortas. Comparar lo estimado con lo real.
