@@ -19,7 +19,7 @@ Lee las reglas de `~/.claude/CLAUDE.md` (bloque Gremio). Datos de la tarjeta y p
 4. Lanzas con el prompt de «Codex directo» de `PROMPTS.md`:
    - **Trabajo, misión o auditoría:** `/codex:rescue --model <id> --effort <e> --background "<prompt>"`
    - **Solo revisar cambios sin tocar nada:** `/codex:review --background` (usa el modelo de `config.toml`). Para retar decisiones: `/codex:adversarial-review --background <foco>`.
-5. **Tarjeta ligera** en el tablero, sin esperar Confirmar, porque Iván ya lo pidió: `set proyectos/<slug>/misiones/<M-XXX>` con `modo: "codex"`, `tipo: "sencilla"`, `estado: "trabajando"`, `paso: 0`, `inicio`, `equipos.sencilla.ejecuta` = el modelo elegido y `planes.sencilla: [{"titulo":"Codex hace todo","rol":"ejecuta"},{"titulo":"Revisión de Iván","rol":"ivan"}]`.
+5. **Tarjeta ligera** en el tablero, sin esperar Confirmar ni escuchar el tablero, porque Iván ya lo pidió: `set proyectos/<slug>/misiones/<M-XXX>` con `modo: "codex"`, `tipo: "sencilla"`, `estado: "trabajando"`, `paso: 0`, `inicio`, `equipos.sencilla.ejecuta` = el modelo elegido y `planes.sencilla: [{"titulo":"Codex hace todo","rol":"ejecuta"},{"titulo":"Revisión de Iván","rol":"ivan"}]`.
 6. Mientras trabaja **no hagas nada más**. Cuando Iván pregunte, o al terminar, usa `/codex:status` y `/codex:result`.
 7. **Al terminar:** pon `paso: 1` (le toca a Iván) y el `resultado` con lo que dijo Codex, resumido en 3–6 líneas sin rehacerlo. En el chat, lo mismo. Nada de revisión cruzada salvo que Iván la pida.
 8. **Si Codex falla:** sección 3b (aviso en la tarjeta y preguntar). Nunca lo hagas tú.
@@ -48,11 +48,19 @@ Esfuerzo: `low` · `medium` · `high` · `xhigh`; si algo no acepta `xhigh`, usa
 5. Publica la tarjeta en el tablero con `ArtifactData`: `set proyectos/<slug>/misiones/<M-XXX>` con el formato de la sección 6.1 de GREMIO.md. El número sigue al último del sandbox. Si el sandbox tiene tarjetas completadas, archívalas en el mismo `batch`: `set completadas/<slug>-<id>` con su resumen, `proyecto` y `proyectoId`, y luego `delete proyectos/<slug>/misiones/<id>`.
    Además, `update gremio/estado` con `{cinco_h, semanal, actualizado}` copiados de `~/.gremio/estado.json`, para que el tablero muestre el cupo.
 6. Copia el mismo estado en `~/.gremio/mision.json` y en `Gremio/Tablero.md` de la bóveda.
-7. Al chat, en 2–3 líneas: qué propones y «ajusta la tarjeta y pulsa Confirmar».
+7. **Escucha el tablero** para recibir el aviso de Confirmar: `ArtifactComments` con `action: "watch"` y la `url` del tablero.
+8. Al chat, en 2–3 líneas: qué propones y «ajusta la tarjeta y pulsa Confirmar; empiezo solo».
 
-## 2. Al recibir «empezar»
-- Iván confirma en la tarjeta y luego escribe **«empezar»** en el chat de su proyecto. Lee **una vez** la tarjeta confirmada (`estado: lista`) de tu sandbox: `proyectos/<slug>/misiones/<M-XXX>`. Su campo `confirmacion` resume el tipo, el equipo, Astra, los pasos con modelo propio, la estimación y las notas. Lee `spec` solo si dice «Especificación editada: sí».
-- **Comprueba tu modelo:** si la tarjeta pide para la orquesta un modelo o esfuerzo de Claude distinto al de esta sesión, no empieces. Dile a Iván en una línea: «Cambia con `/model` a <modelo> (esfuerzo <x>) y vuelve a escribir empezar». Un chat no puede cambiarse de modelo a sí mismo.
+## 2. Arrancar: aviso automático o «empezar»
+**Aviso automático:** al confirmar, el tablero envía un comentario que empieza por `GREMIO-EMPEZAR · sandbox=<slug> · tarjeta=<M-XXX>` a los chats que escuchan.
+- **Si la tarjeta no es tuya** (otro sandbox, o una tarjeta que no creaste en esta sesión): **no hagas nada**. No respondas, no leas nada y termina el turno. Así el gasto es mínimo.
+- **Si es tuya:** responde en ese hilo «Empiezo M-XXX», resuélvelo y arranca (abajo).
+- Cuando ya no tengas tarjetas esperando confirmación, **deja de escuchar**: `ArtifactComments` con `action: "watch"`, `on: false` y la `url` del tablero.
+- Si tu sesión no tiene esa herramienta, o el aviso no llega, Iván escribirá **«empezar»**: arranca igual.
+
+**Arrancar:**
+- Lee **una vez** la tarjeta confirmada (`estado: lista`): `proyectos/<slug>/misiones/<M-XXX>`. Su campo `confirmacion` resume el tipo, el equipo, Astra, los pasos con modelo propio, la estimación y las notas. Lee `spec` solo si dice «Especificación editada: sí».
+- **Comprueba tu modelo:** si la tarjeta pide para la orquesta un modelo o esfuerzo de Claude distinto al de esta sesión, no empieces. Dile a Iván en una línea: «Cambia con `/model` a <modelo> (esfuerzo <x>) y escribe empezar». Un chat no puede cambiarse de modelo a sí mismo.
 - Si el tipo confirmado es distinto del sugerido, escribe ahora el plan de ese tipo.
 - Pon `estado: trabajando`, `paso: 0` e `inicio` (ISO), con `if_version`.
 

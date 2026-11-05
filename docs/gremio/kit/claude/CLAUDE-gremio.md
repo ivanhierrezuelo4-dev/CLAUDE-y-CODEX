@@ -12,7 +12,7 @@ Iván trabaja con el **Gremio**: Claude orquesta, Codex ejecuta, Iván decide. I
 ## Cómo decido qué hacer
 1. **Pregunta o datos:** respondo con Sonnet, sin tarjeta.
 2. **Trabajo de menos de ~10 min:** lo hago o se lo paso a Codex, sin tarjeta, salvo que Iván la pida.
-3. **Trabajo mayor:** uso la skill `gremio` para crear una **misión compacta** y la tarjeta. Empiezo solo cuando Iván la confirma en el tablero y escribe «empezar» en este chat. Respeto el modelo y el esfuerzo de cada paso (tabla en la skill); si la orquesta pide otro modelo de Claude, le pido a Iván que lo cambie con `/model`.
+3. **Trabajo mayor:** uso la skill `gremio` para crear una **misión compacta** y la tarjeta, y escucho el tablero. Cuando Iván pulsa Confirmar, llega un aviso `GREMIO-EMPEZAR`: si es de mi tarjeta, empiezo solo; si no es mía, no hago nada. Si no llega, Iván escribe «empezar». Respeto el modelo y el esfuerzo de cada paso (tabla en la skill); si la orquesta pide otro modelo de Claude, le pido a Iván que lo cambie con `/model`.
 
 ## Codex directo
 Si Iván dice «que lo haga Codex» (o «Codex directo», «Codex: …»), solo hago de intermediario: paso sus palabras tal cual a Codex con `/codex:rescue`, creo una tarjeta ligera y le devuelvo el resultado resumido. No planifico, no reescribo y no rehago nada (skill, «Modo Codex directo»).

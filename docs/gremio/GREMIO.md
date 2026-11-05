@@ -143,7 +143,7 @@ La página calcula sola el equipo por defecto, las estimaciones y las plantillas
 
 1. **Crear (misión compacta):** escribir con `set` en `proyectos/<slug>/misiones/<M-XXX>` (nunca en otro sandbox) solo el plan del **tipo sugerido** y una especificación de 3–5 apartados cortos. No escribir los planes de los otros tipos.
 2. **Si Iván confirma otro tipo**, en ese momento escribir el plan de ese tipo (una sola vez).
-3. **Al confirmar**, la tarjeta guarda en `confirmacion` un resumen con el tipo, el equipo, Astra, los pasos con modelo propio, la estimación, **las notas de Iván** y si editó la especificación. Después Iván escribe **«empezar» en el chat de ese proyecto**, que lee la tarjeta una sola vez. No hay aviso automático: llegaría a una sesión cualquiera y despertar a todos los chats gastaría cupo.
+3. **Al confirmar**, la tarjeta guarda en `confirmacion` un resumen (tipo, equipo, Astra, pasos con modelo propio, estimación, **notas de Iván** y si editó la especificación) y envía el aviso `GREMIO-EMPEZAR · sandbox=<slug> · tarjeta=<id>`. Solo escuchan los chats que tienen una tarjeta esperando confirmación. El que la creó arranca solo; los demás ignoran el aviso sin responder. Al empezar, el chat deja de escuchar. Si el aviso no llega, la tarjeta pide escribir «empezar» en ese chat.
 3b. **Modelos de la tarjeta:** cada pieza de Codex se lanza con `/codex:rescue --model <id> --effort <e>` (tabla de ids en la skill). Las revisiones de Codex con un modelo distinto al de `config.toml` también van por `/codex:rescue`, con la instrucción «revisa sin modificar archivos». Los pasos de Claude con otro modelo van como subagente. El modelo de la orquesta lo pone Iván con `/model`: el chat lo comprueba al empezar y se lo pide si no coincide.
 4. **Durante el trabajo:** un `update` solo al cambiar de paso o de estado (4–6 escrituras por misión), siempre con `if_version`.
 5. **Al cerrar:** `estado: completada`, `resultado`, tokens y % reales. La tarjeta se queda en su sandbox con un trofeo. Al crear la siguiente tarjeta de ese sandbox, en un `batch`: copiar un resumen a `completadas/<slug>-<id>` y borrar la completada de `misiones/`.
@@ -318,7 +318,7 @@ Todo el flujo funciona desde el móvil. Lo único que cambia es **dónde corre C
 | Síntoma | Causa probable | Arreglo |
 |---|---|---|
 | La tarjeta dice «SIN CONEXIÓN · EJEMPLO» | La base de datos del artefacto no respondió | Recargar; comprobar que el artefacto tiene la capacidad `db` |
-| Confirmé y no pasa nada | Es lo esperado: confirmar no despierta a ningún chat | Escribir «empezar» en el chat de ese proyecto (la tarjeta lo recuerda) |
+| Confirmé y no empieza | El chat estaba cerrado o no escuchaba el tablero | Escribir «empezar» en el chat de ese proyecto (la tarjeta lo recuerda) |
 | Los % salen «—» | La statusline no está configurada o la fuente de Codex no está verificada | Sección 8 |
 | Va lento | Muchas animaciones en un PC o teléfono modesto | Elegir la skin «Clásico»; minimizar la animación de trabajo |
 | En el teléfono no veo el % de cupo | La barra de estado solo existe en el PC | Sección 15b: mirarlo en la app o usar el último valor guardado |

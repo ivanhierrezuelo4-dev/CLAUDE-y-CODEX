@@ -909,8 +909,11 @@ function renderCard(){
       <div class="steps">${steps.map((x,i)=>`<i class="${i<pi||st==='completada'?'done':i===pi?'act':''}"></i>`).join('')}</div>${p&&wovMin()?'<button class="wbtn" type="button" id="wovShow">▲ VER ANIMACIÓN</button>':''}</div>`; }
   if(st==='completada'&&M.resultado) h+=`<div class="work" style="border-color:var(--codex)"><b style="color:var(--codex)">Resultado</b><span style="font-size:.85rem">${esc(M.resultado)}</span></div>`;
   h+=`<div class="acts"><button class="mapbtn" type="button" id="mapBtn">${sprite('map',2)}MAPA</button>`;
-  if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Después de confirmar, escribe «empezar» en el chat ${esc(chatDe())}. Puedes cambiar todo antes, también en el mapa.</span>`;
-  else if(st==='lista') h+=`<span class="lock">Confirmada · ajustes bloqueados</span><div class="sent">✓ Ahora escribe <b>«empezar»</b> en el chat ${esc(chatDe())}. Ese chat leerá esta tarjeta y la pondrá a trabajar.</div>`;
+  if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Al confirmar, el chat ${esc(chatDe())} recibe el aviso y empieza solo. Puedes cambiar todo antes, también en el mapa.</span>`;
+  else if(st==='lista') h+=`<span class="lock">Confirmada · ajustes bloqueados</span>`+(M.aviso==='enviado'
+      ?`<div class="sent">✓ Aviso enviado al chat ${esc(chatDe())}: empezará solo. Si en un par de minutos no pasa a TRABAJANDO, escribe <b>«empezar»</b> en ese chat.</div>`
+      :M.aviso==='enviando'?`<div class="sent">Enviando aviso al chat ${esc(chatDe())}…</div>`
+      :`<div class="sent warnbox">✓ Confirmada. No se pudo avisar solo: escribe <b>«empezar»</b> en el chat ${esc(chatDe())}.</div>`);
   else h+=`<span class="lock">${st==='completada'?'Misión completada':'En marcha · ajustes bloqueados'}</span>`;
   if(st!=='propuesta') h+=closeBtn();
   h+=`</div>`;
@@ -1019,15 +1022,19 @@ async function confirmMission(btn){
   const t=tipoOf(), eq=team(t), e=estimate(), steps=stepsFor(t);
   const notas=isObj(M.notas)?Object.values(M.notas).filter(x=>String(x||'').trim()).length:0;
   const cust=steps.filter(s=>s.cust).map(s=>`${s.titulo}: ${s.modelo} ${s.esfuerzo||''}`.trim());
-  const resumen=`Gremio · sandbox ${sbName(sb)} (${sb}) · tarjeta ${sel} CONFIRMADA desde el tablero → empezar (solo el chat ${sb==='boveda'?'madre':'de ese proyecto'}). Tipo: ${TIPO[t]}. `+
+  const resumen=`GREMIO-EMPEZAR · sandbox=${sb} · tarjeta=${sel}\nSolo para el chat que creó esta tarjeta (${sbName(sb)} · ${sel}). Si no la creaste tú, no hagas nada y termina el turno sin responder.\nTipo: ${TIPO[t]}. `+
     (eq.orquesta?`Orquesta: ${eq.orquesta.modelo} ${eq.orquesta.esfuerzo}. `:'')+`Ejecuta: ${eq.ejecuta.modelo} ${eq.ejecuta.esfuerzo}. `+
     `Revisión: ${eq.revisa.modelo}${eq.revisa.modelo!=='Sin revisión'?' '+eq.revisa.esfuerzo:''}. `+(t==='compleja'?`Astra: ${astraOn()?'sí':'no'}. `:'')+
     (cust.length?`Pasos con modelo propio: ${cust.join('; ')}. `:'')+`Estimación: ${e.tiempo}, Claude ${e.cupo5h}, Codex ${e.codex5h}.`+
     (notas?`\nNotas de Iván:\n`+steps.filter(x=>M.notas&&String(M.notas[x.key]||'').trim()).map(x=>`- ${x.titulo}: ${String(M.notas[x.key]).trim()}`).join('\n'):'')+
     `\nEspecificación editada: ${M.specEditada?'sí (leer la misión)':'no'}.`;
-  await save({estado:'lista',tipo:t,tipoConfirmado:true,confirmadoEn:new Date().toISOString(),confirmacion:resumen.slice(0,3900)});
+  let anchor=null; try{ if(comments) anchor=await comments.anchorFor(btn); }catch(_){}
+  await save({estado:'lista',tipo:t,tipoConfirmado:true,confirmadoEn:new Date().toISOString(),confirmacion:resumen.slice(0,3900),aviso:'enviando'});
   burst($('#card'),['#55D98B','#FCEE0A','#FFFFFF']); animIn($('#card'),'haloin');
-  log('Confirmada · escribe «empezar» en el chat '+chatDe()); renderCard();
+  let ok=false;
+  if(comments&&anchor){ try{ const c=await comments.canSendToClaude(); if(c==='available'){ await comments.sendToClaude({anchor,text:resumen.slice(0,3900)}); ok=true; } }catch(_){ } }
+  save({aviso:ok?'enviado':'manual'},false);
+  log(ok?'Confirmada · aviso enviado al chat '+chatDe():'Confirmada · escribe «empezar» en el chat '+chatDe()); renderCard();
 }
 
 /* ---------- mapa ---------- */
