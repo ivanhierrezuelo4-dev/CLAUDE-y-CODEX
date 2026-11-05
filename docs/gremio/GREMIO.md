@@ -89,9 +89,10 @@ Iván pide algo en el chat
 
 `tablero.html` es una página (artefacto de claude.ai) con:
 
-- **Pestañas:** *Misión* y *Salón*.
-  - *Misión* muestra **todos los proyectos** con el Gremio: una tarjeta pequeña por proyecto con su misión, estado, paso, tiempo y tokens. Arriba hay un resumen (cuántos proyectos, cuántos trabajan, cuántos esperan confirmación y el cupo de Claude). Al tocar un proyecto se abre su tarjeta completa.
-  - *Salón* muestra las completadas de todos los proyectos, con filtro por proyecto. Es solo para verlas.
+- **Nombres:** el **tablero principal** es la vista de inicio, que está vacía y espera. Los **sandboxes** son los proyectos conectados más la **Bóveda**. Las **tarjetas** son las misiones; cada sandbox puede tener varias.
+- **Pestaña Misión ▾:** despliega la lista de sandboxes, con cuántas tarjetas tiene cada uno, cuántas trabajan y el cupo de Claude. Al elegir uno se ven sus tarjetas como píldoras (estado, paso, tiempo y tokens); al tocar una se abre la tarjeta completa.
+- **Sandbox Bóveda:** resumen de la memoria (notas, proyectos con o sin brief, aprendizajes recientes y decisiones vigentes), botón para abrirla en Obsidian y sus propias tarjetas (tareas de la bóveda). Lo lleva el chat madre.
+- **Pestaña Salón:** las completadas de todos los sandboxes, con filtro. Es solo para verlas.
 - **Tarjeta flotante:** se arrastra por la barra y se minimiza en una píldora que vuelve al mismo sitio. En el teléfono se acopla al ancho y la píldora va abajo.
   - Nombre editable (✎) y **META** plegable con trofeo.
   - Tipo (✦ sugerido · ↺ volver a lo sugerido).
@@ -108,13 +109,14 @@ Iván pide algo en el chat
 ### 6.1 Datos de la tarjeta (contrato entre Claude y la página)
 
 La página lee su base de datos:
-- `proyectos/<slug>`: un documento por proyecto, con su misión activa. El `slug` es la carpeta del proyecto en la bóveda, en minúsculas, sin tildes y con guiones. Un proyecto sin misión es solo `{ "proyecto": "Nombre" }` y sale como «Sin misión activa».
+- `proyectos/<slug>`: un documento por sandbox, `{ "proyecto": "Nombre" }`. El `slug` es el nombre en minúsculas, sin tildes y con guiones.
+- `proyectos/<slug>/misiones/<M-XXX>`: las tarjetas de ese sandbox (formato de abajo). Puede haber varias.
+- `gremio/boveda`: resumen de la bóveda para el sandbox Bóveda (ver la skill, sección 6).
 - `completadas/<slug>-<id>`: las cerradas, con `proyecto` y `proyectoId`.
 - `gremio/estado`: `{ cinco_h, semanal, actualizado }`, el cupo que muestra el resumen. Lo actualiza Claude desde `~/.gremio/estado.json`.
 
 ```jsonc
 {
-  "proyecto": "Roblox",            // nombre bonito del proyecto
   "id": "M-003", "simulada": false, "titulo": "…", "meta": "Qué existirá al terminar (1 frase)",
   "porque": "Por qué este tipo", "tipoSugerido": "compleja", "tipo": "compleja",
   "estado": "propuesta",            // propuesta | lista | trabajando | revision | completada | pausa | bloqueada
@@ -139,11 +141,11 @@ La página calcula sola el equipo por defecto, las estimaciones y las plantillas
 
 ### 6.2 Protocolo de Claude con la tarjeta (ahorro incluido)
 
-1. **Crear (misión compacta):** escribir con `set` en `proyectos/<slug>` (nunca en otro proyecto) solo el plan del **tipo sugerido** y una especificación de 3–5 apartados cortos. No escribir los planes de los otros tipos.
+1. **Crear (misión compacta):** escribir con `set` en `proyectos/<slug>/misiones/<M-XXX>` (nunca en otro sandbox) solo el plan del **tipo sugerido** y una especificación de 3–5 apartados cortos. No escribir los planes de los otros tipos.
 2. **Si Iván confirma otro tipo**, en ese momento escribir el plan de ese tipo (una sola vez).
 3. **Al confirmar**, el aviso que llega a Claude ya trae el tipo, el equipo, Astra, los pasos con modelo propio, la estimación, **las notas de Iván** y si editó la especificación. **No hace falta releer la misión**, salvo que diga «Especificación editada: sí».
 4. **Durante el trabajo:** un `update` solo al cambiar de paso o de estado (4–6 escrituras por misión), siempre con `if_version`.
-5. **Al cerrar:** `estado: completada`, `resultado`, tokens y % reales. En la siguiente misión del mismo proyecto, en un `batch`: copiar un resumen a `completadas/<slug>-<id>` y reemplazar `proyectos/<slug>`.
+5. **Al cerrar:** `estado: completada`, `resultado`, tokens y % reales. La tarjeta se queda en su sandbox con un trofeo. Al crear la siguiente tarjeta de ese sandbox, en un `batch`: copiar un resumen a `completadas/<slug>-<id>` y borrar la completada de `misiones/`.
 7. **El aviso de Confirmar dice el proyecto:** cada chat actúa solo sobre el suyo. Si el aviso no llega a ese chat, Iván escribe «empezar» allí.
 6. **Tareas de menos de ~10 min:** sin tarjeta, salvo que Iván la pida.
 

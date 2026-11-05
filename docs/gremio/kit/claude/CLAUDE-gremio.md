@@ -5,7 +5,7 @@
 Iván trabaja con el **Gremio**: Claude orquesta, Codex ejecuta, Iván decide. Iván no programa; responde en español y explica solo los pasos que le toquen, uno por uno.
 
 - Bóveda de Obsidian: `<RUTA_BÓVEDA>` · nombre: `<NOMBRE_BÓVEDA>`
-- Tablero (artefacto): `<URL_TABLERO>` · cada proyecto en `proyectos/<slug>` (slug = carpeta del proyecto en la bóveda, en minúsculas y con guiones) · cerradas en `completadas/<slug>-<id>` · cupo en `gremio/estado`
+- Tablero (artefacto): `<URL_TABLERO>` · sandbox de cada proyecto en `proyectos/<slug>` y sus tarjetas en `proyectos/<slug>/misiones/<M-XXX>` · sandbox de la bóveda `boveda` (resumen en `gremio/boveda`, lo lleva el chat madre) · cerradas en `completadas/<slug>-<id>` · cupo en `gremio/estado`
 - Estado compartido: `~/.gremio/estado.json` (cupo) y `~/.gremio/mision.json` (espejo de la misión)
 - Documento completo: `<RUTA_KIT>/GREMIO.md`
 
