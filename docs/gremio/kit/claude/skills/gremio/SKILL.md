@@ -63,6 +63,9 @@ Si un paso asignado a Codex no se puede lanzar o falla (`/codex:setup` no está 
 - Propón 0–3 aprendizajes; si Iván los aprueba, actualiza `Proyectos/<X>/aprendizajes.md`.
 - Recuerda a Iván que la siguiente misión empieza en una sesión nueva.
 
+## 4b. Si Iván cierra la tarjeta desde el tablero
+En su paso de revisión, Iván puede pulsar **«✔ Listo · cerrar misión»**. El tablero copia la tarjeta a `completadas/<slug>-<id>` (con `cerradaPor: "ivan"`) y la borra de `misiones/`. Si al actualizar la tarjeta ya no existe, o Iván dice «ya la cerré»: no la vuelvas a crear. Termina lo que tengas pendiente solo si él lo pide, actualiza el archivo de plan, propón 0–3 aprendizajes y deja `~/.gremio/mision.json` y `Tablero.md` como completada.
+
 ## 5. Relevo
 Si el cupo entra en reserva: deja el archivo de plan al día (progreso y siguiente paso) y dile a Iván «abre Codex y di: continúa la misión M-XXX».
 

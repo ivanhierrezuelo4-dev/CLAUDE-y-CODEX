@@ -150,6 +150,10 @@ La página calcula sola el equipo por defecto, las estimaciones y las plantillas
 7. **El aviso de Confirmar dice el proyecto:** cada chat actúa solo sobre el suyo. Si el aviso no llega a ese chat, Iván escribe «empezar» allí.
 6. **Tareas de menos de ~10 min:** sin tarjeta, salvo que Iván la pida.
 
+### 6.2b Cerrar desde el tablero
+
+En el paso de revisión de Iván (y en la tarjeta, cuando no está en propuesta) hay un botón **«✔ Listo · cerrar misión»**. Se pulsa dos veces para confirmar. La misión pasa al Salón con su tiempo, sus tokens y su equipo, y la tarjeta se cierra.
+
 ### 6.3 Avisos y bloqueos
 
 Si algo impide seguir, por ejemplo **Codex no responde** o falta una decisión de Iván, el chat **no sigue por su cuenta**. Pone la tarjeta en `bloqueada` con un campo `alerta` (título, texto, pregunta y opciones). El tablero lo muestra en rojo en la tarjeta, en su píldora, en el menú de sandboxes y en la pestaña. Iván responde escribiendo la opción en el chat de ese proyecto, por ejemplo «sigue sin Codex» o «espera». Protocolo completo en la skill, sección 3b.

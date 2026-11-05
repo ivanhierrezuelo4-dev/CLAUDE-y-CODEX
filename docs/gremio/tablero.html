@@ -233,6 +233,11 @@ svg.px{image-rendering:pixelated;display:block;flex:none}
 .go::after{content:"";position:absolute;top:0;bottom:0;width:18px;left:0;background:rgba(255,255,255,.35);transform:translateX(-30px);animation:shine 2.8s cubic-bezier(.5,0,.5,1) infinite;will-change:transform}
 @keyframes shine{0%,55%{transform:translateX(-30px)}100%{transform:translateX(520px)}}
 .go:disabled{background:var(--line);color:var(--muted)} .go:disabled::after{display:none}
+.closebtn{grid-column:1/-1;background:var(--sun);color:var(--ink);border:3px solid #000;box-shadow:3px 3px 0 #000;padding:11px 8px;font-family:var(--f-pix);font-size:.55rem;line-height:1.4;transition:transform .15s ease,filter .15s ease}
+.closebtn:hover{filter:brightness(1.08);transform:translate(-1px,-1px)}
+.closebtn.armed{background:var(--alert);color:#fff}
+.closebtn small{display:block;font-family:var(--f-ui);font-size:.72rem;margin-top:4px;letter-spacing:0}
+.pbody .closebtn{margin-top:8px}
 .sent{grid-column:1/-1;font-size:.8rem;padding:8px 10px;border:2px solid var(--codex);color:var(--codex);background:rgba(85,217,139,.07)}
 .sent.warnbox{border-color:var(--sun);color:var(--sun);background:rgba(252,238,10,.06)}
 .hint,.lock{font-size:.72rem;color:var(--muted)} .hint{grid-column:1/-1}
@@ -905,7 +910,8 @@ function renderCard(){
   h+=`<div class="acts"><button class="mapbtn" type="button" id="mapBtn">${sprite('map',2)}MAPA</button>`;
   if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Después de confirmar, escribe «empezar» en el chat ${esc(chatDe())}. Puedes cambiar todo antes, también en el mapa.</span>`;
   else if(st==='lista') h+=`<span class="lock">Confirmada · ajustes bloqueados</span><div class="sent">✓ Ahora escribe <b>«empezar»</b> en el chat ${esc(chatDe())}. Ese chat leerá esta tarjeta y la pondrá a trabajar.</div>`;
-  else h+=`<span class="lock">${st==='completada'?'Misión cerrada':'En marcha · ajustes bloqueados'}</span>`;
+  else h+=`<span class="lock">${st==='completada'?'Misión completada':'En marcha · ajustes bloqueados'}</span>`;
+  if(st!=='propuesta') h+=closeBtn();
   h+=`</div>`;
   const body=$('#cbody'); if(h!==lastCardHtml){ lastCardHtml=h; const sc=body.scrollTop; body.innerHTML=h; body.scrollTop=sc; animateNums(e); }
   document.querySelectorAll('#el,#cbody .elx').forEach(x=>x.textContent=elapsed());
@@ -959,6 +965,7 @@ $('#cbody').addEventListener('click',ev=>{
   if(b.id==='metaBtn'){ metaOpen=!metaOpen; try{ localStorage.setItem('gremio-meta',metaOpen?'1':'0'); }catch(_){} const mb=$('#metaBox'); mb.classList.toggle('open',metaOpen); b.setAttribute('aria-expanded',metaOpen); b.querySelector('em').textContent=metaOpen?'ocultar':'ver la meta'; lastCardHtml=''; if(metaOpen) animIn(b.querySelector('svg'),'pop'); return; }
   if(b.id==='editTitle'){ editingTitle=true; renderCard(); const i=$('#ttlIn'); if(i){ i.focus(); i.select(); } return; }
   if(b.id==='ttlOk'){ commitTitle(); return; }
+  if(b.classList.contains('closebtn')){ closeMission(b); return; }
   if(b.id==='wovShow'){ setWovMin(false); renderCard(); const h=$('#wovHide'); if(h) h.focus(); return; }
   if(!editable()) return;
   const t=tipoOf();
@@ -985,6 +992,26 @@ function commitTitle(cancel){ const i=$('#ttlIn'); if(!editingTitle) return; edi
 $('#cbody').addEventListener('keydown',e=>{ if(e.target.id!=='ttlIn') return; if(e.key==='Enter'){ e.preventDefault(); commitTitle(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); commitTitle(true); } });
 $('#cbody').addEventListener('focusout',e=>{ if(e.target.id==='ttlIn') setTimeout(()=>{ if(editingTitle&&document.activeElement&&document.activeElement.id!=='ttlOk') commitTitle(); },120); });
 /* ---------- confirmar: guarda y avisa a Claude ---------- */
+/* cerrar la misión desde el tablero (revisión de Iván) */
+let closeArm=0;
+const closeBtn=()=>`<button type="button" class="closebtn">✔ LISTO · CERRAR MISIÓN<small>Pasa al Salón con su trofeo</small></button>`;
+function durTxt(ini){ if(!ini) return '—'; const m=Math.max(0,Math.round((Date.now()-Date.parse(ini))/60000)); return m<60?`${m} min`:`${Math.floor(m/60)} h ${m%60} min`; }
+async function closeMission(btn){
+  if(!M||!sel) return;
+  if(Date.now()-closeArm>4000){ closeArm=Date.now(); document.querySelectorAll('.closebtn').forEach(x=>{ x.classList.add('armed'); x.innerHTML='¿CERRAR? TOCA OTRA VEZ<small>La misión pasará al Salón</small>'; });
+    setTimeout(()=>{ if(Date.now()-closeArm>=4000) document.querySelectorAll('.closebtn').forEach(x=>{ x.classList.remove('armed'); x.innerHTML='✔ LISTO · CERRAR MISIÓN<small>Pasa al Salón con su trofeo</small>'; }); },4100); return; }
+  closeArm=0; const id=sel, slug=sb, t=tipoOf(), eq=team(t), tk=isObj(M.tokens)?M.tokens:{};
+  const sum={id:M.id||id,titulo:M.titulo||id,tipo:t,meta:M.meta||'',proyecto:sbName(slug),proyectoId:slug,completadaEn:new Date().toISOString(),simulada:!!M.simulada,cerradaPor:'ivan',
+    equipo:[eq.orquesta?`Orquesta ${eq.orquesta.modelo} ${eq.orquesta.esfuerzo}`:'',`Ejecuta ${eq.ejecuta.modelo} ${eq.ejecuta.esfuerzo}`,eq.revisa&&eq.revisa.modelo!=='Sin revisión'?`Revisa ${eq.revisa.modelo} ${eq.revisa.esfuerzo}`:'',astraOn()?'con Astra':''].filter(Boolean).join(' · '),
+    duracion:durTxt(M.inicio),gastoClaude:tk.claude!=null?fmtTok(tk.claude)+' tokens':'—',gastoCodex:tk.codex!=null?fmtTok(tk.codex)+' tokens':'—',
+    resultado:M.resultado||'Cerrada por Iván desde el tablero tras su revisión.'};
+  document.querySelectorAll('.closebtn').forEach(x=>{ x.disabled=true; x.textContent='CERRANDO…'; });
+  if(db){ try{ await db.doc('completadas/'+slug+'-'+sum.id).set(sum); await db.doc('proyectos/'+slug+'/misiones/'+id).delete(); }
+    catch(e){ log('No se pudo cerrar ('+((e&&e.code)||'error')+')'); renderCard(); return; } }
+  else { H.push(sum); renderHall(); delete (AllM[slug]||{})[id]; }
+  burst($('#card'),['#FCEE0A','#55D98B','#F08A5D','#B07CFF','#00E5FF'],40); log('🏆 Misión cerrada: '+sum.titulo);
+  const ov=$('#ov'); if(!ov.hidden) closePlan();
+  setTimeout(()=>{ sel=null; resetView(); const c=$('#card'); if(!c.hidden) animOut(c,'shrink',()=>{ c.hidden=true; },320); $('#pill').hidden=true; deskSig=''; renderDesk(); renderTab(); },650); }
 const chatDe=()=>sb==='boveda'?'madre':'de '+sbName(sb);
 async function confirmMission(btn){
   if(!editable()) return; btn.disabled=true; btn.textContent='GUARDANDO…';
@@ -1029,6 +1056,7 @@ function renderPlan(soft){
         ${planMenu===key?menuHtml(opts,p.modelo,'data-sset'):''}</div>
       ${warnFor(p.modelo,p.esfuerzo)}
       ${p.recibe?`<p>Recibe: ${esc(p.recibe)}</p>`:''}${p.entrega?`<p>Entrega: ${esc(p.entrega)}</p>`:''}${p.comprueba?`<p>Comprueba: ${esc(p.comprueba)}</p>`:''}
+      ${p.rol==='ivan'&&st!=='propuesta'?closeBtn():''}
       <div class="nota"><label for="n-${key}">TU NOTA <i id="ok-${key}"></i></label><textarea id="n-${key}" data-note="${key}" maxlength="600" rows="1" placeholder="Algo que Claude deba tener en cuenta en este paso…" ${fin?'disabled':''}>${esc(notas[key]||'')}</textarea></div></div></div>`; });
   h+=`</div>
   <section class="specbox ${specOpen?'open':''}" id="specBox"><button class="spechead" type="button" id="specBtn" aria-expanded="${specOpen}" aria-controls="specWrap">${sprite('scroll',3)}<span><b>ESPECIFICACIÓN COMPLETA</b><small>El plan entero, sin resumir: lo que Claude y Codex seguirán. ${ed?'Puedes editarlo.':'Bloqueado tras confirmar.'}</small></span><span class="chev">▸</span></button>
@@ -1041,7 +1069,7 @@ function paintDashes(){ document.querySelectorAll('#planIn .pstep').forEach(ps=>
     if(ps.classList.contains('done')) d.classList.add('full');
     else if(ps.classList.contains('act')){ if(RM){ d.classList.add('full'); return; } const dur=Math.max(2200,n*170); [...d.querySelectorAll('b')].forEach((el,i)=>{ const a=.04+i/n*.74; el.animate([{opacity:0,offset:0},{opacity:0,offset:a},{opacity:1,offset:Math.min(a+.035,.8)},{opacity:1,offset:.9},{opacity:0,offset:1}],{duration:dur,iterations:Infinity,easing:'ease-out'}); }); } }); }
 function autoSize(ta){ if(!ta.offsetParent) return; ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight+4,420)+'px'; }
-$('#planIn').addEventListener('click',ev=>{
+$('#planIn').addEventListener('click',ev=>{ const cb=ev.target.closest('.closebtn'); if(cb){ closeMission(cb); return; }
   const b=ev.target.closest('button'); if(!b){ if(planMenu){ planMenu=null; renderPlan(); } return; }
   if(b.id==='chestBtn') return toggleChest();
   if(b.id==='specBtn'){ specOpen=!specOpen; const box=$('#specBox'); box.classList.toggle('open',specOpen); b.setAttribute('aria-expanded',specOpen); if(specOpen){ setTimeout(()=>{ document.querySelectorAll('#specBox textarea').forEach(autoSize); box.scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'}); },60); } return; }
