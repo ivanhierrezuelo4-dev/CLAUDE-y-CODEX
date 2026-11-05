@@ -1,0 +1,6 @@
+# Gremio · valores por defecto de Codex (también los usa /codex:review del plugin)
+# Copiar a ~/.codex/config.toml (Windows: %USERPROFILE%\.codex\config.toml).
+# Si el archivo ya existe, AÑADIR estas líneas sin borrar lo demás.
+# Comprobar el nombre exacto del modelo con /model dentro de Codex.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"

@@ -1,0 +1,184 @@
+{
+ "id": "M-001",
+ "simulada": true,
+ "cupoSimulado": true,
+ "titulo": "Sistema de personajes para tu juego de Roblox",
+ "meta": "Al terminar, añades un personaje nuevo rellenando una ficha, sin tocar código, y el juego lo guarda y lo muestra solo.",
+ "porque": "Toca varias piezas a la vez (datos, habilidades, interfaz y guardado) y una mala decisión al principio se arrastra a todo.",
+ "mejora": "Personajes nuevos sin programar.",
+ "tipoSugerido": "compleja",
+ "tipo": "compleja",
+ "tipoConfirmado": false,
+ "estado": "propuesta",
+ "paso": -1,
+ "inicio": null,
+ "actualizado": "2026-11-03T12:00:00Z",
+ "equipos": {},
+ "astra": {
+  "activa": false,
+  "pieza": "Diseña el sistema de habilidades, la pieza más delicada",
+  "esfuerzo": "medium"
+ },
+ "cupoAntes": 35,
+ "notas": {},
+ "boveda": [
+  {
+   "titulo": "Brief del proyecto Roblox",
+   "ruta": "Proyectos/Roblox/_brief.md",
+   "contenido": "# Brief · Juego de Roblox (ejemplo)\n\nGénero: aventura con combate ligero.\nPúblico: 10–16 años.\nFuente de verdad del código: repo del juego (Rojo + Luau).\nMisiones típicas:\n- Nuevo personaje → compleja → Opus + Sol · revisa Sonnet\n- Ajuste de UI → sencilla → Sol low\n- Balance de habilidades → definida → Sonnet high → Sol\nRiesgos: economía del juego y compras con Robux (decide Iván)."
+  },
+  {
+   "titulo": "Decisiones: economía y monedas",
+   "ruta": "Proyectos/Roblox/decisiones.md",
+   "contenido": "# Decisiones (ejemplo)\n\n- 2026-10-12 · Una sola moneda blanda (monedas). Sin moneda premium de momento. Decidió: Iván.\n- 2026-10-20 · Los personajes se desbloquean jugando, no con Robux. Decidió: Iván.\n- Estado: vigente."
+  },
+  {
+   "titulo": "Estilo visual de personajes",
+   "ruta": "Proyectos/Roblox/estilo-personajes.md",
+   "contenido": "# Estilo (ejemplo)\n\n- Proporciones cartoon, cabeza grande.\n- Paleta saturada, contorno oscuro.\n- Cada personaje: 1 color dominante + 1 acento.\n- Animación de entrada al seleccionarlo."
+  },
+  {
+   "titulo": "Reglas del Gremio",
+   "ruta": "Gremio/REGLAS.md",
+   "contenido": "Papeles, tipos de misión, tarjeta, revisión cruzada, relevo y memoria.\n(Versión completa en docs/gremio/REGLAS.md del repositorio.)"
+  }
+ ],
+ "planes": {
+  "compleja": [
+   {
+    "titulo": "Plan vivo de la misión",
+    "rol": "orquesta",
+    "recibe": "Tu petición + brief del proyecto + notas de la bóveda",
+    "entrega": "PLAN.md con hitos, aceptación y decisiones",
+    "comprueba": "Tú apruebas el plan antes de seguir"
+   },
+   {
+    "titulo": "Diseño de habilidades",
+    "rol": "astra",
+    "recibe": "Plan + pieza asignada",
+    "entrega": "Diseño del sistema de habilidades y recargas",
+    "comprueba": "Opus lo valida contra el plan"
+   },
+   {
+    "titulo": "Ficha de datos de personajes",
+    "rol": "ejecuta",
+    "recibe": "Contrato del hito 1",
+    "entrega": "Módulo de datos + 2 personajes de ejemplo",
+    "comprueba": "Se cargan sin errores en Studio"
+   },
+   {
+    "titulo": "Habilidades y combate",
+    "rol": "ejecuta",
+    "recibe": "Contrato del hito 2",
+    "entrega": "Habilidades con tiempos de recarga",
+    "comprueba": "Cada habilidad se activa y respeta su recarga"
+   },
+   {
+    "titulo": "Selección y guardado",
+    "rol": "ejecuta",
+    "recibe": "Contrato del hito 3",
+    "entrega": "Menú de selección + guardado del personaje",
+    "comprueba": "Sales y vuelves: sigue el mismo personaje"
+   },
+   {
+    "titulo": "Revisión cruzada",
+    "rol": "revisa",
+    "recibe": "Cambios + plan + aceptación",
+    "entrega": "Problemas por gravedad",
+    "comprueba": "Nada crítico abierto"
+   },
+   {
+    "titulo": "Cierre y aprendizajes",
+    "rol": "orquesta",
+    "recibe": "Resultado + revisión",
+    "entrega": "Resumen + 0–3 aprendizajes",
+    "comprueba": "Tú apruebas qué se guarda"
+   }
+  ],
+  "definida": [
+   {
+    "titulo": "Contrato de la misión",
+    "rol": "orquesta",
+    "recibe": "Tu petición + brief + bóveda",
+    "entrega": "Contrato nivel 3 con aceptación",
+    "comprueba": "Tú lo apruebas"
+   },
+   {
+    "titulo": "Ficha, habilidades y guardado",
+    "rol": "ejecuta",
+    "recibe": "Contrato",
+    "entrega": "Sistema completo en una pasada",
+    "comprueba": "Pruebas del contrato en Studio"
+   },
+   {
+    "titulo": "Revisión cruzada",
+    "rol": "revisa",
+    "recibe": "Cambios + contrato",
+    "entrega": "Problemas por gravedad",
+    "comprueba": "Nada crítico abierto"
+   },
+   {
+    "titulo": "Tu visto bueno",
+    "rol": "ivan",
+    "entrega": "Lo pruebas en Studio"
+   }
+  ],
+  "sencilla": [
+   {
+    "titulo": "Ficha de un personaje",
+    "rol": "ejecuta",
+    "recibe": "Petición + brief",
+    "entrega": "Un personaje de ejemplo",
+    "comprueba": "Aparece en Studio"
+   },
+   {
+    "titulo": "Revisión rápida",
+    "rol": "revisa"
+   },
+   {
+    "titulo": "Tu visto bueno",
+    "rol": "ivan",
+    "entrega": "Lo miras en Studio"
+   }
+  ]
+ },
+ "vault": "Gremio",
+ "pasosCfg": {},
+ "spec": [
+  {
+   "id": "proposito",
+   "titulo": "Propósito",
+   "texto": "Que Iván pueda crear un personaje nuevo rellenando una ficha de datos (nombre, vida, velocidad, 2 habilidades, colores) sin tocar código. El juego lo carga, lo muestra en el menú de selección y recuerda cuál eligió cada jugador."
+  },
+  {
+   "id": "contexto",
+   "titulo": "Contexto",
+   "texto": "Juego de Roblox en Luau, sincronizado con Rojo. Ya existe el movimiento básico y una moneda. No hay sistema de personajes. Decisiones vigentes: personajes se desbloquean jugando, sin Robux (decisiones.md). Estilo cartoon (estilo-personajes.md). Términos: «ficha» = módulo de datos de un personaje; «habilidad» = acción con tiempo de recarga."
+  },
+  {
+   "id": "alcance",
+   "titulo": "Alcance",
+   "texto": "Puede tocar: src/shared/Personajes/, src/server/Habilidades/, src/client/UI/Seleccion/, el guardado del jugador.\nNo tocar: economía, tienda, compras con Robux, mapas.\nFuera de esta misión: animaciones nuevas y sonidos."
+  },
+  {
+   "id": "hitos",
+   "titulo": "Hitos",
+   "texto": "1. Ficha de datos: formato de ficha + 2 personajes de ejemplo. Prueba: cargan sin errores en Studio.\n2. Habilidades: activar, recarga, efecto básico. Prueba: cada habilidad respeta su recarga.\n3. Selección y guardado: menú con los personajes desbloqueados y guardado de la elección. Prueba: salir y volver mantiene el personaje.\nCada hito es un contrato de nivel 3 para Codex."
+  },
+  {
+   "id": "aceptacion",
+   "titulo": "Aceptación",
+   "texto": "- Añadir un archivo de ficha nuevo hace que el personaje aparezca en el menú sin otros cambios.\n- Las pruebas del proyecto pasan.\n- En Studio: elegir personaje, usar sus 2 habilidades, salir y volver → sigue el mismo.\n- Las pruebas verifican; no se adapta la solución a ellas."
+  },
+  {
+   "id": "detente",
+   "titulo": "Detente si",
+   "texto": "Falta un dato de diseño (vida, daño) · hay que tocar la economía o Robux · dos notas se contradicen · el cambio crece fuera del alcance. En esos casos se para y se pregunta a Iván."
+  },
+  {
+   "id": "riesgos",
+   "titulo": "Riesgos",
+   "texto": "- Guardado: perder la elección del jugador si falla el DataStore → probar con reintentos.\n- Balance: valores de ejemplo, no finales.\n- Rendimiento: muchas fichas cargadas a la vez (de momento pocas)."
+  }
+ ]
+}

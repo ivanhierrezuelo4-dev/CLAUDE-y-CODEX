@@ -1,0 +1,172 @@
+{
+ "id": "M-002",
+ "simulada": true,
+ "cupoSimulado": true,
+ "titulo": "Menú de ajustes: sonido y cámara",
+ "meta": "Al terminar, cada jugador puede subir o bajar música, efectos y sensibilidad de cámara desde un menú, y el juego recuerda su elección.",
+ "porque": "Está claro qué hay que hacer y cómo comprobarlo: un contrato bien escrito basta, no hace falta que Opus coordine.",
+ "mejora": "Ajustes de sonido y cámara guardados por jugador.",
+ "tipoSugerido": "definida",
+ "tipo": "definida",
+ "tipoConfirmado": false,
+ "estado": "propuesta",
+ "paso": -1,
+ "inicio": null,
+ "actualizado": "2026-11-03T04:50:00Z",
+ "equipos": {},
+ "pasosCfg": {},
+ "notas": {},
+ "astra": {
+  "activa": false,
+  "esfuerzo": "medium",
+  "pieza": "No aplica en misiones definidas"
+ },
+ "cupoAntes": 42,
+ "vault": "Gremio",
+ "boveda": [
+  {
+   "titulo": "Brief del proyecto Roblox",
+   "ruta": "Proyectos/Roblox/_brief.md",
+   "contenido": "# Brief · Juego de Roblox (ejemplo)\n\nGénero: aventura con combate ligero.\nFuente de verdad: repo del juego (Rojo + Luau).\nMisiones típicas: ajuste de UI → sencilla; menús con guardado → definida."
+  },
+  {
+   "titulo": "Estilo de interfaz",
+   "ruta": "Proyectos/Roblox/estilo-ui.md",
+   "contenido": "# UI (ejemplo)\n\n- Botones grandes, legibles en móvil.\n- Paleta del juego; fondo semitransparente.\n- Deslizadores con valor visible (0–100)."
+  },
+  {
+   "titulo": "Aprendizaje: guardado con reintentos",
+   "ruta": "Proyectos/Roblox/aprendizajes.md",
+   "contenido": "# Aprendizajes (ejemplo)\n\n- 2026-11-03 · M-001: guardar datos del jugador con reintentos; probar saliendo y volviendo."
+  }
+ ],
+ "planes": {
+  "definida": [
+   {
+    "titulo": "Contrato del menú de ajustes",
+    "rol": "orquesta",
+    "recibe": "Tu petición + brief + estilo de UI",
+    "entrega": "Contrato nivel 3 con aceptación",
+    "comprueba": "Lo apruebas antes de ejecutar"
+   },
+   {
+    "titulo": "Menú, deslizadores y guardado",
+    "rol": "ejecuta",
+    "recibe": "Contrato",
+    "entrega": "Menú de ajustes funcionando y guardado por jugador",
+    "comprueba": "Cambias valores, sales y vuelves: se mantienen"
+   },
+   {
+    "titulo": "Revisión cruzada",
+    "rol": "revisa",
+    "recibe": "Cambios + contrato",
+    "entrega": "Problemas por gravedad",
+    "comprueba": "Nada crítico abierto"
+   },
+   {
+    "titulo": "Tu visto bueno",
+    "rol": "ivan",
+    "entrega": "Lo pruebas en Studio y en móvil"
+   }
+  ],
+  "sencilla": [
+   {
+    "titulo": "Menú de ajustes básico",
+    "rol": "ejecuta",
+    "recibe": "Petición + estilo de UI",
+    "entrega": "Menú con 3 deslizadores (sin guardado)",
+    "comprueba": "Se ve y responde en Studio"
+   },
+   {
+    "titulo": "Revisión rápida",
+    "rol": "revisa"
+   },
+   {
+    "titulo": "Tu visto bueno",
+    "rol": "ivan",
+    "entrega": "Lo miras en Studio"
+   }
+  ],
+  "compleja": [
+   {
+    "titulo": "Plan vivo",
+    "rol": "orquesta",
+    "recibe": "Petición + brief + bóveda",
+    "entrega": "PLAN.md con hitos",
+    "comprueba": "Lo apruebas"
+   },
+   {
+    "titulo": "Arquitectura de ajustes",
+    "rol": "astra",
+    "recibe": "Plan",
+    "entrega": "Sistema de ajustes ampliable",
+    "comprueba": "Opus lo valida"
+   },
+   {
+    "titulo": "Menú y deslizadores",
+    "rol": "ejecuta",
+    "recibe": "Contrato hito 1",
+    "entrega": "Interfaz",
+    "comprueba": "Responde en Studio"
+   },
+   {
+    "titulo": "Guardado por jugador",
+    "rol": "ejecuta",
+    "recibe": "Contrato hito 2",
+    "entrega": "Guardado con reintentos",
+    "comprueba": "Salir y volver mantiene valores"
+   },
+   {
+    "titulo": "Revisión cruzada",
+    "rol": "revisa",
+    "recibe": "Cambios + plan",
+    "entrega": "Problemas por gravedad",
+    "comprueba": "Nada crítico"
+   },
+   {
+    "titulo": "Cierre y aprendizajes",
+    "rol": "orquesta",
+    "recibe": "Resultado + revisión",
+    "entrega": "Resumen + aprendizajes",
+    "comprueba": "Apruebas qué se guarda"
+   }
+  ]
+ },
+ "spec": [
+  {
+   "id": "proposito",
+   "titulo": "Propósito",
+   "texto": "Que cada jugador ajuste volumen de música, volumen de efectos y sensibilidad de cámara, y que el juego lo recuerde la próxima vez."
+  },
+  {
+   "id": "contexto",
+   "titulo": "Contexto",
+   "texto": "Juego de Roblox en Luau con Rojo. Ya existe guardado del personaje (M-001), reutilizar su forma de guardar con reintentos (aprendizajes.md). Estilo de UI en estilo-ui.md."
+  },
+  {
+   "id": "alcance",
+   "titulo": "Alcance",
+   "texto": "Puede tocar: src/client/UI/Ajustes/, el módulo de guardado del jugador.\nNo tocar: economía, personajes, mapas."
+  },
+  {
+   "id": "hitos",
+   "titulo": "Hitos",
+   "texto": "1. Menú con 3 deslizadores (0–100) y botón para abrir/cerrar.\n2. Aplicar valores al sonido y a la cámara en vivo.\n3. Guardar y cargar por jugador."
+  },
+  {
+   "id": "aceptacion",
+   "titulo": "Aceptación",
+   "texto": "- Mover un deslizador cambia el sonido o la cámara al momento.\n- Salir y volver mantiene los 3 valores.\n- Se usa bien en móvil (botones grandes).\n- Las pruebas del proyecto pasan."
+  },
+  {
+   "id": "detente",
+   "titulo": "Detente si",
+   "texto": "Hay que cambiar el formato de guardado existente · falta un valor por defecto · el cambio toca otras pantallas."
+  },
+  {
+   "id": "riesgos",
+   "titulo": "Riesgos",
+   "texto": "- Guardar demasiado seguido (límite de DataStore): guardar al cerrar el menú, no en cada movimiento."
+  }
+ ]
+}

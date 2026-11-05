@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Plan Claude + Codex</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: una columna de lectura con secciones en "paneles de terminal"; simulador en 2 columnas que se apilan en móvil. Estética oscura deliberada (cyberpunk), un solo tema. */
+:root{
+  --bg:#0B0E14; --surface:#151B26; --surface2:#1C2433; --line:#2A3446;
+  --text:#EDF2F7; --muted:#A9B4C4; --claude:#F08A5D; --codex:#55D98B;
+  --cyan:#00E5FF; --yellow:#FCEE0A; --onyellow:#0B0E14; --alert:#FF5C7C; --sim:#B48CFF;
+  --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:16px/1.6 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px;}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1120px;margin:0 auto}
+a{color:var(--cyan)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:clamp(1.9rem,4.5vw,3rem);letter-spacing:.01em}
+h2{font-size:1.6rem}
+h3{font-size:1.15rem}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-size:.88em}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--surface2);padding:1px 5px;border-radius:3px}
+small,.small{font-size:.9rem;color:var(--muted)}
+
+/* Cabecera */
+header.top{padding-block:28px 20px;border-bottom:1px solid var(--line);display:grid;gap:14px}
+.eyebrow{font-family:var(--f-mono);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.hl{background:var(--yellow);color:var(--onyellow);padding:0 .25em}
+.lede{max-width:68ch;color:var(--muted);font-size:1.05rem}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+nav.toc a{font-family:var(--f-mono);font-size:.82rem;text-decoration:none;color:var(--text);border:1px solid var(--line);padding:4px 10px;border-radius:2px}
+nav.toc a:hover{border-color:var(--cyan);color:var(--cyan)}
+
+section{padding-block:36px 8px;display:grid;gap:18px}
+.sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sec-h .tag{font-family:var(--f-mono);font-size:.78rem;color:var(--cyan);letter-spacing:.1em}
+.intro{max-width:72ch;color:var(--muted)}
+
+/* Agentes: siempre nombre + icono + color */
+.ag{display:inline-flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap}
+.ag svg{width:16px;height:16px;flex:none}
+.ag.claude{color:var(--claude)} .ag.codex{color:var(--codex)} .ag.ivan{color:var(--yellow)} .ag.tool{color:var(--cyan)}
+
+/* Veredicto */
+.verdict{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media (max-width:800px){.verdict{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px;min-width:0}
+.panel.key{border-color:var(--cyan);box-shadow:inset 3px 0 0 var(--cyan)}
+.stack{display:grid;gap:10px}
+.opts{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.opts li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.chip{display:inline-block;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap;line-height:1.5}
+.c-ok{color:var(--codex)} .c-opt{color:var(--cyan)} .c-eval{color:var(--yellow)} .c-no{color:var(--alert)} .c-sim{color:var(--sim)} .c-pend{color:var(--muted)}
+.chip.solid-y{background:var(--yellow);color:var(--onyellow);border-color:var(--yellow)}
+.findings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:800px){.findings{grid-template-columns:1fr}}
+.finding{border-top:2px solid var(--yellow);padding-top:10px;display:grid;gap:4px}
+.finding b{font-family:var(--f-display);font-size:1.02rem}
+
+/* Simulador */
+.sim{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.sim{grid-template-columns:1fr}}
+.controls{display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.field>label,.field>.lbl{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+select{width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--line);border-radius:3px;padding:8px 10px;font:inherit;font-size:.95rem}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.btn{background:var(--surface2);color:var(--text);border:1px solid var(--line);border-radius:3px;padding:6px 10px;font:inherit;font-size:.88rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--cyan);color:var(--onyellow);border-color:var(--cyan);font-weight:600}
+.btn:hover,.seg button:hover{border-color:var(--cyan)}
+.check{display:flex;gap:8px;align-items:center;font-size:.95rem}
+.check input{accent-color:var(--cyan);width:18px;height:18px}
+.examples{display:flex;flex-wrap:wrap;gap:6px}
+.examples .btn{border-style:dashed}
+
+.route-head{display:grid;gap:8px}
+.route-name{font-family:var(--f-display);font-size:1.5rem}
+.why{color:var(--muted);max-width:70ch}
+.alertbox{border:1px solid var(--alert);border-left-width:4px;padding:10px 12px;border-radius:3px;display:grid;gap:4px}
+.alertbox b{color:var(--alert)}
+.infobox{border:1px solid var(--line);border-left:4px solid var(--yellow);padding:10px 12px;border-radius:3px}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;position:relative;padding-bottom:14px}
+.step::before{content:"";position:absolute;left:16px;top:30px;bottom:0;width:2px;background:var(--line)}
+.step:last-child::before{display:none}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:.8rem;font-weight:600;border:2px solid var(--line);background:var(--surface);z-index:1}
+.step.claude .dot{border-color:var(--claude);color:var(--claude)}
+.step.codex .dot{border-color:var(--codex);color:var(--codex)}
+.step.ivan .dot{border-color:var(--yellow);color:var(--yellow)}
+.step.tool .dot{border-color:var(--cyan);color:var(--cyan)}
+.step.fail .dot{border-color:var(--alert);color:var(--alert)}
+.step-body{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:grid;gap:6px;min-width:0}
+.step.fail .step-body{border-color:var(--alert)}
+.step-title{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.step-title b{font-family:var(--f-display);font-size:1.02rem}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:2px 10px;font-size:.92rem}
+.kv dt{color:var(--muted);font-family:var(--f-mono);font-size:.78rem;padding-top:3px}
+.kv dd{margin:0}
+
+/* Tablas */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:760px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+tr.hit td{background:rgba(0,229,255,.07)}
+td.id{font-family:var(--f-mono);font-size:.82rem}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.tabs button{background:none;border:1px solid transparent;color:var(--muted);padding:6px 12px;font:inherit;cursor:pointer;border-radius:3px}
+.tabs button[aria-selected="true"]{color:var(--text);border-color:var(--cyan)}
+.vault{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:800px){.vault{grid-template-columns:1fr}}
+pre.tree{font-family:var(--f-mono);font-size:.82rem;line-height:1.55;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px;overflow-x:auto;margin:0;color:var(--text)}
+.tree .dim{color:var(--muted)} .tree .y{color:var(--yellow)} .tree .c{color:var(--cyan)}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.flow{grid-template-columns:1fr}}
+.flow .panel{padding:12px}
+.flow h3{font-size:1rem;margin-bottom:6px;color:var(--cyan)}
+.flow ul{margin:0;padding-left:18px;font-size:.93rem}
+.rtest{display:grid;gap:8px}
+.rtest-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:8px 10px}
+
+/* Tarjeta arrastrable */
+.stage{position:relative;height:340px;border:1px dashed var(--sim);border-radius:4px;overflow:hidden;
+  background:repeating-linear-gradient(0deg,transparent 0 31px,rgba(42,52,70,.5) 31px 32px),repeating-linear-gradient(90deg,transparent 0 31px,rgba(42,52,70,.5) 31px 32px),var(--bg)}
+.stage-label{position:absolute;left:10px;bottom:8px;font-family:var(--f-mono);font-size:.75rem;color:var(--sim)}
+.mini{position:absolute;left:16px;top:16px;width:min(300px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.45);touch-action:none;user-select:none}
+.mini:focus-visible{outline:2px solid var(--yellow)}
+.mini-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);cursor:grab;font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.mini-bar:active{cursor:grabbing}
+.mini-body{padding:10px;display:grid;gap:6px;font-size:.88rem}
+.mini-row{display:flex;justify-content:space-between;gap:8px}
+.mini-row span:first-child{color:var(--muted);font-family:var(--f-mono);font-size:.74rem;padding-top:2px}
+.state{font-family:var(--f-mono);font-size:.74rem;padding:2px 7px;border-radius:2px;border:1px solid currentColor}
+.st-work{color:var(--cyan)} .st-review{color:var(--yellow)} .st-block{color:var(--alert)} .st-pause{color:var(--muted)} .st-done{color:var(--codex)}
+.meter{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--sim)}
+.cardgrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:800px){.cardgrid{grid-template-columns:1fr}}
+
+/* Tooltips */
+.tip{border-bottom:1px dotted var(--cyan);cursor:help;position:relative}
+.tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 6px);z-index:20;width:max-content;max-width:260px;background:var(--surface2);border:1px solid var(--cyan);color:var(--text);padding:8px 10px;font-size:.84rem;line-height:1.4;border-radius:3px;font-family:var(--f-body);font-weight:400;text-transform:none;letter-spacing:0;white-space:normal}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0}
+details>summary{cursor:pointer;padding:10px 14px;font-weight:600;list-style-position:inside}
+details>div{padding:0 14px 14px;display:grid;gap:10px}
+ol.plain,ul.plain{margin:0;padding-left:20px;display:grid;gap:6px}
+footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.88rem}
+
+@media (prefers-reduced-motion:no-preference){
+  .route-out{animation:fadein .25s ease-out}
+  @keyframes fadein{from{opacity:.4}to{opacity:1}}
+}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-claude" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0l1.6 5.2L15 4 10.8 8 15 12l-5.4-1.2L8 16l-1.6-5.2L1 12l4.2-4L1 4l5.4 1.2z"/></symbol>
+  <symbol id="i-codex" viewBox="0 0 16 16"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9.5 2.5l-3 11"/></symbol>
+  <symbol id="i-ivan" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" fill="currentColor"/><path fill="currentColor" d="M2 15c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5z"/></symbol>
+  <symbol id="i-tool" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path stroke="currentColor" stroke-width="1.6" d="M4 6l2 2-2 2M7.5 10.5h4"/></symbol>
+</svg>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Plan de trabajo · documento de simulación · fuentes consultadas el 2 nov 2026</span>
+  <h1>Claude + Codex + Obsidian, <span class="hl">sin construir otra app</span></h1>
+  <p class="lede">Para Iván. Esta página explica qué probar, cómo se reparte el trabajo y qué se guarda en la memoria. <b>No está conectada a nada.</b> Las rutas y las tarjetas son simulaciones y las cifras de ejemplo están marcadas como tales.</p>
+  <nav class="toc" aria-label="Secciones">
+    <a href="#veredicto">Veredicto</a><a href="#construimos">Qué construimos</a><a href="#capacidad">Capacidad y relevo</a><a href="#ruta">Simulador de ruta</a><a href="#modelos">Modelos</a><a href="#memoria">Memoria</a><a href="#tarjeta">Tarjeta</a><a href="#herramientas">Herramientas</a><a href="#auditoria">Autoauditoría</a><a href="#piloto">Piloto</a><a href="#fuentes">Fuentes</a>
+  </nav>
+</header>
+
+<!-- 1. VEREDICTO -->
+<section id="veredicto" aria-labelledby="h-ver">
+  <div class="sec-h"><span class="tag">1</span><h2 id="h-ver">Veredicto</h2></div>
+  <div class="verdict">
+    <div class="panel key stack">
+      <span class="chip c-ok" style="justify-self:start">Recomendado</span>
+      <h3>Probar el plugin oficial con el seguimiento nativo. No hace falta un mod ni una app.</h3>
+      <ul class="opts">
+        <li><span class="ag claude"><svg><use href="#i-claude"/></svg>Claude Code</span><span>con el plugin <code>codex@openai-codex</code> para delegar y revisar.</span></li>
+        <li><span class="ag tool"><svg><use href="#i-tool"/></svg>Seguimiento</span><span><code>claude agents</code> para las sesiones de Claude, <code>/codex:status</code> para los trabajos de Codex y <code>/usage</code> para tu cuota.</span></li>
+        <li><span class="ag tool"><svg><use href="#i-tool"/></svg>Memoria</span><span>Una bóveda de Obsidian usada como carpeta Markdown, con un <code>AGENTS.md</code> breve que leen <span class="ag claude"><svg><use href="#i-claude"/></svg>Claude</span> y <span class="ag codex"><svg><use href="#i-codex"/></svg>Codex</span>.</span></li>
+      </ul>
+      <p class="small">El plugin reutiliza tu sesión local de Codex, así que su uso cuenta contra el cupo de tu ChatGPT. Las cuotas de Claude y Codex no se suman.</p>
+      <p class="small"><b>Con tu plan Pro:</b> Claude Code usa Opus 5.5 por defecto, que es lo que más rápido gasta la ventana de 5 h. Con <code>opusplan</code> Claude planifica con Opus y ejecuta con Sonnet.</p>
+    </div>
+    <div class="panel stack">
+      <h3>Alternativas</h3>
+      <ul class="opts">
+        <li><span class="chip c-opt">Opcional</span><span>Barra de estado con la cuota de Claude y el esfuerzo (la nativa o <code>ccstatusline</code>). Informe semanal con <code>ccusage</code>.</span></li>
+        <li><span class="chip c-opt">Opcional</span><span>Ventana siempre visible: una terminal con <code>claude agents</code> fijada con PowerToys (<span class="mono">Win+Ctrl+T</span>).</span></li>
+        <li><span class="chip c-eval">Evaluar</span><span>Agent Usage Monitor (widget con las dos cuotas, v0.1.0). Antes hay que auditarlo.</span></li>
+        <li><span class="chip c-no">Descartado</span><span>Mod propio, ampliar Nexo, Vibe Kanban (en cierre), Claude Squad, trackers que leen credenciales y una base vectorial.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="findings">
+    <div class="finding"><b>AGENTS.md sirve a las dos herramientas</b><span class="small">Claude Code puede cargar <code>AGENTS.md</code> como instrucciones del proyecto y Codex lo usa por defecto. Las reglas no se duplican.</span></div>
+    <div class="finding"><b>Ejemplos de modelos desfasados en el plugin</b><span class="small"><code>gpt-5.4-mini</code> y <code>spark</code> no figuran en el catálogo actual. Hay que usar los IDs del catálogo o los valores por defecto de Codex.</span></div>
+    <div class="finding"><b>Fable 5.1 no se usa por defecto</b><span class="small">Existe <code>claude-fable-5-1</code>, pero en algunos planes pide créditos de uso y tiene un límite semanal propio. Solo se elige a mano.</span></div>
+  </div>
+</section>
+
+<!-- QUÉ CONSTRUIMOS -->
+<section id="construimos" aria-labelledby="h-con">
+  <div class="sec-h"><span class="tag">1b</span><h2 id="h-con">Qué estamos construyendo</h2></div>
+  <p class="intro"><b>No es una aplicación.</b> Es un <b>kit de oficina</b>: unos pocos archivos que se copian en cualquier proyecto (Roblox, Pragmat o uno nuevo) para que Claude y Codex trabajen con las mismas reglas. Más adelante te daré un prompt para adaptarlo a cada proyecto.</p>
+  <div class="tbl"><table style="min-width:640px">
+    <thead><tr><th>Pieza</th><th>Qué hace</th><th>Gasto de contexto</th></tr></thead>
+    <tbody>
+      <tr><td><code>AGENTS.md</code> universal</td><td>Quién hace qué, cuándo delegar, contrato de tarea, límites, dónde está la bóveda. Lo leen <span class="ag claude"><svg><use href="#i-claude"/></svg>Claude</span> y <span class="ag codex"><svg><use href="#i-codex"/></svg>Codex</span></td><td>Se carga siempre, así que debe ser <b>corto</b> (menos de 200 líneas)</td></tr>
+      <tr><td><code>CLAUDE.md</code> mínimo</td><td>Importa <code>AGENTS.md</code> y añade solo lo exclusivo de Claude</td><td>Casi nulo</td></tr>
+      <tr><td>Skill «oficina»</td><td>Procedimientos largos: enrutar, contrato, relevo, cierre de memoria</td><td>Solo su descripción, hasta que se usa</td></tr>
+      <tr><td>2 scripts pequeños</td><td>La barra de estado guarda el % de cupo de Claude; un hook avisa <b>solo</b> al cruzar el umbral</td><td>Cero mientras no hay aviso</td></tr>
+      <tr><td>Bóveda de Obsidian</td><td>Tu contexto ordenado, que puedes ver y editar</td><td>Solo lo que se busca</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small"><b>Lo que verás tú:</b> <code>claude agents</code> (quién trabaja y quién espera tu respuesta), la barra con el cupo de Claude, <code>/codex:status</code> para Codex y la bóveda en Obsidian. Esas son las «tarjetitas» reales. La tarjeta de la sección 5 es una maqueta.</p>
+</section>
+
+<!-- CAPACIDAD -->
+<section id="capacidad" aria-labelledby="h-cap">
+  <div class="sec-h"><span class="tag">1c</span><h2 id="h-cap">Capacidad y relevo</h2><span class="chip c-sim">Simulación</span></div>
+  <p class="intro">Claude orquesta, así que conserva siempre una reserva para coordinar: <b>~5 % de la ventana de 5 h</b> y <b>~3 % de la semanal</b>. Hace falta porque incluso delegar a Codex pasa por un pequeño subagente de Claude: con un 0 % no podría ni delegar ni revisar. Mueve los controles.</p>
+  <div class="sim">
+    <div class="panel controls" role="group" aria-label="Simular cupo">
+      <div class="field"><label for="c-5h">Claude · 5 h usado: <b id="c-5h-v">60 %</b></label><input type="range" id="c-5h" min="0" max="100" value="60" style="width:100%;accent-color:var(--claude)"></div>
+      <div class="field"><label for="c-7d">Claude · semanal usado: <b id="c-7d-v">40 %</b></label><input type="range" id="c-7d" min="0" max="100" value="40" style="width:100%;accent-color:var(--claude)"></div>
+      <div class="field"><label for="c-cx">Cupo de Codex</label><select id="c-cx"><option value="alto">Amplio</option><option value="bajo">Bajo</option><option value="nd">Sin dato (no se ve desde Claude)</option><option value="agotado">Agotado</option></select></div>
+      <div class="field"><label for="c-job">Trabajo en curso</label><select id="c-job"><option value="contrato">Código con contrato definido</option><option value="complejo">Complejo, ya planificado</option><option value="creativo">Creativo (Hecho de Nada)</option><option value="decision">Falta una decisión</option></select></div>
+      <div class="field"><label for="c-pref">En reserva</label><select id="c-pref"><option value="auto">Relevo automático si hay contrato (propuesto)</option><option value="preguntar">Preguntarme siempre</option><option value="esperar">Esperar siempre la recarga</option></select></div>
+    </div>
+    <div class="stack" id="cap-out" aria-live="polite"></div>
+  </div>
+  <details>
+    <summary>Cómo funcionaría técnicamente (confirmado en la documentación, no instalado)</summary>
+    <div class="small">
+      <ul class="plain">
+        <li>La barra de estado recibe <code>rate_limits.five_hour.used_percentage</code>, <code>seven_day.used_percentage</code> y <code>resets_at</code>. Está disponible en <b>Pro</b> y aparece tras la primera respuesta de la sesión.</li>
+        <li>El script de la barra guarda esas cifras. Un hook <code>UserPromptSubmit</code> las lee y solo escribe una línea para Claude cuando se cruza un umbral.</li>
+        <li><b>Hueco:</b> Claude Code no ve el cupo de Codex. Se mira con <code>/status</code> en Codex o con un lector de <code>account/rateLimits/read</code> (por evaluar).</li>
+        <li>El % se actualiza en cada respuesta, y un turno grande puede saltar de 90 a 100. Por eso el traspaso se prepara antes de llegar a la reserva.</li>
+        <li>Si Claude no está disponible, hablas con Codex directamente: lee el mismo <code>AGENTS.md</code> y la misma bóveda, y retomas con <code>codex resume</code> o <code>/codex:transfer</code>.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- 2-3. SIMULADOR -->
+<section id="ruta" aria-labelledby="h-ruta">
+  <div class="sec-h"><span class="tag">2</span><h2 id="h-ruta">Simulador de ruta</h2><span class="chip c-sim">Simulación</span></div>
+  <p class="intro">Elige un proyecto y un tipo de trabajo, o carga un ejemplo. La ruta cambia según la <span class="tip" tabindex="0" data-tip="Cuánto falta por decidir. Si no está claro qué significa 'terminado', la ambigüedad es alta.">ambigüedad</span>, el <span class="tip" tabindex="0" data-tip="Qué pasa si sale mal: dinero, datos de usuarios, permisos, economía del juego o la publicación de tu marca.">riesgo</span> y qué herramientas tienes disponibles, no solo según el tamaño. Puedes forzar la ruta a mano.</p>
+
+  <div class="sim">
+    <div class="panel controls" role="group" aria-label="Opciones del simulador">
+      <div class="field"><span class="lbl">Ejemplos completos</span>
+        <div class="examples" id="examples">
+          <button class="btn" data-ex="roblox">Roblox: tienda</button>
+          <button class="btn" data-ex="pragmat">Pragmat: landing</button>
+          <button class="btn" data-ex="hdn">Hecho de Nada: Short</button>
+          <button class="btn" data-ex="codex">Bug directo a Codex</button>
+          <button class="btn" data-ex="nuevo">Proyecto nuevo</button>
+        </div>
+      </div>
+      <div class="field"><label for="f-proj">Proyecto</label>
+        <select id="f-proj">
+          <option value="hdn">Hecho de Nada (contenido)</option>
+          <option value="pragmat">Pragmat (webs, automatización)</option>
+          <option value="roblox">Estudio Roblox (juegos)</option>
+          <option value="nuevo">Proyecto nuevo</option>
+        </select></div>
+      <div class="field"><label for="f-work">Tipo de trabajo</label>
+        <select id="f-work">
+          <option value="creativo">Pieza creativa / guion</option>
+          <option value="implementacion">Implementación definida</option>
+          <option value="bug">Bug</option>
+          <option value="revision">Revisión de cambios</option>
+          <option value="documentacion">Documentación</option>
+          <option value="informe">Informe o extracción de datos</option>
+          <option value="investigacion">Investigación</option>
+          <option value="arquitectura">Arquitectura / plan grande</option>
+        </select></div>
+      <div class="field"><span class="lbl" id="l-amb">Ambigüedad</span>
+        <div class="seg" data-group="amb" role="group" aria-labelledby="l-amb">
+          <button data-v="baja" aria-pressed="true">Baja</button><button data-v="media" aria-pressed="false">Media</button><button data-v="alta" aria-pressed="false">Alta</button>
+        </div></div>
+      <div class="field"><span class="lbl" id="l-risk">Riesgo</span>
+        <div class="seg" data-group="risk" role="group" aria-labelledby="l-risk">
+          <button data-v="bajo" aria-pressed="true">Bajo</button><button data-v="medio" aria-pressed="false">Medio</button><button data-v="alto" aria-pressed="false">Alto</button><button data-v="critico" aria-pressed="false" title="Pagos, permisos, datos sensibles o economía persistente">Crítico</button>
+        </div></div>
+      <div class="field"><span class="lbl">Disponible ahora</span>
+        <label class="check"><input type="checkbox" id="f-claude" checked> <span class="ag claude"><svg><use href="#i-claude"/></svg>Claude</span> con cupo</label>
+        <label class="check"><input type="checkbox" id="f-codex" checked> <span class="ag codex"><svg><use href="#i-codex"/></svg>Codex</span> con cupo</label>
+      </div>
+      <div class="field"><label for="f-mode">Ruta</label>
+        <select id="f-mode">
+          <option value="auto">Automática (sugerida)</option>
+          <option value="solo">Forzar: Claude solo</option>
+          <option value="directo">Forzar: Codex directo</option>
+          <option value="coordina">Forzar: Claude coordina</option>
+        </select></div>
+      <div class="field"><label for="f-fail">Escenario de fallo</label>
+        <select id="f-fail">
+          <option value="none">Ninguno (todo va bien)</option>
+          <option value="contexto">Contexto insuficiente</option>
+          <option value="contradiccion">Documentos contradictorios</option>
+          <option value="herramienta">Herramienta no disponible</option>
+          <option value="prueba">Prueba fallida</option>
+          <option value="decision">Requiere decisión de Iván</option>
+        </select></div>
+    </div>
+
+    <div class="stack route-out" id="out" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 4. MODELOS -->
+<section id="modelos" aria-labelledby="h-mod">
+  <div class="sec-h"><span class="tag">3</span><h2 id="h-mod">Modelos y esfuerzo</h2></div>
+  <p class="intro">Los IDs salen del catálogo oficial de Codex y del changelog de Claude Code. <b>Que tu cuenta tenga acceso a cada modelo está pendiente</b>: se comprueba con <code>/model</code> en cada herramienta. Los niveles de esfuerzo no se copian de una plataforma a la otra. La fila resaltada es la del tipo de trabajo elegido en el simulador.</p>
+  <div class="tbl"><table id="matrix">
+    <thead><tr><th>Tarea</th><th>Principal</th><th>Esfuerzo inicial</th><th>Motivo</th><th>Revisión</th><th>Escalar si…</th><th>Si no está disponible</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <details>
+    <summary>Catálogo verificado y niveles admitidos</summary>
+    <div>
+      <div class="tbl"><table style="min-width:640px">
+        <thead><tr><th>Modelo</th><th>ID</th><th>Esfuerzos</th><th>Por defecto</th><th>Nota</th></tr></thead>
+        <tbody>
+          <tr><td><span class="ag codex"><svg><use href="#i-codex"/></svg>GPT-6.1 Sol</span></td><td class="id">gpt-6.1-sol</td><td>low…max, ultra</td><td>low</td><td>«Workhorse» para programación. Codex ≥ 0.153</td></tr>
+          <tr><td><span class="ag codex"><svg><use href="#i-codex"/></svg>GPT-6.1 Terra</span></td><td class="id">gpt-6.1-terra</td><td>low…max, ultra</td><td>low</td><td>Contexto de 500 k. Sin evidencia de que supere a Sol</td></tr>
+          <tr><td><span class="ag codex"><svg><use href="#i-codex"/></svg>GPT-6 Astra</span></td><td class="id">gpt-6-astra</td><td>low…max, ultra</td><td>low</td><td>«Para el trabajo más exigente»</td></tr>
+          <tr><td><span class="ag codex"><svg><use href="#i-codex"/></svg>GPT-6 Luna</span></td><td class="id">gpt-6-luna</td><td>low…max</td><td>medium</td><td>Rápido y asequible. Codex ≥ 0.155</td></tr>
+          <tr><td><span class="ag claude"><svg><use href="#i-claude"/></svg>Opus 5.5</span></td><td class="id">claude-opus-5-5</td><td colspan="2">low / medium / high / xhigh / max, según el modelo (verificar con <code>/effort</code>)</td><td>Opus por defecto</td></tr>
+          <tr><td><span class="ag claude"><svg><use href="#i-claude"/></svg>Sonnet 5.5</span></td><td class="id">claude-sonnet-5-5</td><td colspan="2">ídem</td><td>Sonnet por defecto</td></tr>
+          <tr><td><span class="ag claude"><svg><use href="#i-claude"/></svg>Haiku 5.5</span></td><td class="id">claude-haiku-5-5</td><td colspan="2">ídem</td><td>Solo pensamiento adaptativo</td></tr>
+          <tr><td><span class="ag claude"><svg><use href="#i-claude"/></svg>Fable 5.1</span></td><td class="id">claude-fable-5-1</td><td colspan="2">ídem</td><td><span class="chip c-no">Solo manual</span> Puede requerir créditos de uso</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small"><b>ultra</b> significa razonamiento máximo con delegación automática a otros agentes. No es un ajuste de eficiencia. Si no pasas <code>--model</code> ni <code>--effort</code>, Codex usa sus valores por defecto, y Sol arranca en <code>low</code>.</p>
+      <p class="small"><b>No se mezclan:</b> tokens (entrada, salida, razonamiento, caché) · contexto ocupado · % de cuota de la suscripción · coste equivalente en API (una estimación) · lo que realmente pagas.</p>
+    </div>
+  </details>
+</section>
+
+<!-- 5. MEMORIA -->
+<section id="memoria" aria-labelledby="h-mem">
+  <div class="sec-h"><span class="tag">4</span><h2 id="h-mem">Memoria con Obsidian</h2></div>
+  <p class="intro">Una bóveda de Obsidian es una carpeta de archivos Markdown. Ningún modelo la recuerda por sí solo: cada tarea recupera lo que necesita. Se empieza por el nivel más simple.</p>
+  <div class="tabs" role="tablist" aria-label="Niveles de memoria">
+    <button role="tab" id="t-n1" aria-selected="true" aria-controls="p-lvl" data-lvl="1">Nivel 1 · Carpeta</button>
+    <button role="tab" id="t-n2" aria-selected="false" aria-controls="p-lvl" data-lvl="2">Nivel 2 · CLI de Obsidian</button>
+    <button role="tab" id="t-n3" aria-selected="false" aria-controls="p-lvl" data-lvl="3">Nivel 3 · Skills</button>
+  </div>
+  <div id="p-lvl" role="tabpanel" class="panel"></div>
+
+  <div class="vault">
+    <pre class="tree" aria-label="Estructura propuesta de la bóveda"><span class="y">Oficina/</span>
+  <span class="c">AGENTS.md</span>              <span class="dim">← reglas breves, ambas IA</span>
+  General/Preferencias.md
+  Proyectos/
+    Hecho-de-Nada/  Indice · Estado · Identidad
+                    Procedimiento · Decisiones
+    Pragmat/        Indice · Estado · Procedimiento
+                    Oferta.md <span class="dim">→ enlaza tu Excel</span>
+      Clientes/&lt;cliente&gt;/  <span class="dim">← nunca mezclar</span>
+    Roblox/         Indice · Estado · Diseno
+                    Economia · Decisiones
+    &lt;Nuevo&gt;/        Indice <span class="dim">← crece con uso</span>
+  Aprendizajes/       <span class="dim">← solo comprobado</span>
+  Archivo/            <span class="dim">← sustituido, fuera
+                         de la búsqueda</span></pre>
+    <div class="stack">
+      <div class="panel stack">
+        <h3>Fuente canónica de cada dato</h3>
+        <ul class="plain small">
+          <li><b>Precios de Pragmat</b>: tu Excel. La nota enlaza y resume con la fecha.</li>
+          <li><b>Identidad de Hecho de Nada</b>: <code>Identidad.md</code>, la misma versión que usa tu skill.</li>
+          <li><b>Economía de Roblox</b>: <code>Economia.md</code>, o tu Excel si ya existe.</li>
+        </ul>
+        <p class="small">Nota importante: <code>estado: borrador | aprobado | sustituido</code>, <code>fuente</code>, <code>actualizado</code> y <code>sustituido_por</code>.</p>
+      </div>
+      <div class="panel stack">
+        <h3>Valor en el tiempo</h3>
+        <div class="seg" data-group="time" role="group" aria-label="Momento">
+          <button data-v="ini" aria-pressed="true">Inicio</button><button data-v="sem" aria-pressed="false">Semanas</button><button data-v="mes" aria-pressed="false">Meses</button>
+        </div>
+        <p id="time-out" class="small"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="panel"><h3>Qué entra</h3><ul><li>Decisiones aprobadas</li><li>Procedimientos que funcionaron</li><li>Soluciones reproducibles</li><li>Estado actual del proyecto</li></ul></div>
+    <div class="panel"><h3>Qué se recupera</h3><ul><li>Índice del proyecto</li><li>Búsqueda de términos concretos</li><li>Notas o secciones completas</li><li>Se comprueban fecha y estado; se amplía si falta algo</li></ul></div>
+    <div class="panel"><h3>Qué se actualiza</h3><ul><li>Al cerrar, el agente propone de 0 a 3 aprendizajes</li><li>Tú apruebas</li><li>Se edita la nota existente</li><li>La versión anterior pasa a «sustituido»</li></ul></div>
+  </div>
+
+  <div class="panel stack">
+    <h3>Prueba de recuperación del piloto <span class="chip c-sim">Simulación</span></h3>
+    <p class="small">Tres preguntas cuya respuesta correcta se conoce de antemano. Pulsa cada una para ver qué debería pasar.</p>
+    <div class="rtest" id="rtest">
+      <div class="rtest-row"><span>¿Precio actual del plan web básico de Pragmat?</span><button class="btn" data-r="0">Ver</button></div>
+      <div class="rtest-row"><span>¿Cuántas monedas da el pase VIP de Roblox?</span><button class="btn" data-r="1">Ver</button></div>
+      <div class="rtest-row"><span>Al preparar una landing para el cliente A, ¿aparece algo del cliente B?</span><button class="btn" data-r="2">Ver</button></div>
+    </div>
+    <p id="rtest-out" class="small" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 6. TARJETA -->
+<section id="tarjeta" aria-labelledby="h-card">
+  <div class="sec-h"><span class="tag">5</span><h2 id="h-card">Tarjeta compacta</h2><span class="chip c-sim">Simulación · datos inventados</span></div>
+  <p class="intro">Puedes arrastrar la tarjeta con el ratón o el dedo, o moverla con las flechas del teclado tras seleccionarla. <b>Solo se mueve dentro de este recuadro.</b> Una ventana que siga visible al cambiar de aplicación necesita una herramienta de escritorio (ver la tabla de abajo).</p>
+  <div class="cardgrid">
+    <div class="stage" id="stage">
+      <div class="mini" id="mini" tabindex="0" role="group" aria-label="Tarjeta simulada; usa las flechas para moverla">
+        <div class="mini-bar" id="minibar"><span>SIMULADO · Roblox</span><span id="mini-clock">00:00</span></div>
+        <div class="mini-body" id="mini-body"></div>
+      </div>
+      <span class="stage-label">Superficie del documento, no tu escritorio</span>
+    </div>
+    <div class="stack">
+      <div class="field"><span class="lbl" id="l-st">Estado</span>
+        <div class="seg" data-group="st" role="group" aria-labelledby="l-st">
+          <button data-v="work" aria-pressed="true">Trabajando</button><button data-v="review" aria-pressed="false">Revisión</button><button data-v="block" aria-pressed="false">Bloqueado</button><button data-v="pause" aria-pressed="false">Pausa</button><button data-v="done" aria-pressed="false">Terminado</button>
+        </div></div>
+      <div class="tbl"><table style="min-width:520px">
+        <thead><tr><th>Campo</th><th>Fuente real posible</th><th>Límite</th></tr></thead>
+        <tbody>
+          <tr><td>Agente / estado</td><td>Claude: <code>claude agents</code>. Codex: <code>/codex:status</code></td><td>Dos fuentes separadas; los trabajos de Codex no aparecen en agent view</td></tr>
+          <tr><td>Modelo / esfuerzo</td><td>Barra de estado (<code>model</code>, <code>effort.level</code>)</td><td>En Codex sale del flag o de <code>config.toml</code></td></tr>
+          <tr><td>Comprobaciones</td><td>Lista de aceptación del contrato</td><td>«2 de 4» solo si la lista existe</td></tr>
+          <tr><td>Tiempo transcurrido</td><td>Marcas de tiempo</td><td>Observable</td></tr>
+          <tr><td>Tiempo restante</td><td>—</td><td><b>Desconocido</b>; no se inventa</td></tr>
+          <tr><td>Cuota</td><td>Claude: <code>rate_limits</code> (Pro/Max). Codex: <code>account/rateLimits/read</code></td><td>Es de la cuenta, no de la tarea</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="tbl"><table style="min-width:640px">
+    <thead><tr><th>Dónde se ve</th><th>Qué es</th><th>Visible al cambiar de app</th><th>Compatibilidad</th></tr></thead>
+    <tbody>
+      <tr><td>Dentro de Claude Code</td><td>Agent view, barra de estado, <code>/diff</code></td><td>No</td><td>Windows, macOS y Linux (agent view en vista previa)</td></tr>
+      <tr><td>Esta tarjeta</td><td>Demostración educativa</td><td>No</td><td>Cualquier navegador</td></tr>
+      <tr><td>Terminal fijada</td><td><code>claude agents</code> + PowerToys <i>Always On Top</i></td><td><b>Sí</b></td><td>Windows (PowerToys)</td></tr>
+      <tr><td>Widget</td><td>Agent Usage Monitor: solo cuotas de Claude y Codex</td><td>Sí</td><td>Windows 10/11. Hay que compilarlo y auditarlo</td></tr>
+      <tr><td>Widget</td><td>HarnessMonitor: sesiones de varias herramientas</td><td>Sí</td><td>En Windows solo ve agentes dentro de WSL2</td></tr>
+    </tbody>
+  </table></div>
+  <details>
+    <summary>Especificación mínima de un mod futuro (no se construye ahora)</summary>
+    <div class="small">
+      <p><b>Solo si</b> el piloto demuestra que falta un dato que ni agent view, ni <code>/codex:status</code>, ni la barra de estado dan.</p>
+      <ul class="plain">
+        <li><b>Qué haría:</b> un panel lateral con las sesiones de Claude y los trabajos del plugin, leyendo eventos y sin llamadas a IA.</li>
+        <li><b>Datos:</b> estado de la sesión, modelo, esfuerzo, jobs de Codex (status y result) y la lista de aceptación.</li>
+        <li><b>Dependencias:</b> hooks module de mods (acceso temprano; solo funciona donde las <i>function hooks</i> están habilitadas). La API puede cambiar sin aviso.</li>
+        <li><b>Mantenimiento:</b> revisarlo en cada actualización de Claude Code.</li>
+        <li><b>Alternativa más simple:</b> terminal fijada con <code>claude agents</code> y <code>/codex:status</code>.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- 7. HERRAMIENTAS -->
+<section id="herramientas" aria-labelledby="h-tools">
+  <div class="sec-h"><span class="tag">6</span><h2 id="h-tools">Herramientas existentes</h2></div>
+  <div class="seg" data-group="tf" role="group" aria-label="Filtrar herramientas">
+    <button data-v="all" aria-pressed="true">Todas</button><button data-v="ok" aria-pressed="false">Recomendadas</button><button data-v="opt" aria-pressed="false">Opcionales</button><button data-v="eval" aria-pressed="false">Evaluar</button><button data-v="no" aria-pressed="false">Descartadas</button>
+  </div>
+  <div class="tbl"><table id="tools">
+    <thead><tr><th>Herramienta</th><th>Qué cubre</th><th>Límite o exigencia</th><th>Licencia / estado</th><th>Decisión</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<!-- AUTOAUDITORÍA -->
+<section id="auditoria" aria-labelledby="h-aud">
+  <div class="sec-h"><span class="tag">6b</span><h2 id="h-aud">Autoauditoría y ahorro real</h2></div>
+  <p class="intro">Lo que fallaba en el primer plan y cómo se ahorra de verdad. Las herramientas de «ahorro» rinden mucho menos de lo que anuncian. Lo que más ahorra es <b>no hacer el trabajo dos veces</b>.</p>
+  <div class="verdict">
+    <div class="panel stack">
+      <h3>Correcciones al plan anterior</h3>
+      <ul class="plain small">
+        <li>No tuve en cuenta que en <b>Pro el modelo por defecto es Opus 5.5</b>. Ahora Opus planifica y Sonnet ejecuta (<code>opusplan</code>).</li>
+        <li>No dije que <b>delegar también gasta Claude</b>. Por eso la reserva y el traspaso se preparan antes del límite.</li>
+        <li>El simulador mandaba demasiado a «Claude coordina». Ahora prima «Codex directo» cuando hay contrato.</li>
+        <li>Revisión adversarial solo con riesgo alto. Con riesgo medio basta una revisión corta y dirigida.</li>
+        <li>Usar <code>medium</code> en Sol era una hipótesis. El piloto compara <code>low</code> (por defecto) con <code>medium</code>.</li>
+        <li>Faltaba medir el «impuesto fijo» de cada mensaje: <code>/context</code>, <code>/usage</code> (desglose por skill, plugin o MCP) y <code>claude plugin details</code>.</li>
+        <li>Los artifacts sirven para entender, no ahorran tokens, y no se meten en el contexto de trabajo.</li>
+      </ul>
+    </div>
+    <div class="panel stack">
+      <h3>Palancas de ahorro, por impacto</h3>
+      <ol class="plain small">
+        <li><b>Dos depósitos.</b> Lo que gasta muchos tokens (leer mucho código, ciclos de prueba, implementar) va a Codex, que tiene su propio cupo. Claude piensa y revisa.</li>
+        <li><b>Modelo según la fase:</b> <code>opusplan</code>; Haiku para tareas mecánicas.</li>
+        <li><b>Sesiones limpias:</b> <code>/clear</code> entre tareas y <code>/compact</code> con instrucciones.</li>
+        <li><b>Impuesto fijo pequeño:</b> <code>AGENTS.md</code> breve, pocos MCP activos.</li>
+        <li><b>Memoria selectiva:</b> índice, luego búsqueda, luego nota concreta.</li>
+        <li><b>Sin bucles:</b> 2 correcciones como máximo, review gate apagado, nada de <code>ultra</code>.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 8. PILOTO -->
+<section id="piloto" aria-labelledby="h-pil">
+  <div class="sec-h"><span class="tag">7</span><h2 id="h-pil">Piloto y pendientes</h2></div>
+  <div class="verdict">
+    <div class="panel stack">
+      <h3>Piloto de 2 semanas</h3>
+      <ol class="plain">
+        <li>Inventario de solo lectura en tu PC: sistema operativo, versiones, modelos visibles y <code>/codex:setup</code>. No se leen secretos.</li>
+        <li>Referencia: 2 o 3 tareas hechas como hasta ahora.</li>
+        <li>8–10 tareas: 2 de Pragmat, 2 de Roblox, 2 de Hecho de Nada (Claude solo), 1 bug y 1 proyecto nuevo.</li>
+        <li>Por tarea se mide: tiempo total, intervenciones tuyas, correcciones, pruebas ejecutadas y % de cuota antes y después.</li>
+        <li>Prueba de memoria: una respuesta conocida, una nota sustituida y una nota de otro proyecto.</li>
+        <li>Se adopta solo si se cumplen los requisitos y las pruebas, sin fallos críticos. Si baja el consumo pero aumenta el retrabajo, no se adopta.</li>
+      </ol>
+      <p class="small">Son metas del piloto, no resultados. No hay ningún porcentaje de ahorro demostrado.</p>
+    </div>
+    <div class="panel stack">
+      <h3>Se comprueba en tu PC</h3>
+      <ul class="plain small">
+        <li>Sistema operativo. <span class="chip c-pend">Supuesto: Windows</span></li>
+        <li>Claude Code ≥ 2.1.139 (agent view) y Codex ≥ 0.153 (modelos 6.x)</li>
+        <li>Plan de Claude y modelos visibles en <code>/model</code></li>
+        <li>Límites de Codex en tu ChatGPT Plus (la web oficial estaba bloqueada desde aquí)</li>
+        <li>Codex en Windows nativo o WSL</li>
+        <li>Roblox Studio/MCP y Buffer: inspeccionar, no reconstruir</li>
+        <li>Dónde están tus MD y Excel</li>
+      </ul>
+      <div class="infobox"><b>Primer paso:</b> Claude Code hace el inventario e instala el plugin. <span class="ag ivan"><svg><use href="#i-ivan"/></svg>Tú</span> solo inicias sesión en Codex en la ventana oficial cuando aparezca.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FUENTES -->
+<section id="fuentes" aria-labelledby="h-src">
+  <div class="sec-h"><span class="tag">8</span><h2 id="h-src">Fuentes</h2></div>
+  <p class="intro">Consultadas el 2 de noviembre de 2026. «Consultada» significa leída, no instalada ni probada. No se pudieron abrir desde este entorno <code>developers.openai.com</code>, <code>help.openai.com</code> ni <code>obsidian.md</code>.</p>
+  <ul class="plain small">
+    <li><a href="https://github.com/openai/codex-plugin-cc" target="_blank" rel="noopener">openai/codex-plugin-cc</a>: comandos, autenticación local, aviso del review gate. v1.0.6, Apache-2.0</li>
+    <li><a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Claude Code CHANGELOG</a>: agent view (2.1.139), modelos 5.5, Fable 5.1, esfuerzo, <code>claude plugin details</code></li>
+    <li><a href="https://github.com/anthropics/claude-code/blob/main/mods/README.md" target="_blank" rel="noopener">Claude Code mods</a>: acceso temprano, API inestable</li>
+    <li><a href="https://code.claude.com/docs/en/agent-view" target="_blank" rel="noopener">Agent view</a>, <a href="https://code.claude.com/docs/en/statusline" target="_blank" rel="noopener">Status line</a> y <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">Memory / AGENTS.md</a>: documentación oficial</li>
+    <li><a href="https://github.com/openai/codex/blob/main/codex-rs/models-manager/models.json" target="_blank" rel="noopener">Catálogo de modelos de Codex</a>: IDs, esfuerzos, planes y versión mínima</li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/en/Extending%20Obsidian/Obsidian%20CLI.md" target="_blank" rel="noopener">Obsidian CLI</a>, <a href="https://github.com/obsidianmd/obsidian-help/blob/master/en/Files%20and%20folders/How%20Obsidian%20stores%20data.md" target="_blank" rel="noopener">almacenamiento</a> y <a href="https://github.com/kepano/obsidian-skills" target="_blank" rel="noopener">obsidian-skills</a></li>
+    <li><a href="https://github.com/sirmalloc/ccstatusline" target="_blank" rel="noopener">ccstatusline</a>, <a href="https://github.com/ryoppippi/ccusage" target="_blank" rel="noopener">ccusage</a>, <a href="https://github.com/barracodev/agent-usage-monitor" target="_blank" rel="noopener">Agent Usage Monitor</a>, <a href="https://github.com/localhost94/harness-monitor" target="_blank" rel="noopener">HarnessMonitor</a>, <a href="https://github.com/markaljhon/codex-claude-usage-tracker" target="_blank" rel="noopener">Usage Tracker</a>, <a href="https://github.com/BloopAI/vibe-kanban" target="_blank" rel="noopener">Vibe Kanban</a> y <a href="https://github.com/smtg-ai/claude-squad" target="_blank" rel="noopener">Claude Squad</a></li>
+    <li>Experiencias de terceros: <a href="https://azukiazusa.dev/blog/claude-code-codex-plugin.md" target="_blank" rel="noopener">azukiazusa.dev (japonés)</a>, <a href="https://www.webreactiva.com/blog/codex-plugin-claude-code" target="_blank" rel="noopener">webreactiva (español)</a>, <a href="https://github.com/openai/codex-plugin-cc/issues/102" target="_blank" rel="noopener">issue #102</a> y límites de Codex según <a href="https://www.developersdigest.tech/blog/codex-usage-limits-pricing-2026" target="_blank" rel="noopener">developersdigest</a> (no oficial)</li>
+  </ul>
+</section>
+
+<footer>La evaluación completa está en <code>docs/workflow/EVALUACION-CLAUDE.md</code>. Esta página no ejecuta nada, no se conecta a tus cuentas y no lee tus archivos. Dirección visual provisional, inspirada en una estética cyberpunk/anime; no reproduce ningún personaje.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const ICON={claude:'i-claude',codex:'i-codex',ivan:'i-ivan',tool:'i-tool',fail:'i-tool'};
+const NAME={claude:'Claude',codex:'Codex',ivan:'Iván',tool:'Herramienta',fail:'Bloqueo'};
+const ag=(w,label)=>`<span class="ag ${w==='fail'?'tool':w}"><svg><use href="#${ICON[w]}"/></svg>${label||NAME[w]}</span>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const state={amb:'baja',risk:'bajo',time:'ini',st:'work',tf:'all'};
+
+/* ---------- datos ---------- */
+const PROJ={
+  hdn:{n:'Hecho de Nada',ctx:'Hecho-de-Nada/Indice.md, Identidad.md, Procedimiento.md (versión aprobada)',tools:'Skill de Hecho de Nada, Remotion, Buffer (sujeto a tu aprobación)',accept:'Revisión visual y de identidad por ti antes de publicar'},
+  pragmat:{n:'Pragmat',ctx:'Pragmat/Indice.md, Oferta.md → Excel de precios vigente, carpeta del cliente correcto',tools:'Repositorio del cliente, pruebas funcionales',accept:'Pruebas funcionales y revisión del brief del cliente'},
+  roblox:{n:'Estudio Roblox',ctx:'Roblox/Indice.md, Economia.md, Decisiones.md',tools:'Luau, conexión Studio/MCP existente (sin verificar)',accept:'Pruebas de lógica y prueba en Studio si la conexión responde'},
+  nuevo:{n:'Proyecto nuevo',ctx:'Ficha mínima Indice.md (objetivo, fuentes, herramientas, modo preferido)',tools:'Por definir en la ficha',accept:'Lo que la ficha defina como «terminado»'}
+};
+const WORK={
+  creativo:{n:'pieza creativa',m:'El modelo Claude de tu flujo actual',e:'el que ya usas'},
+  implementacion:{n:'implementación',m:'Codex · gpt-6.1-sol',e:'medium'},
+  bug:{n:'bug',m:'Codex · gpt-6.1-sol → gpt-6-astra si se atasca',e:'medium → high'},
+  revision:{n:'revisión',m:'/codex:review (modelo por defecto de Codex)',e:'por defecto'},
+  documentacion:{n:'documentación',m:'Claude · claude-sonnet-5-5',e:'medium'},
+  informe:{n:'informe / extracción',m:'Plantilla o script; si hace falta lenguaje: claude-haiku-5-5 o gpt-6-luna',e:'low–medium'},
+  investigacion:{n:'investigación',m:'Claude · claude-sonnet-5-5 u claude-opus-5-5',e:'medium–high'},
+  arquitectura:{n:'arquitectura / plan',m:'Claude · claude-opus-5-5',e:'high'}
+};
+const RISKN={bajo:0,medio:1,alto:2,critico:3};
+const AMBN={baja:0,media:1,alta:2};
+
+/* ---------- enrutado ---------- */
+function decide(p,w,amb,risk){
+  const a=AMBN[amb], r=RISKN[risk];
+  if(p==='hdn' && (w==='creativo'||w==='documentacion'||w==='investigacion'))
+    return {route:'solo',why:'Hecho de Nada conserva su flujo creativo con Claude. Delegar a Codex no aporta calidad y añade un traspaso.'};
+  if(w==='informe') return {route:'solo',light:true,why:'Los datos son claros y el formato fijo. Una plantilla o un script lo resuelven sin otra llamada a IA; si hace falta redactar, basta un modelo ligero.'};
+  if(r>=3) return {route:'coordina',why:'Riesgo crítico (pagos, permisos, datos o economía). Hace falta plan, pruebas específicas, revisión independiente y tu decisión final.'};
+  if(a>=2) return {route:'coordina',why:'Ambigüedad alta. Primero hay que cerrar qué significa «terminado»; lanzar ejecutores antes solo gasta cupo.'};
+  if(w==='arquitectura') return {route:'coordina',why:'Decisiones difíciles de revertir y con dependencias. Claude coordina y puede delegar piezas ya definidas.'};
+  if(w==='creativo') return {route:'solo',why:'Trabajo de dirección creativa. Claude lo hace directamente.'};
+  if((w==='implementacion'||w==='bug'||w==='revision') && a===0 && r<=1)
+    return {route:'directo',why:'Hay objetivo, contexto y una forma de comprobarlo. Codex puede hacerlo de principio a fin, aunque sea un trabajo grande; meter a Claude de intermediario solo añade lecturas y traspasos.'};
+  if((w==='implementacion'||w==='bug') && a===1 && r<=1)
+    return {route:'directo',why:'Quedan detalles menores. Claude escribe un contrato corto con los criterios de aceptación y Codex hace el resto. Coordinar más no aportaría.'};
+  if((w==='implementacion'||w==='bug') && r===2)
+    return {route:'coordina',why:'Quedan detalles por cerrar o el riesgo es alto. Claude fija los criterios de aceptación y Codex ejecuta la parte definida.'};
+  return {route:'solo',why:'Tarea acotada sin riesgo especial. Coordinar costaría más de lo que aporta.'};
+}
+
+function build(){
+  const p=$('#f-proj').value, w=$('#f-work').value, amb=state.amb, risk=state.risk;
+  const cOK=$('#f-claude').checked, xOK=$('#f-codex').checked, mode=$('#f-mode').value, fail=$('#f-fail').value;
+  const P=PROJ[p], W=WORK[w];
+  let d=decide(p,w,amb,risk); let manual=false;
+  if(mode!=='auto'){ manual=true; d={route:mode,why:'Ruta elegida a mano. Se respeta tu elección; abajo se indica si la sugerencia automática era otra.',auto:decide(p,w,amb,risk)}; }
+  const notes=[]; let route=d.route; let paused=false;
+
+  // disponibilidad
+  if(!cOK && !xOK){ paused=true; notes.push(['Sin cupo en ninguna herramienta','El trabajo se pausa y queda anotado con su contrato. Nunca se cambia a una API de pago automáticamente.']); }
+  else if(route==='directo' && !xOK){ route='solo'; notes.push(['Codex sin cupo','Lo hace Claude o se pospone. No se activa una API de pago.']); }
+  else if(route==='solo' && !cOK){
+    if(p==='hdn'){ paused=true; notes.push(['Claude sin cupo en Hecho de Nada','Se espera al reinicio de la ventana. El flujo creativo no se delega a Codex sin tu permiso.']); }
+    else if(amb==='baja'){ route='directo'; notes.push(['Claude sin cupo','La tarea está definida, así que Codex puede seguir con un contrato.']); }
+    else { paused=true; notes.push(['Claude sin cupo','Falta una decisión de dirección; queda pendiente hasta que Claude vuelva a tener cupo.']); }
+  }
+  else if(route==='coordina' && !cOK){ notes.push(['Claude sin cupo a mitad de coordinación','Codex continúa solo con las tareas ya especificadas con contrato. Las decisiones nuevas quedan pendientes para ti o para Claude.']); }
+  else if(route==='coordina' && !xOK){ notes.push(['Codex sin cupo','Claude coordina y ejecuta, o deja las piezas definidas para más tarde.']); }
+
+  const reviewLvl = RISKN[risk]>=2 ? 'adversarial' : RISKN[risk]===1 ? 'dirigida' : 'normal';
+  const steps=[];
+  const S=(who,title,o)=>steps.push(Object.assign({who,title},o));
+
+  if(p==='nuevo') S('claude','Ficha mínima del proyecto',{ctx:'Lo que cuentes y tus documentos existentes',chk:'Objetivo, fuentes, herramientas y definición de «terminado»',keep:'Indice.md (unas 10 líneas). Nada más hasta que haya contenido'});
+
+  const execWho = route==='directo' ? 'codex' : 'claude';
+  if(!paused){
+    S(execWho==='codex'&&route==='directo'?'codex':'claude','Recuperar contexto',{ctx:P.ctx,chk:'Fecha y estado de las notas; se descartan las «sustituidas» y las de otros proyectos',keep:'—'});
+    if(fail==='contexto') S('fail','Contexto insuficiente',{ctx:'La búsqueda no encuentra el dato',chk:'Se amplía la búsqueda una vez dentro del proyecto',keep:'Si sigue faltando: una pregunta concreta a ti; el resto del trabajo continúa'});
+    if(fail==='contradiccion') S('fail','Documentos contradictorios',{ctx:'Dos notas o el Excel dicen cosas distintas',chk:'Se muestran las dos versiones con su fecha y estado',keep:'Decides tú; la versión perdedora pasa a «sustituido»'});
+    if(amb!=='baja' && route!=='coordina') S('ivan','Aclaración',{ctx:'Una pregunta cerrada con opciones',chk:'Solo si la respuesta cambia el resultado',keep:'La decisión, en Decisiones.md'});
+
+    if(route==='coordina'){
+      S('claude','Plan y contrato',{ctx:'Contexto recuperado + tu objetivo',chk:'Criterios de aceptación medibles; dependencias',keep:'Plan aprobado'});
+      if(amb==='alta' || RISKN[risk]>=3) S('ivan','Apruebas el plan',{ctx:'Resumen de una pantalla',chk:'Alcance y riesgos',keep:'Decisión en Decisiones.md'});
+      S(xOK?'codex':'claude', xOK?'Ejecución delegada (/codex:rescue)':'Ejecución (Codex sin cupo)',{ctx:'Contrato: objetivo, fuentes (rutas), alcance permitido, aceptación y cuándo detenerse',chk:'Responde con: hecho · probado · fallido · pendiente',keep:'—'});
+    } else if(route==='directo'){
+      S('codex','Trabajo directo (/codex:rescue --background)',{ctx:'Contrato breve + notas recuperadas',chk:P.accept,keep:'—'});
+    } else {
+      S('claude', d.light?'Plantilla / modelo ligero':'Claude hace el trabajo',{ctx:d.light?'Datos de origen y plantilla':P.ctx,chk:P.accept,keep:'—'});
+    }
+    if(fail==='herramienta'){
+      const tool = p==='roblox'?'Conexión Studio/MCP': p==='hdn'?'Buffer o render':'Codex u otra herramienta';
+      S('fail',tool+' no responde',{ctx:'Se informa del error concreto',chk:'No se simula el resultado',keep:'La parte independiente sigue; queda pendiente la prueba con esa herramienta'});
+    }
+    S('tool','Comprobaciones del proyecto',{ctx:P.tools,chk:P.accept,keep:'Salida de las pruebas'});
+    if(fail==='prueba') S('fail','Prueba fallida',{ctx:'Salida del error',chk:'Hasta 2 intentos de corrección',keep:'Si sigue fallando: se replantea la causa o decides tú. No se entrega como terminado'});
+    if(reviewLvl==='adversarial') S(xOK?'codex':'claude', xOK?'Revisión adversarial (/codex:adversarial-review)':'Revisión independiente',{ctx:'Cambios + riesgos concretos ('+(p==='roblox'?'persistencia, compras duplicadas':'pagos, permisos, datos')+')',chk:'Hallazgos con archivo y línea',keep:'—'});
+    else if(reviewLvl==='dirigida') S(route==='directo'?'claude':(xOK?'codex':'claude'),'Revisión dirigida',{ctx:'Cambios + el riesgo concreto',chk:'Una sola revisión adicional',keep:'—'});
+    if(fail==='decision') S('ivan','Hace falta tu decisión',{ctx:'Pregunta cerrada con 2–3 opciones y su impacto',chk:'—',keep:'El trabajo ya especificado sigue; solo esta parte espera'});
+    S(route==='directo'?'codex':'claude','Decisión y entrega',{ctx:'Evidencias: pruebas y revisión',chk:'Si dos modelos discrepan, deciden las pruebas o tú, no una votación',keep:'Resumen: hecho · probado · pendiente'});
+    if(RISKN[risk]>=2 || p==='hdn' || (p==='roblox'&&RISKN[risk]>=1)) S('ivan', p==='hdn'?'Apruebas antes de publicar':'Apruebas antes de publicar o desplegar',{ctx:'Resumen + evidencias',chk:'—',keep:'—'});
+    S(route==='directo'?'codex':'claude','Propuesta de memoria',{ctx:'Lo aprendido en la tarea',chk:'0–3 aprendizajes con su evidencia; tú los apruebas',keep:'Actualizar la nota existente; la anterior pasa a «sustituido»'});
+  } else {
+    S('fail','En pausa',{ctx:'Contrato guardado',chk:'—',keep:'Se retoma cuando haya cupo o decidas'});
+  }
+
+  const RN={solo:p==='hdn'?'Claude solo (flujo creativo)':(d.light?'Plantilla o modelo ligero':'Claude solo'),directo:'Codex directo',coordina:'Claude coordina'};
+  const RW={solo:'claude',directo:'codex',coordina:'claude'};
+  let html=`<div class="panel route-head"><span class="eyebrow">${esc(P.n)} · ${esc(W.n)} · ambigüedad ${amb} · riesgo ${risk}</span>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="route-name">${paused?'En pausa':esc(RN[route])}</span>${paused?'':ag(RW[route])}${manual?'<span class="chip c-eval">Manual</span>':'<span class="chip c-opt">Sugerida</span>'}</div>
+    <p class="why">${esc(d.why)}</p>`;
+  if(manual && d.auto && d.auto.route!==mode) html+=`<p class="small">La sugerencia automática habría sido <b>${esc(RN[d.auto.route])}</b>: ${esc(d.auto.why)}</p>`;
+  if(!paused) html+=`<p class="small">Modelo inicial: <span class="mono">${esc(W.m)}</span> · esfuerzo <span class="mono">${esc(W.e)}</span> <span class="chip c-pend">acceso pendiente</span></p>`;
+  html+=`</div>`;
+  notes.forEach(n=>{html+=`<div class="alertbox"><b>${esc(n[0])}</b><span>${esc(n[1])}</span></div>`;});
+  if(route==='coordina' && !paused) html+=`<p class="small">Coordinar también cuesta: más lecturas, traspasos y revisiones. Compensa con ambigüedad, riesgo o dependencias, y no con tareas simples.</p>`;
+  html+='<ol class="steps">'+steps.map((s,i)=>`<li class="step ${s.who}"><span class="dot">${i+1}</span><div class="step-body"><div class="step-title"><b>${esc(s.title)}</b>${ag(s.who)}</div>
+    <dl class="kv"><dt>Recibe</dt><dd>${esc(s.ctx)}</dd><dt>Comprueba</dt><dd>${esc(s.chk)}</dd><dt>Conserva</dt><dd>${esc(s.keep)}</dd></dl></div></li>`).join('')+'</ol>';
+  $('#out').innerHTML=html;
+  // resaltar fila de matriz
+  $$('#matrix tbody tr').forEach(tr=>tr.classList.toggle('hit',tr.dataset.w===w || (w==='creativo'&&tr.dataset.w==='creativo')));
+}
+
+/* ---------- matriz ---------- */
+const MATRIX=[
+ ['informe','Extraer datos / informe rutinario','Plantilla o script; si no, claude-haiku-5-5 o gpt-6-luna','low–medium','Determinista y verificable','Comparar totales','Hay interpretación de negocio','claude-sonnet-5-5 medium'],
+ ['documentacion','Documentación','claude-sonnet-5-5 o gpt-6.1-sol','medium','Claridad sin decisiones costosas','Normal','Aparecen decisiones de arquitectura','El otro proveedor'],
+ ['creativo','Brief creativo (Hecho de Nada)','El modelo Claude de tu flujo actual','El que ya usas','Conservar la dirección aprobada','Tú','—','Pausar, no sustituir'],
+ ['investigacion','Investigación','claude-sonnet-5-5 / claude-opus-5-5 con búsqueda','medium–high','Síntesis y criterio','Fuentes enlazadas','Fuentes contradictorias','Pendiente'],
+ ['arquitectura','Planificación / arquitectura','claude-opus-5-5','high','Ambigüedad y decisiones difíciles de revertir','Adversarial de Codex','El alcance no se cierra','gpt-6-astra high'],
+ ['implementacion','Implementación definida','gpt-6.1-sol','medium (el valor por defecto es low)','Modelo general de programación según el catálogo','Pruebas + revisión normal','Falla 2 veces → high','gpt-6.1-terra o claude-sonnet-5-5'],
+ ['bug','Bug difícil','gpt-6-astra o claude-opus-5-5','high (xhigh puntual)','Diagnóstico profundo','Reproducción antes y después','Sin causa tras 2 intentos → replantear','El otro proveedor'],
+ ['revision','Revisión corriente','/codex:review','Por defecto','Revisión de solo lectura','—','Hallazgos críticos','Claude /code-review'],
+ ['critico','Pagos / permisos / economía','claude-opus-5-5 o gpt-6-astra + pruebas específicas','high','Impacto alto','Adversarial + tu decisión','Siempre humano al final','No se hace sin revisión']
+];
+$('#matrix tbody').innerHTML=MATRIX.map(r=>`<tr data-w="${r[0]}"><td>${esc(r[1])}</td><td class="id">${esc(r[2])}</td>${r.slice(3).map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+
+/* ---------- herramientas ---------- */
+const TOOLS=[
+ ['ok','Plugin oficial Codex','Delegar, revisar, trabajos en segundo plano, status/result/cancel, pasar la sesión a Codex','El uso cuenta contra el cupo de ChatGPT. No da memoria compartida ni un panel unificado','Apache-2.0 · v1.0.6'],
+ ['ok','Agent view (claude agents)','Sesiones de Claude: trabajando, esperando tu respuesta, terminadas','En vista previa; no muestra los trabajos de Codex; cada sesión gasta su propio cupo','Oficial · ≥ 2.1.139'],
+ ['ok','/usage y /status de Codex','Cuota real de cada cuenta','Hay que mirarlo en dos sitios','Oficial'],
+ ['opt','Barra de estado nativa / ccstatusline','Modelo, esfuerzo y % de 5 h/7 días de Claude','Solo Claude; rate_limits solo en Pro/Max','MIT · docs de Windows'],
+ ['opt','ccusage','Informes locales de Claude y Codex; --no-cost','Las cifras en dólares son estimaciones, no tu factura','MIT'],
+ ['opt','PowerToys Always On Top','Fija cualquier ventana (p. ej. la terminal con agent view)','No recopila datos','Microsoft · Windows'],
+ ['eval','Agent Usage Monitor','Widget arrastrable con las cuotas de Claude y Codex; declara no leer credenciales','v0.1.0; no confirmé un instalador; hay que compilarlo y auditarlo; solo muestra cuotas','MIT · Electron · Windows'],
+ ['eval','HarnessMonitor','Ventana flotante con sesiones de varias herramientas','En Windows su agente corre dentro de WSL2; macOS es experimental','MIT'],
+ ['eval','CLI de Obsidian / obsidian-skills','search:context; Bases y Canvas bien escritos','Instalador 1.12+ y la app abierta. Las skills no son memoria automática','Oficial / MIT'],
+ ['no','Codex + Claude Usage Tracker','Panel de cuotas para Windows','Lee el token OAuth y, como opción, cookies web','Descartado por credenciales'],
+ ['no','Vibe Kanban','Tablero de agentes','«Vibe Kanban is sunsetting»','En cierre'],
+ ['no','Claude Squad','Varios agentes en tmux','tmux + gh; para Codex documenta una API key','No es el primer paso'],
+ ['no','CC Switch','Gestión de proveedores, MCP y prompts','Resuelve otro problema','No aplica'],
+ ['no','Mod propio','Panel a medida','API de acceso temprano; mantenimiento en cada versión','Solo tras el piloto'],
+ ['ok','opusplan (nativo)','Opus en modo plan, Sonnet al ejecutar','Comprobar en /model','Oficial · clave en Pro'],
+ ['no','JEV (TypeSafe)','Modelo de juicio rápido: clasifica, puntúa o verifica muchos elementos. No es un «cerebro» de estrategia','Otra cuenta y cobro por API (TYPESAFE_API_KEY); acceso temprano','Las decisiones se resuelven con un protocolo'],
+ ['eval','Graphify','Grafo de una carpeta (código, docs, imágenes); exporta a Obsidian','Anuncia 71x con 52 archivos, ~1x con 6; un revisor midió 7–8 %. Usa Claude para extraer y gasta cupo','Solo si una carpeta crece mucho'],
+ ['eval','codebase-memory-mcp','Índice local del código sin LLM; incluye Luau','Un tester midió 8–10x (el autor anuncia ~99 %). Toca la configuración global de Claude y Codex y arranca un daemon','MIT · para repos grandes'],
+ ['no','RTK','Comprime la salida de comandos','JetBrains: sin ahorro; +7,6 % de coste con esfuerzo bajo. No cubre Read, Grep ni Glob','Apache-2.0 + BUSL-1.1'],
+ ['eval','Ponytail','Reglas para escribir solo el código necesario','Prueba independiente: ~10 %; bug en Windows; se inyecta en subagentes','Medir si ya lo tienes'],
+ ['no','Caveman','Respuestas telegráficas','JetBrains: ~8,5 % de la salida frente al 65 % anunciado','Marginal']
+];
+const TL={ok:['Recomendada','c-ok'],opt:['Opcional','c-opt'],eval:['Evaluar','c-eval'],no:['Descartada','c-no']};
+function renderTools(){
+  $('#tools tbody').innerHTML=TOOLS.filter(t=>state.tf==='all'||t[0]===state.tf).map(t=>`<tr><td><b>${esc(t[1])}</b></td><td>${esc(t[2])}</td><td>${esc(t[3])}</td><td class="small">${esc(t[4])}</td><td><span class="chip ${TL[t[0]][1]}">${TL[t[0]][0]}</span></td></tr>`).join('');
+}
+
+/* ---------- memoria ---------- */
+const LVL={
+ 1:'<b>Carpeta Markdown.</b> Claude y Codex buscan y leen archivos de la bóveda como cualquier carpeta, y Obsidian muestra los cambios al instante. No requiere conectores. <span class="chip c-ok">Empezar aquí</span>',
+ 2:'<b>CLI oficial de Obsidian.</b> <code>obsidian search</code> y <code>search:context</code> devuelven fragmentos con contexto. Requiere el instalador 1.12 (recomendado 1.12.7+) y la app abierta. Se añade cuando buscar en los archivos no basta. <span class="chip c-eval">Más adelante</span>',
+ 3:'<b>obsidian-skills (kepano).</b> Enseñan a Claude y Codex a escribir Markdown de Obsidian, Bases y Canvas. No son memoria automática ni dan permisos. Embeddings, base vectorial o MCP solo si una medición demuestra que la búsqueda textual falla. <span class="chip c-eval">Opcional</span>'
+};
+const TIME={
+ ini:'<b>Inicio:</b> tener a mano la identidad, el estado y las reglas. Una carpeta pequeña es suficiente. Riesgo: crear categorías que nadie usa.',
+ sem:'<b>Semanas:</b> no volver a explicar decisiones ni repetir fallos ya resueltos. Riesgo: notas duplicadas o demasiado largas, que se arreglan actualizando en vez de crear otra.',
+ mes:'<b>Meses:</b> continuidad aunque cambies de sesión, modelo o herramienta. Riesgo: tratar hipótesis antiguas como hechos. Por eso cada nota lleva estado y fecha.'
+};
+const RT=[
+ '<b>Correcto:</b> leer Oferta.md, ver que enlaza al Excel vigente y responder con su fecha. <b>Fallo a detectar:</b> usar una nota con estado «sustituido» que conserva un precio antiguo.',
+ '<b>Correcto:</b> Roblox/Economia.md, si está aprobada. Si Decisiones.md la contradice, se muestran las dos versiones y decides tú.',
+ '<b>Correcto:</b> no. La búsqueda se limita a Clientes/cliente-A. Si aparece algo del cliente B, la prueba falla. Una carpeta separa el contenido, pero no es una barrera de seguridad: los clientes sensibles van en otra bóveda.'
+];
+
+/* ---------- tarjeta ---------- */
+const ST={
+ work:{l:'Trabajando',c:'st-work',agent:'codex',task:'Tienda de 3 objetos · Luau',chk:'1 de 4 comprobaciones',block:'—',upd:'hace 20 s'},
+ review:{l:'En revisión',c:'st-review',agent:'codex',task:'Revisión adversarial: persistencia',chk:'3 de 4 comprobaciones',block:'—',upd:'hace 1 min'},
+ block:{l:'Bloqueado',c:'st-block',agent:'claude',task:'Prueba en Studio',chk:'3 de 4 comprobaciones',block:'Studio/MCP no responde',upd:'hace 4 min'},
+ pause:{l:'En pausa',c:'st-pause',agent:'claude',task:'¿Precio en Robux del pase?',chk:'3 de 4 comprobaciones',block:'Espera tu decisión',upd:'hace 12 min'},
+ done:{l:'Terminado',c:'st-done',agent:'claude',task:'Entregado para tu aprobación',chk:'4 de 4 comprobaciones',block:'—',upd:'hace 2 min'}
+};
+let elapsed=754;
+function renderCard(){
+  const s=ST[state.st]; const nm=s.agent==='codex'?'gpt-6.1-sol · medium':'claude-opus-5-5 · high';
+  $('#mini-body').innerHTML=`
+   <div class="mini-row"><span>AGENTE</span>${ag(s.agent)}</div>
+   <div class="mini-row"><span>TAREA</span><span style="text-align:right">${esc(s.task)}</span></div>
+   <div class="mini-row"><span>MODELO</span><span class="mono">${esc(nm)}</span></div>
+   <div class="mini-row"><span>ESTADO</span><span class="state ${s.c}">${s.l}</span></div>
+   <div class="mini-row"><span>BLOQUEO</span><span>${esc(s.block)}</span></div>
+   <div class="mini-row"><span>AVANCE</span><span>${esc(s.chk)}</span></div>
+   <div class="mini-row"><span>RESTANTE</span><span class="small">desconocido</span></div>
+   <div class="mini-row"><span>CUOTA 5 h</span><span class="small">42 % · simulado</span></div>
+   <div class="meter" aria-hidden="true"><i style="width:42%"></i></div>
+   <div class="mini-row"><span>ACTUALIZADO</span><span class="small">${esc(s.upd)}</span></div>`;
+}
+function tick(){ if(state.st==='work'||state.st==='review'){elapsed++;} const m=Math.floor(elapsed/60),s=elapsed%60; $('#mini-clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+setInterval(tick,1000); tick();
+
+(function drag(){
+  const card=$('#mini'), bar=$('#minibar'), stage=$('#stage'); let sx,sy,ox,oy,on=false;
+  const clamp=(x,y)=>{const mx=stage.clientWidth-card.offsetWidth, my=stage.clientHeight-card.offsetHeight; return [Math.max(0,Math.min(mx,x)),Math.max(0,Math.min(my,y))];};
+  const place=(x,y)=>{[x,y]=clamp(x,y); card.style.left=x+'px'; card.style.top=y+'px';};
+  bar.addEventListener('pointerdown',e=>{on=true; sx=e.clientX; sy=e.clientY; ox=card.offsetLeft; oy=card.offsetTop; bar.setPointerCapture(e.pointerId);});
+  bar.addEventListener('pointermove',e=>{ if(on) place(ox+e.clientX-sx, oy+e.clientY-sy); });
+  bar.addEventListener('pointerup',()=>{on=false;}); bar.addEventListener('pointercancel',()=>{on=false;});
+  card.addEventListener('keydown',e=>{ const k={ArrowLeft:[-16,0],ArrowRight:[16,0],ArrowUp:[0,-16],ArrowDown:[0,16]}[e.key]; if(k){e.preventDefault(); place(card.offsetLeft+k[0],card.offsetTop+k[1]);} });
+  window.addEventListener('resize',()=>place(card.offsetLeft,card.offsetTop));
+})();
+
+/* ---------- eventos ---------- */
+$$('.seg[data-group]').forEach(g=>{
+  const key=g.dataset.group;
+  g.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+    g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    state[key]=b.dataset.v;
+    if(key==='amb'||key==='risk') build();
+    if(key==='time') $('#time-out').innerHTML=TIME[state.time];
+    if(key==='st') renderCard();
+    if(key==='tf') renderTools();
+  });
+});
+function setSeg(key,v){ state[key]=v; document.querySelectorAll(`.seg[data-group="${key}"] button`).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===v))); }
+['#f-proj','#f-work','#f-claude','#f-codex','#f-mode','#f-fail'].forEach(s=>$(s).addEventListener('change',build));
+
+const EX={
+ roblox:{p:'roblox',w:'implementacion',amb:'media',risk:'critico'},
+ pragmat:{p:'pragmat',w:'implementacion',amb:'baja',risk:'medio'},
+ hdn:{p:'hdn',w:'creativo',amb:'media',risk:'medio'},
+ codex:{p:'pragmat',w:'bug',amb:'baja',risk:'bajo'},
+ nuevo:{p:'nuevo',w:'investigacion',amb:'alta',risk:'bajo'}
+};
+$('#examples').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const x=EX[b.dataset.ex];
+  $('#f-proj').value=x.p; $('#f-work').value=x.w; setSeg('amb',x.amb); setSeg('risk',x.risk);
+  $('#f-mode').value='auto'; $('#f-fail').value='none'; $('#f-claude').checked=true; $('#f-codex').checked=true; build(); });
+
+$$('.tabs button').forEach(b=>b.addEventListener('click',()=>{ $$('.tabs button').forEach(x=>x.setAttribute('aria-selected',String(x===b))); $('#p-lvl').innerHTML=LVL[b.dataset.lvl]; $('#p-lvl').setAttribute('aria-labelledby',b.id); }));
+$('.tabs').addEventListener('keydown',e=>{ if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return; const t=$$('.tabs button'); const i=t.findIndex(x=>x.getAttribute('aria-selected')==='true'); const n=t[(i+(e.key==='ArrowRight'?1:t.length-1))%t.length]; n.click(); n.focus(); });
+$('#rtest').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) $('#rtest-out').innerHTML=RT[+b.dataset.r]; });
+
+/* ---------- capacidad ---------- */
+function cap(){
+  const h=+$('#c-5h').value, d=+$('#c-7d').value, cx=$('#c-cx').value, job=$('#c-job').value, pref=$('#c-pref').value;
+  $('#c-5h-v').textContent=h+' %'; $('#c-7d-v').textContent=d+' %';
+  const codexOK = cx==='alto' || cx==='bajo';
+  let lvl, title, body=[], who='claude';
+  if(h>=100||d>=100){ lvl='c-no'; title='Claude no disponible'; who='codex';
+    body.push('Hablas con Codex directamente. Lee el mismo AGENTS.md y la misma bóveda.');
+    body.push(job==='decision'?'La decisión la tomas tú; Codex puede aportar análisis.':'Sigue lo que ya está especificado; lo nuevo y lo creativo espera.');
+    if(!codexOK) { body.push('Codex tampoco tiene cupo confirmado: se pausa todo y se guarda el contrato. Nunca se activa una API de pago.'); who='ivan'; }
+  } else if(h>=95||d>=97){ lvl='c-eval'; title='Reserva: Claude solo coordina';
+    const creative = job==='creativo'||job==='decision';
+    if(pref==='esperar' || creative || !codexOK){ who='ivan';
+      body.push(creative?'Lo creativo y las decisiones no se delegan: se espera a que se recargue Claude.':!codexOK?'Codex no tiene cupo confirmado: se espera la recarga.':'Elegiste esperar siempre la recarga.');
+      body.push('Claude usa su reserva solo para dejar anotado el estado.');
+    } else if(pref==='preguntar'){ who='ivan'; body.push('Claude te pregunta: ¿relevo a Codex o esperar? Con su reserva solo envía la pregunta.'); }
+    else { who='codex';
+      body.push('Relevo a Codex con el contrato ya escrito: '+(job==='complejo'?'gpt-6-astra · medium':'gpt-6.1-sol')+'.');
+      body.push('Claude solo envía el contrato y revisa al final. Las decisiones nuevas esperan.');
+      if(cx==='bajo') body.push('Codex tiene poco cupo: se prioriza la pieza más importante y se para al terminarla.');
+    }
+  } else if(h>=85||d>=92){ lvl='c-eval'; title='Preparar traspaso';
+    body.push('Claude escribe ya el contrato de lo pendiente (hecho, pendiente, aceptación, qué no puede decidir Codex) mientras aún tiene margen.');
+    body.push('Termina lo pequeño; no empieza bloques grandes.');
+  } else { lvl='c-ok'; title='Normal';
+    body.push('Ruta habitual: Codex directo para trabajo definido, Claude coordina lo ambiguo o de riesgo y Claude solo para lo creativo.');
+  }
+  if(cx==='nd') body.push('Aviso: el cupo de Codex no se ve desde Claude Code. Compruébalo con /status en Codex.');
+  $('#cap-out').innerHTML=`<div class="panel route-head"><span class="eyebrow">5 h: ${h} % · semanal: ${d} % · umbrales 85/95 % y 92/97 %</span>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="route-name">${esc(title)}</span><span class="chip ${lvl}">${lvl==='c-ok'?'OK':lvl==='c-no'?'Límite':'Atención'}</span>${ag(who, who==='ivan'?'Tú decides':null)}</div>
+    ${body.map(b=>`<p class="why">${esc(b)}</p>`).join('')}</div>
+    <p class="small">Cifras de ejemplo. En la realidad, el % lo da la barra de estado de Claude Code y la hora de reinicio aparece en <code>/usage</code>.</p>`;
+}
+['#c-5h','#c-7d'].forEach(s=>$(s).addEventListener('input',cap));
+['#c-cx','#c-job','#c-pref'].forEach(s=>$(s).addEventListener('change',cap));
+cap();
+
+/* ---------- inicio ---------- */
+$('#p-lvl').innerHTML=LVL[1]; $('#p-lvl').setAttribute('aria-labelledby','t-n1'); $('#time-out').innerHTML=TIME.ini;
+renderTools(); renderCard();
+$('#f-proj').value='roblox'; $('#f-work').value='implementacion'; setSeg('amb','media'); setSeg('risk','critico'); build();
+})();
+</script>
+
+</body>
+</html>
