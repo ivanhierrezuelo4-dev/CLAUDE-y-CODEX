@@ -50,6 +50,16 @@ svg.px{image-rendering:pixelated;display:block;flex:none}
 .mpill[aria-current="true"]{border-color:var(--text);box-shadow:0 0 0 3px var(--frame),5px 5px 0 3px #000,0 0 20px 2px color-mix(in srgb,var(--pc,var(--hi)) 50%,transparent)}
 .mpill.s-trabajando,.mpill.s-revision{border-color:var(--cyan)}
 .mpill.s-completada{opacity:.78}
+.mpill.alert{border-color:var(--alert)!important;box-shadow:0 0 0 3px var(--frame),5px 5px 0 3px #000,0 0 18px 2px rgba(255,92,124,.45)}
+.mpill .ma{color:var(--alert);font-weight:600}
+.alertbox{display:grid;gap:8px;border:3px solid var(--alert);background:rgba(255,92,124,.10);padding:10px 12px;box-shadow:3px 3px 0 #000}
+.alertbox .ah{display:flex;gap:8px;align-items:center;font-family:var(--f-pix);font-size:.52rem;color:var(--alert);line-height:1.6}
+.alertbox p{margin:0;font-size:.88rem;line-height:1.45}
+.alertbox .ao{display:grid;gap:6px}
+.alertbox .ao span{display:block;background:var(--bg2);border:2px dashed var(--line);padding:6px 8px;font-size:.84rem}
+.alertbox .ao b{color:var(--sun)}
+@media (prefers-reduced-motion:no-preference){ .alertbox{animation:alertpulse 2.4s ease-in-out infinite} @keyframes alertpulse{50%{box-shadow:3px 3px 0 #000,0 0 18px 2px rgba(255,92,124,.45)}} }
+.sbmenu .sba{font-family:var(--f-pix);font-size:.46rem;color:var(--alert)}
 .mpill .mi{display:grid;place-items:center;width:34px}
 .mpill .mt{display:grid;gap:5px;min-width:0}
 .mpill .mh{display:flex;gap:10px;align-items:center;justify-content:space-between;min-width:0}
@@ -852,6 +862,10 @@ function member(rol,o,t,act){ if(!o) return ''; const w=who(o.modelo); const ed=
   return `<div class="mem ${w.cls} ${act?'active':''}" data-rol="${rol}">${sprite(w.sp,3)}<div><div class="rl">${esc(ROL_TXT[t][rol])}</div><button class="pick" type="button" data-pick="${rol}" ${ed?'':'disabled'} aria-haspopup="menu" aria-expanded="${openMenu===rol}">${esc(o.modelo)}${ed?' ▾':''}</button>${warnFor(o.modelo,none?'':o.esfuerzo)}</div>${none?'<span></span>':`<button class="ef ${o.esfuerzo}" type="button" data-ef="${rol}" ${ed?'':'disabled'} title="Pulsa para cambiar el esfuerzo" aria-label="Esfuerzo ${o.esfuerzo}, pulsa para cambiar">${String(o.esfuerzo).toUpperCase()}</button>`}
    ${openMenu===rol?menuHtml(optsFor(rol,t),o.modelo,'data-set'):''}</div>`; }
 
+function alertHtml(m){ const a=m&&m.alerta; if(!isObj(a)||a.resuelta) return '';
+  const ops=Array.isArray(a.opciones)&&a.opciones.length?a.opciones:['sigue sin Codex','espera'];
+  return `<div class="alertbox" role="alert"><div class="ah">⚠ ${esc(a.titulo||'AVISO')}</div><p>${esc(a.texto||'')}</p>${a.pregunta?`<p><b>${esc(a.pregunta)}</b></p>`:''}
+    <div class="ao">${ops.map(o=>`<span>Escribe <b>«${esc(o)}»</b> en el chat ${esc(chatDe())}</span>`).join('')}</div></div>`; }
 function renderCard(){
   const card=$('#card');
   if(!M||!M.id){ card.hidden=true; $('#pill').hidden=true; return; }
@@ -865,6 +879,7 @@ function renderCard(){
   const ncust=steps.filter(s=>s.cust).length;
   let h=`<div class="ttl">${sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',4)}${editingTitle?`<input id="ttlIn" class="ttlin" maxlength="80" value="${esc(M.titulo||'')}" aria-label="Nombre de la misión"><button class="edit" type="button" id="ttlOk" aria-label="Guardar nombre">✔</button>`:`<h2>${esc(M.titulo||'Misión')}</h2><button class="edit" type="button" id="editTitle" aria-label="Cambiar el nombre de la misión" title="Cambiar nombre">✎</button>`}</div>
   <div class="metabox ${metaOpen?'open':''}" id="metaBox"><button class="metabtn" type="button" id="metaBtn" aria-expanded="${metaOpen}" aria-controls="metaWrap">${sprite('trophy',2)}<span>META</span><em>${metaOpen?'ocultar':'ver la meta'}</em><b class="chev">▸</b></button><div class="metawrap" id="metaWrap"><div><p>${esc(M.meta||M.mejora||'—')}</p></div></div></div>
+  ${alertHtml(M)}
   <div class="why"><b>Por qué este tipo:</b> ${esc(M.porque||'—')}</div>
   <div class="sec"><div class="lbl"><span>TIPO DE MISIÓN</span>${ed?'<button class="reset" type="button" id="resetBtn" title="Volver a lo sugerido">↺ SUGERIDO</button>':''}</div>
    <div class="seg" role="group" aria-label="Tipo de misión">${TIPOS.map(x=>`<button type="button" class="${x}" data-tipo="${x}" aria-pressed="${x===t}" ${ed?'':'disabled'}>${TIPO[x]}<span class="sg">${x===sug?'✦ sugerido':'&nbsp;'}</span></button>`).join('')}</div></div>
@@ -896,7 +911,7 @@ function renderCard(){
   document.querySelectorAll('#el,#cbody .elx').forEach(x=>x.textContent=elapsed());
   const pk=activeStep?'clk':t; if($('#pillIco').dataset.k!==pk){ $('#pillIco').dataset.k=pk; $('#pillIco').innerHTML=activeStep?clock(2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2); }
   renderWov(activeStep,steps,pi,st);
-$('#pillTxt').textContent=(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
+$('#pillTxt').textContent=(isObj(M.alerta)&&!M.alerta.resuelta?'⚠ ':'')+(ST[st]||st)+' · '+(M.titulo||'').slice(0,24);
   const ps=$('#pillStats'); if(activeStep){ const tk=isObj(M.tokens)?M.tokens:{}; ps.innerHTML=`⏱ <b class="pel">${elapsed()}</b> · Claude <b>${fmtTok(tk.claude)}</b> · Codex <b>${fmtTok(tk.codex)}</b>`; ps.hidden=false; } else { ps.hidden=true; ps.innerHTML=''; }
   if(card.hidden && $('#pill').hidden){ card.hidden=false; place(); animIn(card,'enter'); }
   if(prevState && prevState!==st && (st==='trabajando'||st==='lista') && (prevState==='propuesta'||prevState==='lista')) animIn(card,'haloin');
@@ -1130,15 +1145,16 @@ function stepsOf(d){ const t=TIPOS.includes(d.tipo)?d.tipo:'sencilla'; const src
   return src.filter(x=>x.rol==='astra'?(t==='compleja'&&d.astra&&d.astra.activa):x.rol==='revisa'?eqR!=='Sin revisión':true).length; }
 const sbIds=()=>[...Object.keys(P).filter(x=>x!=='boveda').sort((a,b)=>sbName(a).localeCompare(sbName(b))),'boveda'];
 const misOf=id=>AllM[id]||{};
-function countsOf(id){ const ms=Object.values(misOf(id)); return {n:ms.filter(m=>m.estado!=='completada').length,t:ms.filter(m=>m.estado==='trabajando'||m.estado==='revision').length,p:ms.filter(m=>m.estado==='propuesta'||m.estado==='lista').length}; }
+function countsOf(id){ const ms=Object.values(misOf(id)); return {a:ms.filter(m=>isObj(m.alerta)&&!m.alerta.resuelta).length,n:ms.filter(m=>m.estado!=='completada').length,t:ms.filter(m=>m.estado==='trabajando'||m.estado==='revision').length,p:ms.filter(m=>m.estado==='propuesta'||m.estado==='lista').length}; }
 function sortedMis(id){ return Object.entries(misOf(id)).sort((a,b)=>(ORD[a[1].estado]??9)-(ORD[b[1].estado]??9)||String(b[1].actualizado||'').localeCompare(String(a[1].actualizado||''))); }
 /* tablero principal o sandbox elegido */
 let deskSig='';
 function mpill(id,m){ const t=TIPOS.includes(m.tipo)?m.tipo:'sencilla', st=m.estado||'propuesta', work=st==='trabajando'||st==='revision', n=stepsOf(m), pi=Number.isInteger(m.paso)?m.paso:-1, tk=m.tokens||{};
   const isNew=seenMis&&!seenMis.has(sb+'/'+id);
-  const info=work?`Paso <b>${pi+1}/${n}</b> · ⏱ <b class="ptick" data-ini="${esc(m.inicio||'')}">${elapsedOf(m.inicio)}</b>${tk.claude!=null?` · Claude <b>${fmtTok(tk.claude)}</b>`:''}${tk.codex!=null?` · Codex <b>${fmtTok(tk.codex)}</b>`:''}`
+  const al=isObj(m.alerta)&&!m.alerta.resuelta;
+  const info=al?`<span class="ma">⚠ ${esc(m.alerta.titulo||'Aviso')}: ${esc(m.alerta.pregunta||m.alerta.texto||'')}</span>`:work?`Paso <b>${pi+1}/${n}</b> · ⏱ <b class="ptick" data-ini="${esc(m.inicio||'')}">${elapsedOf(m.inicio)}</b>${tk.claude!=null?` · Claude <b>${fmtTok(tk.claude)}</b>`:''}${tk.codex!=null?` · Codex <b>${fmtTok(tk.codex)}</b>`:''}`
     :st==='propuesta'?'Esperando tu confirmación · toca para abrir':st==='completada'?'Completada · '+esc(hace(m.actualizado)):esc(ST[st]||st)+' · '+esc(hace(m.actualizado));
-  return `<button type="button" class="mpill t-${t} s-${st} ${isNew?'new':''}" data-m="${esc(id)}" aria-current="${id===sel}"><span class="mi">${work?clock(2):st==='completada'?sprite('trophy',2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2)}</span>
+  return `<button type="button" class="mpill t-${t} s-${st} ${isNew?'new':''} ${al?'alert':''}" data-m="${esc(id)}" aria-current="${id===sel}"><span class="mi">${work?clock(2):st==='completada'?sprite('trophy',2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2)}</span>
     <span class="mt"><span class="mh"><b>${esc(m.titulo||id)}</b><span class="st ${st}">${ST[st]||st}</span></span><span class="ms">${info}</span></span></button>`; }
 function vaultPanel(){ if(!VB) return `<div class="vault"><p>Aún no hay resumen de tu bóveda. Pide al chat madre: «actualiza la bóveda en el tablero».</p></div>`;
   const pr=Array.isArray(VB.proyectos)?VB.proyectos:[], ap=(Array.isArray(VB.aprendizajes)?VB.aprendizajes:[]).slice(0,6), de=(Array.isArray(VB.decisiones)?VB.decisiones:[]).slice(0,6);
@@ -1155,12 +1171,12 @@ function renderDesk(){ let h;
   if(seenMis) Object.keys(misOf(sb)).forEach(id=>seenMis.add(sb+'/'+id)); }
 setInterval(()=>{ document.querySelectorAll('#deskIn .ptick').forEach(x=>{ x.textContent=elapsedOf(x.dataset.ini); }); },1000);
 /* pestaña MISIÓN y menú de sandboxes */
-function renderTab(){ let nT=0; sbIds().forEach(id=>{ nT+=countsOf(id).t; });
+function renderTab(){ let nT=0, nA=0; sbIds().forEach(id=>{ const c=countsOf(id); nT+=c.t; nA+=c.a; });
   const k=nT?'clk':'m'; const ti=$('#tabMIco'); if(ti.dataset.k!==k){ ti.dataset.k=k; ti.innerHTML=nT?clock(2):sprite('shield',2); }
-  $('#tabMTxt').textContent=`MISIÓN · ${sb?sbName(sb).toUpperCase():'INICIO'}`; $('#tabM').title=nT?`${nT} tarjeta${nT!==1?'s':''} trabajando`:''; }
+  $('#tabMTxt').textContent=(nA?'⚠ ':'')+`MISIÓN · ${sb?sbName(sb).toUpperCase():'INICIO'}`; $('#tabM').title=nT?`${nT} tarjeta${nT!==1?'s':''} trabajando`:''; }
 function renderMenu(){ const cupo=G&&G.cinco_h!=null?`Claude 5 h ${G.cinco_h} % · sem ${G.semanal??'—'} %`:'';
-  const item=id=>{ const c=countsOf(id), v=id==='boveda'; const sub=c.n?`${c.n} tarjeta${c.n!==1?'s':''}${c.t?` · ${c.t} trabajando`:''}${c.p?` · ${c.p} por confirmar`:''}`:(v?'Toda la info de tu memoria':'Sin tarjetas');
-    return `<button type="button" role="menuitemradio" data-sb="${esc(id)}" aria-current="${id===sb}">${c.t?clock(2):v?sprite('chest',2):sprite('shield',2)}<span><b>${esc(sbName(id))}</b><small>${esc(sub)}</small></span>${c.t?`<span class="sbn">${c.t} EN MARCHA</span>`:''}</button>`; };
+  const item=id=>{ const c=countsOf(id), v=id==='boveda'; const sub=c.n?`${c.n} tarjeta${c.n!==1?'s':''}${c.a?` · ⚠ ${c.a} aviso${c.a!==1?'s':''}`:''}${c.t?` · ${c.t} trabajando`:''}${c.p?` · ${c.p} por confirmar`:''}`:(v?'Toda la info de tu memoria':'Sin tarjetas');
+    return `<button type="button" role="menuitemradio" data-sb="${esc(id)}" aria-current="${id===sb}">${c.t?clock(2):v?sprite('chest',2):sprite('shield',2)}<span><b>${esc(sbName(id))}</b><small>${esc(sub)}</small></span>${c.a?`<span class="sba">⚠ AVISO</span>`:c.t?`<span class="sbn">${c.t} EN MARCHA</span>`:''}</button>`; };
   const ids=sbIds(); const proj=ids.filter(x=>x!=='boveda');
   $('#sbmenu').innerHTML=`<div class="sbmh"><span>SANDBOXES</span><em>${esc(cupo)}</em></div><button type="button" role="menuitemradio" data-sb="" aria-current="${!sb}">${sprite('shield',2)}<span><b>Tablero principal</b><small>Vista de inicio</small></span></button><hr>${proj.map(item).join('')||'<small style="color:var(--muted);padding:6px">Aún no hay proyectos conectados.</small>'}<hr>${item('boveda')}`; }
 function toggleSb(force){ const m=$('#sbmenu'); const open=force!=null?force:m.hidden; $('#tabM').setAttribute('aria-expanded',open);

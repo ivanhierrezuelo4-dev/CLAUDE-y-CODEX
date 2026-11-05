@@ -47,6 +47,17 @@ Esfuerzo: `low` · `medium` · `high` · `xhigh`; si algo no acepta `xhigh`, usa
 - Al cambiar de paso, actualiza `paso` y, si hay datos reales, `tokens`, en `proyectos/<slug>/misiones/<M-XXX>`, en `mision.json` y en `Tablero.md`. Aprovecha para actualizar `gremio/estado`.
 - Pide la revisión cruzada en una línea: «¿Revisión? Sugerido: Sonnet 5.5 medium · sí / otro / no».
 
+## 3b. Si Codex falla: avisar y preguntar, nunca sustituir en silencio
+Si un paso asignado a Codex no se puede lanzar o falla (`/codex:setup` no está listo, sesión cerrada, sin cupo, error del plugin, modelo no disponible):
+1. **No lo hagas tú con Claude por tu cuenta.** El Gremio existe para repartir el trabajo y gastar menos cupo de Claude.
+2. Intenta arreglarlo una vez si es obvio: `/codex:setup` y, si pide iniciar sesión, pídele a Iván `!codex login`.
+3. Si sigue sin funcionar, para y marca la tarjeta (`update` con `if_version`):
+   `estado: "bloqueada"`, `alerta: { "tipo": "codex", "titulo": "CODEX NO RESPONDE", "texto": "<qué pasó, en una línea>", "pregunta": "¿Sigo solo con Claude (gasta más cupo de Claude) o espero a que lo arregles?", "opciones": ["sigue sin Codex", "espera"] }`.
+4. En el chat, en 2 líneas: qué falló y las dos opciones.
+5. Si Iván escribe **«sigue sin Codex»**: `alerta.resuelta: true`, `estado: "trabajando"`, y haces ese paso con Claude, con un Sonnet de esfuerzo parecido, salvo que la tarjeta diga otra cosa. Apúntalo en el resultado.
+   Si escribe **«espera»**: déjala bloqueada hasta que diga «sigue».
+6. Lo mismo vale para cualquier otro bloqueo (falta un dato, una decisión de negocio): `alerta` con `tipo: "decision"`, su pregunta y sus opciones.
+
 ## 4. Cerrar
 - Pon `estado: completada` y el `resultado` (qué se hizo, qué se probó con su salida, qué falta), junto con el tiempo real, el % real y los tokens.
 - Propón 0–3 aprendizajes; si Iván los aprueba, actualiza `Proyectos/<X>/aprendizajes.md`.

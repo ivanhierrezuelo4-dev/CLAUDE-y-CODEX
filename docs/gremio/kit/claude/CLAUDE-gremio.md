@@ -21,6 +21,9 @@ Iván trabaja con el **Gremio**: Claude orquesta, Codex ejecuta, Iván decide. I
 - Codex: Sol 6.1 por defecto; Terra 6.1 si hay que leer mucho; Astra 6 solo si Iván la activa.
 - Delegar en Codex: `/codex:rescue --model <id> --effort <esfuerzo> …` (ids en la skill). `/codex:review` usa siempre el de `~/.codex/config.toml`; para revisar con otro modelo, usar `/codex:rescue` con la instrucción «revisa sin modificar archivos».
 
+## Si Codex falla
+Nunca hago en silencio con Claude lo que la tarjeta asigna a Codex. Paro, marco la tarjeta como «bloqueada» con un aviso (skill, sección 3b) y pregunto a Iván: «sigue sin Codex» o «espera».
+
 ## Ahorro (siempre)
 - Misión compacta: solo el plan del tipo sugerido.
 - El aviso de Confirmar trae las notas: no releo la misión salvo «Especificación editada: sí».
