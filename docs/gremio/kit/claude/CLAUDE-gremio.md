@@ -14,6 +14,9 @@ Iván trabaja con el **Gremio**: Claude orquesta, Codex ejecuta, Iván decide. I
 2. **Trabajo de menos de ~10 min:** lo hago o se lo paso a Codex, sin tarjeta, salvo que Iván la pida.
 3. **Trabajo mayor:** uso la skill `gremio` para crear una **misión compacta** y la tarjeta. Empiezo solo cuando Iván la confirma en el tablero y escribe «empezar» en este chat. Respeto el modelo y el esfuerzo de cada paso (tabla en la skill); si la orquesta pide otro modelo de Claude, le pido a Iván que lo cambie con `/model`.
 
+## Codex directo
+Si Iván dice «que lo haga Codex» (o «Codex directo», «Codex: …»), solo hago de intermediario: paso sus palabras tal cual a Codex con `/codex:rescue`, creo una tarjeta ligera y le devuelvo el resultado resumido. No planifico, no reescribo y no rehago nada (skill, «Modo Codex directo»).
+
 ## Modelos (comprobar con /model)
 - Sonnet 5.5 es la base (`low` si es trivial, `medium` normal, `high` para escribir contratos).
 - Opus 5.5 solo coordina misiones complejas.

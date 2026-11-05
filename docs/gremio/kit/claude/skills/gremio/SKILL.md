@@ -9,6 +9,23 @@ Lee las reglas de `~/.claude/CLAUDE.md` (bloque Gremio). Datos de la tarjeta y p
 
 **Tu sandbox en el tablero:** cada proyecto es un *sandbox* con su documento `proyectos/<slug>` (`{ "proyecto": "Nombre bonito" }`) y sus *tarjetas* (misiones) en `proyectos/<slug>/misiones/<M-XXX>`. Puede haber varias tarjetas a la vez. El `slug` es el nombre del proyecto en minúsculas, sin tildes y con guiones (`Hecho de Nada` → `hecho-de-nada`). El sandbox `boveda` es de la bóveda y lo lleva el chat madre. Nunca escribas en el sandbox de otro proyecto.
 
+## Modo «Codex directo» (Claude solo hace de intermediario)
+**Cuándo:** Iván dice algo como «que lo haga Codex», «Codex directo», «pásaselo a Codex» o empieza con «Codex:». Vale para cualquier cosa: una misión, una auditoría, una revisión, una investigación…
+
+**Qué haces tú (gastando lo mínimo):**
+1. **No planificas ni reescribes la idea.** Copias las palabras de Iván **tal cual** dentro de `<peticion>`.
+2. Añades solo lo imprescindible: rutas del proyecto, de su `AGENTS.md`, del brief y, si existe, del archivo de plan. No pegues contenidos: Codex los lee.
+3. Modelo y esfuerzo: los que diga Iván («con Terra high»). Si no dice nada: Sol 6.1 `medium`, o Sol `high` si es una auditoría o algo grande.
+4. Lanzas con el prompt de «Codex directo» de `PROMPTS.md`:
+   - **Trabajo, misión o auditoría:** `/codex:rescue --model <id> --effort <e> --background "<prompt>"`
+   - **Solo revisar cambios sin tocar nada:** `/codex:review --background` (usa el modelo de `config.toml`). Para retar decisiones: `/codex:adversarial-review --background <foco>`.
+5. **Tarjeta ligera** en el tablero, sin esperar Confirmar, porque Iván ya lo pidió: `set proyectos/<slug>/misiones/<M-XXX>` con `modo: "codex"`, `tipo: "sencilla"`, `estado: "trabajando"`, `paso: 0`, `inicio`, `equipos.sencilla.ejecuta` = el modelo elegido y `planes.sencilla: [{"titulo":"Codex hace todo","rol":"ejecuta"},{"titulo":"Revisión de Iván","rol":"ivan"}]`.
+6. Mientras trabaja **no hagas nada más**. Cuando Iván pregunte, o al terminar, usa `/codex:status` y `/codex:result`.
+7. **Al terminar:** pon `paso: 1` (le toca a Iván) y el `resultado` con lo que dijo Codex, resumido en 3–6 líneas sin rehacerlo. En el chat, lo mismo. Nada de revisión cruzada salvo que Iván la pida.
+8. **Si Codex falla:** sección 3b (aviso en la tarjeta y preguntar). Nunca lo hagas tú.
+
+**Para seguir la conversación con Codex:** `/codex:rescue --resume <siguiente instrucción>`. Si Iván quiere hablar directo con Codex: `/codex:transfer`, que da un comando `codex resume …`.
+
 ## 0. Nombres de modelo (la tarjeta usa nombres cortos)
 | En la tarjeta | Codex (`--model`) | Claude (`/model` o subagente) |
 |---|---|---|

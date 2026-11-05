@@ -83,6 +83,26 @@ Reglas extra de este nivel:
 - **Un plan, no tres.** Opus planifica una vez; los cambios se registran en «Registro de decisiones».
 - **El plan es el traspaso.** Si Claude entra en reserva, Codex continúa desde el plan sin necesitar el chat.
 
+## Prompt «Codex directo» (Claude solo lo pasa)
+
+```
+[CODEX DIRECTO] Iván te encarga esto entero. Claude solo hace de intermediario.
+<peticion>
+(palabras de Iván, tal cual, sin resumir ni reescribir)
+</peticion>
+<contexto>
+Proyecto: <ruta> · Reglas: AGENTS.md · Brief: <ruta del brief> · Plan (si existe): gremio/misiones/M-XXX.md
+</contexto>
+<reglas>
+Sigue AGENTS.md y su sección «Codex directo». Haz todo: planifica, ejecuta, prueba y revisa lo tuyo.
+Si es auditoría o revisión, no modifiques archivos salvo que la petición lo pida.
+Para y pregunta ante decisiones de dinero, economía del juego, marca o borrado de datos.
+</reglas>
+<entrega>
+Hecho / Probado (con salidas) / Fallido / Pendiente · archivos cambiados · preguntas para Iván (si hay) · 0–3 aprendizajes candidatos. Máx. 25 líneas.
+</entrega>
+```
+
 ## Prompt de revisión cruzada (cualquier nivel)
 
 ```

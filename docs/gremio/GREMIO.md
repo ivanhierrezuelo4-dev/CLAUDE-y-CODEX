@@ -154,6 +154,10 @@ La página calcula sola el equipo por defecto, las estimaciones y las plantillas
 
 En el paso de revisión de Iván (y en la tarjeta, cuando no está en propuesta) hay un botón **«✔ Listo · cerrar misión»**. Se pulsa dos veces para confirmar. La misión pasa al Salón con su tiempo, sus tokens y su equipo, y la tarjeta se cierra.
 
+### 6.2c Modo «Codex directo»
+
+Si Iván escribe «que lo haga Codex» (o «Codex directo», «Codex: …»), Claude solo hace de **intermediario**. Pasa sus palabras tal cual a Codex con `/codex:rescue` (o `/codex:review` si es solo revisar), crea una **tarjeta ligera** marcada «CODEX DIRECTO» sin esperar Confirmar y devuelve el resultado resumido. Codex planifica, ejecuta, prueba y revisa lo suyo. Gasta muy poco cupo de Claude: el intermediario y su subagente. El trabajo cuenta para el cupo de Codex. Plantilla en `PROMPTS.md` y protocolo en la skill.
+
 ### 6.3 Avisos y bloqueos
 
 Si algo impide seguir, por ejemplo **Codex no responde** o falta una decisión de Iván, el chat **no sigue por su cuenta**. Pone la tarjeta en `bloqueada` con un campo `alerta` (título, texto, pregunta y opciones). El tablero lo muestra en rojo en la tarjeta, en su píldora, en el menú de sandboxes y en la pestaña. Iván responde escribiendo la opción en el chat de ese proyecto, por ejemplo «sigue sin Codex» o «espera». Protocolo completo en la skill, sección 3b.

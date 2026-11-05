@@ -19,6 +19,15 @@ Trabajas dentro del **Gremio** de Iván: Claude orquesta, tú ejecutas, Iván de
 3. Actualiza el estado en `~/.gremio/mision.json` (`estado`, `paso`, `actualizado`, `por: "codex"`) y la fila de la misión en `Gremio/Tablero.md`.
 4. Decisiones de negocio, dinero, economía del juego o marca: pregúntale a Iván, no decidas tú.
 
+## Modo «Codex directo» (el prompt empieza con [CODEX DIRECTO])
+Iván te encarga **todo** el trabajo y Claude solo hace de mensajero.
+1. Lee el `AGENTS.md` del proyecto, el brief y las rutas que vengan en `<contexto>`. Solo lo necesario.
+2. Si es una misión: crea o actualiza `gremio/misiones/M-XXX.md` con la plantilla del kit (meta, hitos, aceptación) y ve marcando el progreso.
+3. Haz el trabajo completo: planificar, implementar, probar y revisar lo tuyo antes de entregar.
+4. Si es una auditoría o revisión: **no cambies archivos** salvo que la petición lo pida; entrega los hallazgos por gravedad.
+5. Para y pregunta (en la respuesta) ante decisiones de dinero, economía del juego, marca o borrado de datos.
+6. Entrega con el formato de `<entrega>`.
+
 ## Revisión cruzada
 Cuando revises trabajo de Claude: lista los problemas por gravedad (crítico / medio / menor) con archivo:línea, el problema y el arreglo sugerido. No reescribas el trabajo.
 

@@ -50,6 +50,7 @@ svg.px{image-rendering:pixelated;display:block;flex:none}
 .mpill[aria-current="true"]{border-color:var(--text);box-shadow:0 0 0 3px var(--frame),5px 5px 0 3px #000,0 0 20px 2px color-mix(in srgb,var(--pc,var(--hi)) 50%,transparent)}
 .mpill.s-trabajando,.mpill.s-revision{border-color:var(--cyan)}
 .mpill.s-completada{opacity:.78}
+.mpill .cdx{font-style:normal;color:var(--ink);background:var(--codex);padding:2px 4px;margin-right:4px}
 .mpill.alert{border-color:var(--alert)!important;box-shadow:0 0 0 3px var(--frame),5px 5px 0 3px #000,0 0 18px 2px rgba(255,92,124,.45)}
 .mpill .ma{color:var(--alert);font-weight:600}
 .alertbox{display:grid;gap:8px;border:3px solid var(--alert);background:rgba(255,92,124,.10);padding:10px 12px;box-shadow:3px 3px 0 #000}
@@ -876,7 +877,7 @@ function renderCard(){
   if(!M||!M.id){ card.hidden=true; $('#pill').hidden=true; return; }
   const t=tipoOf(), st=M.estado||'propuesta', eq=team(t), ed=editable(), steps=stepsFor(t);
   card.className=`card t-${t} s-${st}`;
-  $('#cid').textContent=`${sbName(sb).toUpperCase()} · ${M.id||''}${M.simulada!==false?' · SIMULADA':''}`;
+  $('#cid').textContent=`${sbName(sb).toUpperCase()} · ${M.id||''}${M.modo==='codex'?' · CODEX DIRECTO':''}${M.simulada!==false?' · SIMULADA':''}`;
   const cst=$('#cst'); cst.className='st '+st; cst.textContent=ST[st]||st.toUpperCase();
   const pi=Number.isInteger(M.paso)?M.paso:-1; const activeStep=(st==='trabajando'||st==='revision')&&pi>=0&&pi<steps.length?steps[pi]:null;
   const actRol=activeStep?activeStep.rol:null;
@@ -1183,7 +1184,7 @@ function mpill(id,m){ const t=TIPOS.includes(m.tipo)?m.tipo:'sencilla', st=m.est
   const info=al?`<span class="ma">⚠ ${esc(m.alerta.titulo||'Aviso')}: ${esc(m.alerta.pregunta||m.alerta.texto||'')}</span>`:work?`Paso <b>${pi+1}/${n}</b> · ⏱ <b class="ptick" data-ini="${esc(m.inicio||'')}">${elapsedOf(m.inicio)}</b>${tk.claude!=null?` · Claude <b>${fmtTok(tk.claude)}</b>`:''}${tk.codex!=null?` · Codex <b>${fmtTok(tk.codex)}</b>`:''}`
     :st==='propuesta'?'Esperando tu confirmación · toca para abrir':st==='completada'?'Completada · '+esc(hace(m.actualizado)):esc(ST[st]||st)+' · '+esc(hace(m.actualizado));
   return `<button type="button" class="mpill t-${t} s-${st} ${isNew?'new':''} ${al?'alert':''}" data-m="${esc(id)}" aria-current="${id===sel}"><span class="mi">${work?clock(2):st==='completada'?sprite('trophy',2):sprite(t==='compleja'?'opus':t==='definida'?'codex':'check',2)}</span>
-    <span class="mt"><span class="mh"><b>${esc(m.titulo||id)}</b><span class="st ${st}">${ST[st]||st}</span></span><span class="ms">${info}</span></span></button>`; }
+    <span class="mt"><span class="mh"><b>${m.modo==='codex'?'<i class="cdx">CODEX</i> ':''}${esc(m.titulo||id)}</b><span class="st ${st}">${ST[st]||st}</span></span><span class="ms">${info}</span></span></button>`; }
 function vaultPanel(){ if(!VB) return `<div class="vault"><p>Aún no hay resumen de tu bóveda. Pide al chat madre: «actualiza la bóveda en el tablero».</p></div>`;
   const pr=Array.isArray(VB.proyectos)?VB.proyectos:[], ap=(Array.isArray(VB.aprendizajes)?VB.aprendizajes:[]).slice(0,6), de=(Array.isArray(VB.decisiones)?VB.decisiones:[]).slice(0,6);
   const row=(x,ico)=>`<div class="vrow">${ico?sprite(ico,2):'<span></span>'}<span>${esc(typeof x==='string'?x:(x.texto||x.nombre||''))}<small>${esc(typeof x==='string'?'':[x.proyecto,x.fecha,x.brief===true?'brief ✓':x.brief===false?'sin brief':''].filter(Boolean).join(' · '))}</small></span></div>`;
