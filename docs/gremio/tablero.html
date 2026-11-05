@@ -888,9 +888,9 @@ function renderCard(){
       <div class="steps">${steps.map((x,i)=>`<i class="${i<pi||st==='completada'?'done':i===pi?'act':''}"></i>`).join('')}</div>${p&&wovMin()?'<button class="wbtn" type="button" id="wovShow">▲ VER ANIMACIÓN</button>':''}</div>`; }
   if(st==='completada'&&M.resultado) h+=`<div class="work" style="border-color:var(--codex)"><b style="color:var(--codex)">Resultado</b><span style="font-size:.85rem">${esc(M.resultado)}</span></div>`;
   h+=`<div class="acts"><button class="mapbtn" type="button" id="mapBtn">${sprite('map',2)}MAPA</button>`;
-  if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Al confirmar, Claude recibe el aviso y empieza. Puedes cambiar todo antes, también en el mapa.</span>`;
-  else if(notice) h+=`<span class="lock">${st==='lista'?'Confirmada':'En marcha'} · ajustes bloqueados</span><div class="sent ${notice.ok?'':'warnbox'}">${esc(notice.txt)}</div>`;
-  else h+=`<span class="lock">${st==='lista'?'Confirmada · esperando a Claude':st==='completada'?'Misión cerrada':'En marcha · ajustes bloqueados'}</span>`;
+  if(st==='propuesta') h+=`<button class="go" type="button" id="goBtn">✔ CONFIRMAR MISIÓN</button><span class="hint">Después de confirmar, escribe «empezar» en el chat ${esc(chatDe())}. Puedes cambiar todo antes, también en el mapa.</span>`;
+  else if(st==='lista') h+=`<span class="lock">Confirmada · ajustes bloqueados</span><div class="sent">✓ Ahora escribe <b>«empezar»</b> en el chat ${esc(chatDe())}. Ese chat leerá esta tarjeta y la pondrá a trabajar.</div>`;
+  else h+=`<span class="lock">${st==='completada'?'Misión cerrada':'En marcha · ajustes bloqueados'}</span>`;
   h+=`</div>`;
   const body=$('#cbody'); if(h!==lastCardHtml){ lastCardHtml=h; const sc=body.scrollTop; body.innerHTML=h; body.scrollTop=sc; animateNums(e); }
   document.querySelectorAll('#el,#cbody .elx').forEach(x=>x.textContent=elapsed());
@@ -970,8 +970,9 @@ function commitTitle(cancel){ const i=$('#ttlIn'); if(!editingTitle) return; edi
 $('#cbody').addEventListener('keydown',e=>{ if(e.target.id!=='ttlIn') return; if(e.key==='Enter'){ e.preventDefault(); commitTitle(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); commitTitle(true); } });
 $('#cbody').addEventListener('focusout',e=>{ if(e.target.id==='ttlIn') setTimeout(()=>{ if(editingTitle&&document.activeElement&&document.activeElement.id!=='ttlOk') commitTitle(); },120); });
 /* ---------- confirmar: guarda y avisa a Claude ---------- */
+const chatDe=()=>sb==='boveda'?'madre':'de '+sbName(sb);
 async function confirmMission(btn){
-  if(!editable()) return; btn.disabled=true; btn.textContent='ENVIANDO…';
+  if(!editable()) return; btn.disabled=true; btn.textContent='GUARDANDO…';
   const t=tipoOf(), eq=team(t), e=estimate(), steps=stepsFor(t);
   const notas=isObj(M.notas)?Object.values(M.notas).filter(x=>String(x||'').trim()).length:0;
   const cust=steps.filter(s=>s.cust).map(s=>`${s.titulo}: ${s.modelo} ${s.esfuerzo||''}`.trim());
@@ -981,18 +982,9 @@ async function confirmMission(btn){
     (cust.length?`Pasos con modelo propio: ${cust.join('; ')}. `:'')+`Estimación: ${e.tiempo}, Claude ${e.cupo5h}, Codex ${e.codex5h}.`+
     (notas?`\nNotas de Iván:\n`+steps.filter(x=>M.notas&&String(M.notas[x.key]||'').trim()).map(x=>`- ${x.titulo}: ${String(M.notas[x.key]).trim()}`).join('\n'):'')+
     `\nEspecificación editada: ${M.specEditada?'sí (leer la misión)':'no'}.`;
-  let anchor=null; try{ if(comments) anchor=await comments.anchorFor(btn); }catch(_){}
-  await save({estado:'lista',tipo:t,tipoConfirmado:true,confirmadoEn:new Date().toISOString()});
+  await save({estado:'lista',tipo:t,tipoConfirmado:true,confirmadoEn:new Date().toISOString(),confirmacion:resumen.slice(0,3900)});
   burst($('#card'),['#55D98B','#FCEE0A','#FFFFFF']); animIn($('#card'),'haloin');
-  let ok=false, why='';
-  if(comments&&anchor){ try{ const c=await comments.canSendToClaude();
-      if(c==='available'){ await comments.sendToClaude({anchor,text:resumen.slice(0,3900)}); ok=true; }
-      else why=c==='no_session'?'Claude no está escuchando ahora':'el aviso automático no está disponible aquí';
-    }catch(err){ why=(err&&err.code)==='consent_required'?'no diste permiso para avisar desde la tarjeta':'no se pudo enviar el aviso'; } }
-  else why='el aviso automático no está disponible aquí';
-  notice= ok?{ok:true,txt:'✓ Claude avisado. Empieza en cuanto lo reciba; no tienes que escribir nada.'}
-            :{ok:false,txt:`✓ Confirmada. ${why[0].toUpperCase()+why.slice(1)}: escribe «empezar» en el chat ${sb==='boveda'?'madre':'de '+sbName(sb)}.`};
-  log(ok?'Confirmada y enviada a Claude':'Confirmada (falta avisar en el chat)'); renderCard();
+  log('Confirmada · escribe «empezar» en el chat '+chatDe()); renderCard();
 }
 
 /* ---------- mapa ---------- */
